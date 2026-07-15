@@ -116,3 +116,12 @@ model SocialLink {
   icon      String?
   order     Int    @default(0)
 }
+
+model ChatMessage {
+  id          String   @id @default(cuid())
+  sessionId   String
+  sender      String
+  message     String
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}

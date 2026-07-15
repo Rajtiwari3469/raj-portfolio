@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Send, Mail, Phone, MapPin } from "lucide-react";
+import { Send, Mail, MapPin, MessageCircle } from "lucide-react";
 import { GithubIcon, LinkedinIcon, InstagramIcon, YoutubeIcon } from "@/components/ui/SocialIcons";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
@@ -85,22 +85,28 @@ export default function Contact() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-accent/20 text-accent">
-                    <Phone size={20} />
-                  </div>
-                  <div>
-                    <p className="text-foreground/60 text-sm">Phone</p>
-                    <p className="font-medium">+91 XXXXX XXXXX</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4">
                   <div className="p-3 rounded-xl bg-gold/20 text-gold">
                     <MapPin size={20} />
                   </div>
                   <div>
                     <p className="text-foreground/60 text-sm">Location</p>
                     <p className="font-medium">India</p>
+                  </div>
+                </div>
+
+                <div
+                  className="flex items-center gap-4 cursor-pointer group"
+                  onClick={() => {
+                    const el = document.getElementById("chat-widget-btn");
+                    if (el) el.click();
+                  }}
+                >
+                  <div className="p-3 rounded-xl bg-green-500/20 text-green-400 group-hover:scale-110 transition-transform">
+                    <MessageCircle size={20} />
+                  </div>
+                  <div>
+                    <p className="text-foreground/60 text-sm">Live Chat</p>
+                    <p className="font-medium">Chat with me instantly</p>
                   </div>
                 </div>
               </div>

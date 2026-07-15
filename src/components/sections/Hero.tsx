@@ -1,10 +1,12 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowDown, Download } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/SocialIcons";
 import Button from "@/components/ui/Button";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 
 const SpaceBackground = dynamic(() => import("@/components/three/SpaceBackground"), {
   ssr: false,
@@ -12,6 +14,17 @@ const SpaceBackground = dynamic(() => import("@/components/three/SpaceBackground
 });
 
 export default function Hero() {
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/sections")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.profileImage) setProfileImage(data.profileImage);
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <SpaceBackground />
@@ -23,6 +36,25 @@ export default function Hero() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="text-center"
         >
+          {profileImage && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1, duration: 0.6 }}
+              className="mb-8 flex justify-center"
+            >
+              <div className="relative w-40 h-40 md:w-52 md:h-52 rounded-full overflow-hidden border-4 border-primary/30 shadow-lg shadow-primary/20">
+                <Image
+                  src={profileImage}
+                  alt="Raj Tiwari"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+            </motion.div>
+          )}
+
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

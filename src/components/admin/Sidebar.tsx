@@ -15,6 +15,7 @@ import {
   Menu,
   X,
   ChevronLeft,
+  MessageCircle,
 } from "lucide-react";
 
 const menuItems = [
@@ -23,6 +24,7 @@ const menuItems = [
   { name: "Skills", href: "/admin/skills", icon: Code2 },
   { name: "Certificates", href: "/admin/certificates", icon: Award },
   { name: "Content", href: "/admin/content", icon: FileText },
+  { name: "Chat", href: "/admin/chat", icon: MessageCircle },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 

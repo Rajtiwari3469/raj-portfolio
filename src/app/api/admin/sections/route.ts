@@ -7,6 +7,7 @@ const SECTION_KEYS = [
   "techStack",
   "educationContent",
   "experienceContent",
+  "profileImage",
 ];
 
 export async function GET() {

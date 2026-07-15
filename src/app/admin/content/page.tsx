@@ -11,6 +11,7 @@ import {
   Plus,
   Trash2,
   AlertCircle,
+  Camera,
 } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
@@ -74,9 +75,10 @@ const defaultExperience: ExperienceEntry[] = [
   },
 ];
 
-type Tab = "about" | "techstack" | "education" | "experience";
+type Tab = "profile" | "about" | "techstack" | "education" | "experience";
 
 const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
+  { id: "profile", label: "Profile Image", icon: <Camera size={18} /> },
   { id: "about", label: "About Me", icon: <User size={18} /> },
   { id: "techstack", label: "Tech Stack", icon: <Layers size={18} /> },
   { id: "education", label: "Education", icon: <GraduationCap size={18} /> },
@@ -84,7 +86,8 @@ const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
 ];
 
 export default function ContentPage() {
-  const [activeTab, setActiveTab] = useState<Tab>("about");
+  const [activeTab, setActiveTab] = useState<Tab>("profile");
+  const [profileImage, setProfileImage] = useState<string>("");
   const [about, setAbout] = useState<AboutContent>(defaultAbout);
   const [techStack, setTechStack] = useState<TechStackContent>(defaultTechStack);
   const [education, setEducation] = useState<EducationEntry[]>(defaultEducation);
@@ -97,6 +100,7 @@ export default function ContentPage() {
     try {
       const response = await fetch("/api/admin/sections");
       const data = await response.json();
+      if (data.profileImage) setProfileImage(data.profileImage);
       if (data.aboutContent) setAbout(data.aboutContent);
       if (data.techStack) setTechStack(data.techStack);
       if (data.educationContent?.entries) setEducation(data.educationContent.entries);
@@ -122,6 +126,7 @@ export default function ContentPage() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          profileImage: profileImage || "",
           aboutContent: about,
           techStack: techStack,
           educationContent: { entries: education },
@@ -221,6 +226,55 @@ export default function ContentPage() {
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.2 }}
         >
+          {activeTab === "profile" && (
+            <GlassPanel className="space-y-6">
+              <h2 className="text-xl font-semibold">Profile Image</h2>
+              <p className="text-foreground/60 text-sm">
+                Upload your profile photo that appears in the Hero section.
+              </p>
+
+              {profileImage && (
+                <div className="flex justify-center">
+                  <div className="relative w-40 h-40 rounded-full overflow-hidden border-2 border-primary/30">
+                    <img
+                      src={profileImage}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium mb-2 text-foreground/80">Image URL or Base64</label>
+                <Textarea
+                  value={profileImage}
+                  onChange={(e) => setProfileImage(e.target.value)}
+                  placeholder="Paste image URL or base64 data URL, or upload a file below"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2 text-foreground/80">Or Upload Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      setProfileImage(reader.result as string);
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                  className="block w-full text-sm text-foreground/60 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-primary/20 file:text-primary hover:file:bg-primary/30 cursor-pointer"
+                />
+              </div>
+            </GlassPanel>
+          )}
+
           {activeTab === "about" && (
             <GlassPanel className="space-y-6">
               <h2 className="text-xl font-semibold">About Me Content</h2>
