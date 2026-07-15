@@ -20,7 +20,6 @@ const defaultSettings = {
   x: "",
   leetcode: "",
   email: "",
-  phone: "",
   location: "",
 };
 
@@ -213,12 +212,6 @@ export default function SettingsPage() {
                   value={settings.email}
                   onChange={(e) => setSettings({ ...settings, email: e.target.value })}
                   placeholder="your@email.com"
-                />
-                <Input
-                  label="Phone"
-                  value={settings.phone}
-                  onChange={(e) => setSettings({ ...settings, phone: e.target.value })}
-                  placeholder="+91 XXXXX XXXXX"
                 />
                 <Input
                   label="Location"
