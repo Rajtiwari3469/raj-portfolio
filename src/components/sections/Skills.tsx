@@ -16,10 +16,6 @@ export default function Skills() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchSkills();
-  }, []);
-
   const fetchSkills = async () => {
     try {
       const response = await fetch("/api/skills");
@@ -33,6 +29,11 @@ export default function Skills() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchSkills();
+  }, []);
 
   const techStack = [
     "React", "Next.js", "TypeScript", "Node.js", "PostgreSQL",

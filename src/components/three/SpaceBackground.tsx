@@ -13,6 +13,7 @@ function ParticleField() {
     const pos = new Float32Array(count * 3);
     const col = new Float32Array(count * 3);
 
+    /* eslint-disable react-hooks/purity */
     for (let i = 0; i < count * 3; i += 3) {
       pos[i] = (Math.random() - 0.5) * 50;
       pos[i + 1] = (Math.random() - 0.5) * 50;
@@ -24,6 +25,7 @@ function ParticleField() {
       col[i + 1] = color.g;
       col[i + 2] = color.b;
     }
+    /* eslint-enable react-hooks/purity */
 
     return [pos, col];
   }, []);

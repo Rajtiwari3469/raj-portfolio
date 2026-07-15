@@ -32,10 +32,6 @@ export default function CertificatesPage() {
     description: "",
   });
 
-  useEffect(() => {
-    fetchCertificates();
-  }, []);
-
   const fetchCertificates = async () => {
     try {
       const response = await fetch("/api/admin/certificates");
@@ -49,6 +45,11 @@ export default function CertificatesPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchCertificates();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

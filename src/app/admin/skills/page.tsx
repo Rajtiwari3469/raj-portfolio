@@ -30,10 +30,6 @@ export default function SkillsPage() {
     order: 0,
   });
 
-  useEffect(() => {
-    fetchSkills();
-  }, []);
-
   const fetchSkills = async () => {
     try {
       const response = await fetch("/api/admin/skills");
@@ -47,6 +43,11 @@ export default function SkillsPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchSkills();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

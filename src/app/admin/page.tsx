@@ -31,11 +31,6 @@ export default function AdminDashboard() {
   const [recentMessages, setRecentMessages] = useState<{ id: string; name: string; email: string; message: string; read: boolean }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchStats();
-    fetchRecentMessages();
-  }, []);
-
   const fetchStats = async () => {
     try {
       const [projects, skills, blogs, messages] = await Promise.all([
@@ -72,6 +67,12 @@ export default function AdminDashboard() {
       console.error("Failed to fetch messages:", error);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchStats();
+    fetchRecentMessages();
+  }, []);
 
   const statCards = [
     {

@@ -6,7 +6,26 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category");
     const limit = searchParams.get("limit");
+    const slug = searchParams.get("slug");
 
+    // If slug is provided, fetch single blog post
+    if (slug) {
+      const blog = await prisma.blog.findUnique({
+        where: { slug },
+        include: { category: true },
+      });
+
+      if (!blog) {
+        return NextResponse.json(
+          { error: "Blog post not found" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(blog);
+    }
+
+    // Otherwise, fetch multiple blog posts
     const where: Record<string, unknown> = {
       published: true,
     };

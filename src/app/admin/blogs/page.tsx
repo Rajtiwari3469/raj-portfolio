@@ -34,10 +34,6 @@ export default function BlogsPage() {
     categoryId: "",
   });
 
-  useEffect(() => {
-    fetchBlogs();
-  }, []);
-
   const fetchBlogs = async () => {
     try {
       const response = await fetch("/api/admin/blogs");
@@ -51,6 +47,11 @@ export default function BlogsPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchBlogs();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

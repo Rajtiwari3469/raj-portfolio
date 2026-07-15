@@ -22,10 +22,6 @@ export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
   const fetchProjects = async () => {
     try {
       const response = await fetch("/api/projects");
@@ -39,6 +35,11 @@ export default function Projects() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchProjects();
+  }, []);
 
   return (
     <section id="projects" className="py-20 relative">

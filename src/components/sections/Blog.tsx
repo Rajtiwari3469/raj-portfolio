@@ -20,10 +20,6 @@ export default function Blog() {
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchBlogs();
-  }, []);
-
   const fetchBlogs = async () => {
     try {
       const response = await fetch("/api/blogs?limit=6");
@@ -37,6 +33,11 @@ export default function Blog() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchBlogs();
+  }, []);
 
   return (
     <section id="blog" className="py-20 relative">

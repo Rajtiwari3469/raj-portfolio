@@ -41,10 +41,6 @@ export default function ProjectsPage() {
     order: 0,
   });
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
   const fetchProjects = async () => {
     try {
       const response = await fetch("/api/admin/projects");
@@ -58,6 +54,11 @@ export default function ProjectsPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchProjects();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

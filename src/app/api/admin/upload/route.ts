@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
-import { randomUUID } from "crypto";
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,31 +35,30 @@ export async function POST(request: NextRequest) {
     ];
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: "Invalid file type" },
+        { error: "Invalid file type. Allowed: JPEG, PNG, WebP, GIF, PDF" },
         { status: 400 }
       );
     }
 
+    // Convert file to base64 for storage in database or return URL
+    // For production, integrate with Cloudinary, S3, or similar service
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+    const base64 = buffer.toString("base64");
+    const dataUrl = `data:${file.type};base64,${base64}`;
 
-    const ext = file.name.split(".").pop();
-    const filename = `${randomUUID()}.${ext}`;
-    const uploadDir = join(process.cwd(), "public", "uploads");
-    const filepath = join(uploadDir, filename);
-
-    await mkdir(uploadDir, { recursive: true });
-    await writeFile(filepath, buffer);
-
-    const url = `/uploads/${filename}`;
+    // Note: For production, use external storage service
+    // This is a temporary solution - base64 data URLs are not recommended for production
+    const url = dataUrl;
 
     return NextResponse.json(
       {
         url,
-        filename,
+        filename: file.name,
         originalName: file.name,
         size: file.size,
         type: file.type,
+        message: "File uploaded successfully. For production, use external storage like Cloudinary or S3.",
       },
       { status: 201 }
     );

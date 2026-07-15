@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, Eye, EyeOff, Mail, MailOpen } from "lucide-react";
+import { Trash2, Mail, MailOpen } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
-import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 
 interface Message {
@@ -23,10 +22,6 @@ export default function MessagesPage() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    fetchMessages();
-  }, []);
-
   const fetchMessages = async () => {
     try {
       const response = await fetch("/api/admin/messages");
@@ -40,6 +35,11 @@ export default function MessagesPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchMessages();
+  }, []);
 
   const markAsRead = async (id: string) => {
     try {
