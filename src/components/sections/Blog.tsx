@@ -57,10 +57,10 @@ export default function Blog() {
         </motion.div>
 
         {isLoading ? (
-          <div className="text-center py-12">Loading blogs...</div>
+          <div className="text-center py-12 text-foreground/60">Loading blogs...</div>
         ) : blogs.length === 0 ? (
           <GlassPanel className="text-center py-12">
-            <p className="text-foreground/60">No blog posts yet. Stay tuned!</p>
+            <p className="text-foreground/60">No blog posts yet. Write your first blog from the admin dashboard!</p>
           </GlassPanel>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

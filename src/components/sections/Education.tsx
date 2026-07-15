@@ -1,8 +1,19 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { GraduationCap, Award, BookOpen } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
+
+interface Certificate {
+  id: string;
+  name: string;
+  organization: string;
+  date: string;
+  image: string | null;
+  pdfUrl: string | null;
+  description: string | null;
+}
 
 const educationData = [
   {
@@ -25,30 +36,28 @@ const educationData = [
   },
 ];
 
-const certifications = [
-  {
-    name: "Web Development Bootcamp",
-    issuer: "Udemy",
-    date: "2024",
-  },
-  {
-    name: "Python for Data Science",
-    issuer: "Coursera",
-    date: "2024",
-  },
-  {
-    name: "React - The Complete Guide",
-    issuer: "Udemy",
-    date: "2024",
-  },
-  {
-    name: "JavaScript Algorithms",
-    issuer: "freeCodeCamp",
-    date: "2023",
-  },
-];
-
 export default function Education() {
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCertificates();
+  }, []);
+
+  const fetchCertificates = async () => {
+    try {
+      const response = await fetch("/api/certificates");
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setCertificates(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch certificates:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <section id="education" className="py-20 relative">
       <div className="container mx-auto px-4">
@@ -130,27 +139,43 @@ export default function Education() {
               Certifications
             </motion.h3>
 
-            <div className="space-y-4">
-              {certifications.map((cert, index) => (
-                <motion.div
-                  key={cert.name}
-                  initial={{ opacity: 0, x: 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                >
-                  <GlassPanel hover glow="accent">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-semibold">{cert.name}</h4>
-                        <p className="text-sm text-foreground/60">{cert.issuer}</p>
+            {isLoading ? (
+              <div className="text-center py-12 text-foreground/60">Loading certificates...</div>
+            ) : certificates.length === 0 ? (
+              <GlassPanel className="text-center py-12">
+                <p className="text-foreground/60">No certificates yet. Add certificates from the admin dashboard!</p>
+              </GlassPanel>
+            ) : (
+              <div className="space-y-4">
+                {certificates.map((cert, index) => (
+                  <motion.div
+                    key={cert.id}
+                    initial={{ opacity: 0, x: 30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                  >
+                    <GlassPanel hover glow="accent">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-semibold">{cert.name}</h4>
+                          <p className="text-sm text-foreground/60">{cert.organization}</p>
+                          {cert.description && (
+                            <p className="text-xs text-foreground/50 mt-1">{cert.description}</p>
+                          )}
+                        </div>
+                        <span className="text-sm text-foreground/50">
+                          {new Date(cert.date).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                          })}
+                        </span>
                       </div>
-                      <span className="text-sm text-foreground/50">{cert.date}</span>
-                    </div>
-                  </GlassPanel>
-                </motion.div>
-              ))}
-            </div>
+                    </GlassPanel>
+                  </motion.div>
+                ))}
+              </div>
+            )}
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -165,11 +190,7 @@ export default function Education() {
                 </p>
                 <div className="flex justify-center gap-4">
                   <div className="text-center">
-                    <p className="text-3xl font-bold gradient-text">10+</p>
-                    <p className="text-sm text-foreground/60">Courses Completed</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-3xl font-bold gradient-text">5+</p>
+                    <p className="text-3xl font-bold gradient-text">{certificates.length || 0}+</p>
                     <p className="text-sm text-foreground/60">Certifications</p>
                   </div>
                 </div>
