@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
-import { GithubIcon, LinkedinIcon, InstagramIcon, XIcon } from "@/components/ui/SocialIcons";
+import { GithubIcon, LinkedinIcon, InstagramIcon, XIcon, LeetcodeIcon } from "@/components/ui/SocialIcons";
 import Button from "@/components/ui/Button";
 
 const navItems = [
@@ -19,6 +19,7 @@ const navItems = [
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,6 +27,13 @@ export default function Navbar() {
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then((res) => res.json())
+      .then((data) => setSocialLinks(data))
+      .catch(() => {});
   }, []);
 
   return (
@@ -56,18 +64,31 @@ export default function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center gap-4">
-            <a href="https://github.com/rajtiwari" target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
-              <GithubIcon size={20} />
-            </a>
-            <a href="https://linkedin.com/in/rajtiwari" target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
-              <LinkedinIcon size={20} />
-            </a>
-            <a href="https://instagram.com/rajtiwari" target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
-              <InstagramIcon size={20} />
-            </a>
-            <a href="https://x.com/rajtiwari" target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
-              <XIcon size={20} />
-            </a>
+            {socialLinks.github && (
+              <a href={socialLinks.github} target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
+                <GithubIcon size={20} />
+              </a>
+            )}
+            {socialLinks.linkedin && (
+              <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
+                <LinkedinIcon size={20} />
+              </a>
+            )}
+            {socialLinks.instagram && (
+              <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
+                <InstagramIcon size={20} />
+              </a>
+            )}
+            {socialLinks.x && (
+              <a href={socialLinks.x} target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
+                <XIcon size={20} />
+              </a>
+            )}
+            {socialLinks.leetcode && (
+              <a href={socialLinks.leetcode} target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
+                <LeetcodeIcon size={20} />
+              </a>
+            )}
 
             <Button variant="primary" size="sm">
               <Link href="/contact">Contact Me</Link>
@@ -103,18 +124,31 @@ export default function Navbar() {
                 </Link>
               ))}
               <div className="flex gap-4 pt-4 border-t border-glass-border">
-                <a href="https://github.com/rajtiwari" target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
-                  <GithubIcon size={20} />
-                </a>
-                <a href="https://linkedin.com/in/rajtiwari" target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
-                  <LinkedinIcon size={20} />
-                </a>
-                <a href="https://instagram.com/rajtiwari" target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
-                  <InstagramIcon size={20} />
-                </a>
-                <a href="https://x.com/rajtiwari" target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
-                  <XIcon size={20} />
-                </a>
+                {socialLinks.github && (
+                  <a href={socialLinks.github} target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
+                    <GithubIcon size={20} />
+                  </a>
+                )}
+                {socialLinks.linkedin && (
+                  <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
+                    <LinkedinIcon size={20} />
+                  </a>
+                )}
+                {socialLinks.instagram && (
+                  <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
+                    <InstagramIcon size={20} />
+                  </a>
+                )}
+                {socialLinks.x && (
+                  <a href={socialLinks.x} target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
+                    <XIcon size={20} />
+                  </a>
+                )}
+                {socialLinks.leetcode && (
+                  <a href={socialLinks.leetcode} target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
+                    <LeetcodeIcon size={20} />
+                  </a>
+                )}
               </div>
             </div>
           </motion.div>

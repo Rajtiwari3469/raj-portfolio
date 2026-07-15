@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Send, Mail, MapPin, MessageCircle } from "lucide-react";
-import { GithubIcon, LinkedinIcon, InstagramIcon, XIcon } from "@/components/ui/SocialIcons";
+import { GithubIcon, LinkedinIcon, InstagramIcon, XIcon, LeetcodeIcon } from "@/components/ui/SocialIcons";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
@@ -17,6 +17,14 @@ export default function Contact() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"success" | "error" | null>(null);
+  const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then((res) => res.json())
+      .then((data) => setSocialLinks(data))
+      .catch(() => {});
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,18 +122,31 @@ export default function Contact() {
               <div className="mt-8 pt-8 border-t border-glass-border">
                 <p className="text-foreground/60 mb-4">Connect with me</p>
                 <div className="flex gap-4">
-                  <a href="https://github.com/rajtiwari" target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-primary/20 hover:text-primary transition-colors">
-                    <GithubIcon size={20} />
-                  </a>
-                  <a href="https://linkedin.com/in/rajtiwari" target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-accent/20 hover:text-accent transition-colors">
-                    <LinkedinIcon size={20} />
-                  </a>
-                  <a href="https://instagram.com/rajtiwari" target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-pink-500/20 hover:text-pink-500 transition-colors">
-                    <InstagramIcon size={20} />
-                  </a>
-                  <a href="https://x.com/rajtiwari" target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-black/20 hover:text-black transition-colors">
-                    <XIcon size={20} />
-                  </a>
+                  {socialLinks.github && (
+                    <a href={socialLinks.github} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-primary/20 hover:text-primary transition-colors">
+                      <GithubIcon size={20} />
+                    </a>
+                  )}
+                  {socialLinks.linkedin && (
+                    <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-accent/20 hover:text-accent transition-colors">
+                      <LinkedinIcon size={20} />
+                    </a>
+                  )}
+                  {socialLinks.instagram && (
+                    <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-pink-500/20 hover:text-pink-500 transition-colors">
+                      <InstagramIcon size={20} />
+                    </a>
+                  )}
+                  {socialLinks.x && (
+                    <a href={socialLinks.x} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-black/20 hover:text-black transition-colors">
+                      <XIcon size={20} />
+                    </a>
+                  )}
+                  {socialLinks.leetcode && (
+                    <a href={socialLinks.leetcode} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-yellow-500/20 hover:text-yellow-500 transition-colors">
+                      <LeetcodeIcon size={20} />
+                    </a>
+                  )}
                 </div>
               </div>
             </GlassPanel>

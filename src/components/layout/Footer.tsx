@@ -1,10 +1,20 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Mail, Phone, MapPin } from "lucide-react";
-import { GithubIcon, LinkedinIcon, InstagramIcon, XIcon } from "@/components/ui/SocialIcons";
+import { Mail, MapPin } from "lucide-react";
+import { GithubIcon, LinkedinIcon, InstagramIcon, XIcon, LeetcodeIcon } from "@/components/ui/SocialIcons";
 
 export default function Footer() {
+  const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then((res) => res.json())
+      .then((data) => setSocialLinks(data))
+      .catch(() => {});
+  }, []);
+
   return (
     <footer className="glass mt-auto py-12">
       <div className="container mx-auto px-4">
@@ -15,18 +25,31 @@ export default function Footer() {
               BCA CS & IT Student passionate about software development and AI technology.
             </p>
             <div className="flex gap-4">
-              <a href="https://github.com/rajtiwari" target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
-                <GithubIcon size={20} />
-              </a>
-              <a href="https://linkedin.com/in/rajtiwari" target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
-                <LinkedinIcon size={20} />
-              </a>
-              <a href="https://instagram.com/rajtiwari" target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
-                <InstagramIcon size={20} />
-              </a>
-              <a href="https://x.com/rajtiwari" target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
-                <XIcon size={20} />
-              </a>
+              {socialLinks.github && (
+                <a href={socialLinks.github} target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
+                  <GithubIcon size={20} />
+                </a>
+              )}
+              {socialLinks.linkedin && (
+                <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
+                  <LinkedinIcon size={20} />
+                </a>
+              )}
+              {socialLinks.instagram && (
+                <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
+                  <InstagramIcon size={20} />
+                </a>
+              )}
+              {socialLinks.x && (
+                <a href={socialLinks.x} target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
+                  <XIcon size={20} />
+                </a>
+              )}
+              {socialLinks.leetcode && (
+                <a href={socialLinks.leetcode} target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
+                  <LeetcodeIcon size={20} />
+                </a>
+              )}
             </div>
           </div>
 
@@ -72,10 +95,6 @@ export default function Footer() {
               <li className="flex items-center gap-2 text-foreground/60">
                 <Mail size={16} />
                 <span>raj@example.com</span>
-              </li>
-              <li className="flex items-center gap-2 text-foreground/60">
-                <Phone size={16} />
-                <span>+91 XXXXX XXXXX</span>
               </li>
               <li className="flex items-center gap-2 text-foreground/60">
                 <MapPin size={16} />
