@@ -99,8 +99,8 @@ export default function ContentPage() {
       const data = await response.json();
       if (data.aboutContent) setAbout(data.aboutContent);
       if (data.techStack) setTechStack(data.techStack);
-      if (data.educationContent) setEducation(data.educationContent);
-      if (data.experienceContent) setExperience(data.experienceContent);
+      if (data.educationContent?.entries) setEducation(data.educationContent.entries);
+      if (data.experienceContent?.entries) setExperience(data.experienceContent.entries);
     } catch (error) {
       console.error("Failed to fetch content:", error);
     } finally {
@@ -124,8 +124,8 @@ export default function ContentPage() {
         body: JSON.stringify({
           aboutContent: about,
           techStack: techStack,
-          educationContent: education,
-          experienceContent: experience,
+          educationContent: { entries: education },
+          experienceContent: { entries: experience },
         }),
       });
 
