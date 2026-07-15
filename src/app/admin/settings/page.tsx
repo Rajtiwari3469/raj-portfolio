@@ -17,7 +17,7 @@ const defaultSettings = {
   github: "",
   linkedin: "",
   instagram: "",
-  youtube: "",
+  x: "",
   leetcode: "",
   email: "",
   phone: "",
@@ -183,10 +183,10 @@ export default function SettingsPage() {
                   placeholder="https://instagram.com/..."
                 />
                 <Input
-                  label="YouTube URL"
-                  value={settings.youtube}
-                  onChange={(e) => setSettings({ ...settings, youtube: e.target.value })}
-                  placeholder="https://youtube.com/..."
+                  label="X (Twitter) URL"
+                  value={settings.x}
+                  onChange={(e) => setSettings({ ...settings, x: e.target.value })}
+                  placeholder="https://x.com/..."
                 />
                 <Input
                   label="LeetCode URL"

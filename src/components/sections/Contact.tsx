@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Send, Mail, MapPin, MessageCircle } from "lucide-react";
-import { GithubIcon, LinkedinIcon, InstagramIcon, YoutubeIcon } from "@/components/ui/SocialIcons";
+import { GithubIcon, LinkedinIcon, InstagramIcon, XIcon } from "@/components/ui/SocialIcons";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
@@ -123,8 +123,8 @@ export default function Contact() {
                   <a href="https://instagram.com/rajtiwari" target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-pink-500/20 hover:text-pink-500 transition-colors">
                     <InstagramIcon size={20} />
                   </a>
-                  <a href="https://youtube.com/@rajtiwari" target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-red-500/20 hover:text-red-500 transition-colors">
-                    <YoutubeIcon size={20} />
+                  <a href="https://x.com/rajtiwari" target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-black/20 hover:text-black transition-colors">
+                    <XIcon size={20} />
                   </a>
                 </div>
               </div>

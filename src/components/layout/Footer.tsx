@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Mail, Phone, MapPin } from "lucide-react";
-import { GithubIcon, LinkedinIcon, InstagramIcon, YoutubeIcon } from "@/components/ui/SocialIcons";
+import { GithubIcon, LinkedinIcon, InstagramIcon, XIcon } from "@/components/ui/SocialIcons";
 
 export default function Footer() {
   return (
@@ -24,8 +24,8 @@ export default function Footer() {
               <a href="https://instagram.com/rajtiwari" target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
                 <InstagramIcon size={20} />
               </a>
-              <a href="https://youtube.com/@rajtiwari" target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
-                <YoutubeIcon size={20} />
+              <a href="https://x.com/rajtiwari" target="_blank" rel="noopener noreferrer" className="text-foreground/60 hover:text-foreground transition-colors">
+                <XIcon size={20} />
               </a>
             </div>
           </div>
