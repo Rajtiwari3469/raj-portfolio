@@ -12,33 +12,41 @@ interface Skill {
   icon: string | null;
 }
 
+const defaultTechStack = [
+  "React", "Next.js", "TypeScript", "Node.js", "PostgreSQL",
+  "Tailwind CSS", "Three.js", "Python", "Java", "Git"
+];
+
 export default function Skills() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  const fetchSkills = async () => {
-    try {
-      const response = await fetch("/api/skills");
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setSkills(data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch skills:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [techStack, setTechStack] = useState<string[]>(defaultTechStack);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchSkills();
-  }, []);
+    const fetchData = async () => {
+      try {
+        const [skillsRes, sectionsRes] = await Promise.all([
+          fetch("/api/skills"),
+          fetch("/api/admin/sections"),
+        ]);
+        
+        const skillsData = await skillsRes.json();
+        if (Array.isArray(skillsData)) {
+          setSkills(skillsData);
+        }
 
-  const techStack = [
-    "React", "Next.js", "TypeScript", "Node.js", "PostgreSQL",
-    "Tailwind CSS", "Three.js", "Python", "Java", "Git"
-  ];
+        const sectionsData = await sectionsRes.json();
+        if (sectionsData.techStack && sectionsData.techStack.length > 0) {
+          setTechStack(sectionsData.techStack);
+        }
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const groupedSkills = skills.reduce((acc, skill) => {
     if (!acc[skill.category]) {

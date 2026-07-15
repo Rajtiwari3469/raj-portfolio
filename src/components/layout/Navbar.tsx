@@ -3,23 +3,22 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sun, Moon } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { GithubIcon, LinkedinIcon, InstagramIcon, YoutubeIcon } from "@/components/ui/SocialIcons";
-import { useTheme } from "@/components/providers/ThemeProvider";
 import Button from "@/components/ui/Button";
 
 const navItems = [
   { name: "Home", href: "/" },
-  { name: "About", href: "/about" },
-  { name: "Projects", href: "/projects" },
-  { name: "Blog", href: "/blog" },
-  { name: "Contact", href: "/contact" },
+  { name: "About", href: "/#about" },
+  { name: "Projects", href: "/#projects" },
+  { name: "Certificates", href: "/#certificates" },
+  { name: "Education", href: "/#education" },
+  { name: "Skills", href: "/#skills" },
 ];
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -70,13 +69,6 @@ export default function Navbar() {
               <YoutubeIcon size={20} />
             </a>
 
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-glass-bg transition-colors"
-            >
-              {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-
             <Button variant="primary" size="sm">
               <Link href="/contact">Contact Me</Link>
             </Button>
@@ -124,13 +116,6 @@ export default function Navbar() {
                   <YoutubeIcon size={20} />
                 </a>
               </div>
-              <button
-                onClick={toggleTheme}
-                className="flex items-center gap-2 text-foreground/80 hover:text-foreground transition-colors py-2"
-              >
-                {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
-                <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
-              </button>
             </div>
           </motion.div>
         )}

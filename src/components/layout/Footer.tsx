@@ -49,8 +49,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/blog" className="text-foreground/60 hover:text-foreground transition-colors">
-                  Blog
+                <Link href="/#certificates" className="text-foreground/60 hover:text-foreground transition-colors">
+                  Certificates
                 </Link>
               </li>
             </ul>

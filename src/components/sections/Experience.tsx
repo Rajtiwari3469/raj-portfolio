@@ -1,11 +1,23 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Briefcase, Calendar, ExternalLink } from "lucide-react";
 import { GithubIcon } from "@/components/ui/SocialIcons";
 import GlassPanel from "@/components/ui/GlassPanel";
 
-const experiences = [
+interface ExperienceEntry {
+  title: string;
+  company: string;
+  period: string;
+  description: string;
+  technologies: string[];
+  achievements: string[];
+  link: string;
+  github: string;
+}
+
+const defaultExperiences: ExperienceEntry[] = [
   {
     title: "Full Stack Developer Intern",
     company: "Tech Company",
@@ -51,6 +63,22 @@ const experiences = [
 ];
 
 export default function Experience() {
+  const [experiences, setExperiences] = useState<ExperienceEntry[]>(defaultExperiences);
+
+  useEffect(() => {
+    const fetchExperience = async () => {
+      try {
+        const response = await fetch("/api/admin/sections");
+        const data = await response.json();
+        if (data.experienceContent && data.experienceContent.entries && data.experienceContent.entries.length > 0) {
+          setExperiences(data.experienceContent.entries);
+        }
+      } catch (error) {
+        console.error("Failed to fetch experience content:", error);
+      }
+    };
+    fetchExperience();
+  }, []);
   return (
     <section id="experience" className="py-20 relative">
       <div className="container mx-auto px-4">

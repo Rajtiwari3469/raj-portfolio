@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { GraduationCap, Code, Cpu, Rocket } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
@@ -27,7 +28,45 @@ const highlights = [
   },
 ];
 
+const defaultBio = [
+  "I am Raj Tiwari, a passionate BCA Computer Science & Information Technology student with a deep interest in software development, artificial intelligence, and modern technologies.",
+  "I enjoy creating innovative digital solutions, building full-stack applications, and exploring AI-powered technologies. My journey in tech is driven by curiosity and a desire to make a meaningful impact through code.",
+  "From building responsive web applications to exploring machine learning algorithms, I am constantly pushing the boundaries of what is possible with technology.",
+];
+
+const defaultCareerGoals = [
+  "Become a proficient Full Stack Developer",
+  "Contribute to AI/ML projects",
+  "Build scalable and impactful applications",
+  "Collaborate with innovative teams",
+];
+
+const goalColors = ["bg-primary", "bg-accent", "bg-gold", "bg-secondary"];
+
 export default function About() {
+  const [bio, setBio] = useState<string[]>(defaultBio);
+  const [careerGoals, setCareerGoals] = useState<string[]>(defaultCareerGoals);
+
+  useEffect(() => {
+    const fetchAbout = async () => {
+      try {
+        const response = await fetch("/api/admin/sections");
+        const data = await response.json();
+        if (data.aboutContent) {
+          if (data.aboutContent.bio && data.aboutContent.bio.length > 0) {
+            setBio(data.aboutContent.bio);
+          }
+          if (data.aboutContent.careerGoals && data.aboutContent.careerGoals.length > 0) {
+            setCareerGoals(data.aboutContent.careerGoals);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch about content:", error);
+      }
+    };
+    fetchAbout();
+  }, []);
+
   return (
     <section id="about" className="py-20 relative">
       <div className="container mx-auto px-4">
@@ -54,35 +93,30 @@ export default function About() {
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             <GlassPanel className="space-y-6">
-              <p className="text-lg text-foreground/80 leading-relaxed">
-                I am <span className="text-primary font-semibold">Raj Tiwari</span>, a passionate BCA Computer Science & Information Technology student with a deep interest in software development, artificial intelligence, and modern technologies.
-              </p>
-              <p className="text-foreground/70 leading-relaxed">
-                I enjoy creating innovative digital solutions, building full-stack applications, and exploring AI-powered technologies. My journey in tech is driven by curiosity and a desire to make a meaningful impact through code.
-              </p>
-              <p className="text-foreground/70 leading-relaxed">
-                From building responsive web applications to exploring machine learning algorithms, I am constantly pushing the boundaries of what is possible with technology.
-              </p>
+              {bio.map((paragraph, index) => (
+                <p
+                  key={index}
+                  className={index === 0 ? "text-lg text-foreground/80 leading-relaxed" : "text-foreground/70 leading-relaxed"}
+                >
+                  {index === 0 ? (
+                    <>
+                      I am <span className="text-primary font-semibold">Raj Tiwari</span>,{paragraph.replace("I am Raj Tiwari, a passionate BCA Computer Science & Information Technology student with a deep interest in software development, artificial intelligence, and modern technologies.", " a passionate BCA Computer Science & Information Technology student with a deep interest in software development, artificial intelligence, and modern technologies.")}
+                    </>
+                  ) : (
+                    paragraph
+                  )}
+                </p>
+              ))}
 
               <div className="pt-4">
                 <h3 className="text-xl font-semibold mb-4 gradient-text">Career Goals</h3>
                 <ul className="space-y-2 text-foreground/70">
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-primary"></span>
-                    Become a proficient Full Stack Developer
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-accent"></span>
-                    Contribute to AI/ML projects
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-gold"></span>
-                    Build scalable and impactful applications
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-secondary"></span>
-                    Collaborate with innovative teams
-                  </li>
+                  {careerGoals.map((goal, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${goalColors[index % goalColors.length]}`}></span>
+                      {goal}
+                    </li>
+                  ))}
                 </ul>
               </div>
             </GlassPanel>

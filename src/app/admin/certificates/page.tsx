@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Edit, Trash2, Award } from "lucide-react";
+import { Plus, Edit, Trash2, Award, Upload, X } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
@@ -31,6 +31,9 @@ export default function CertificatesPage() {
     pdfUrl: "",
     description: "",
   });
+  const [isUploading, setIsUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchCertificates = async () => {
     try {
@@ -50,6 +53,40 @@ export default function CertificatesPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCertificates();
   }, []);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append("file", file);
+
+      const response = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: uploadFormData,
+      });
+
+      const data = await response.json();
+      if (data.url) {
+        setFormData({ ...formData, image: data.url });
+        setImagePreview(data.url);
+      }
+    } catch (error) {
+      console.error("Failed to upload image:", error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setFormData({ ...formData, image: "" });
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,6 +141,7 @@ export default function CertificatesPage() {
         pdfUrl: cert.pdfUrl || "",
         description: cert.description || "",
       });
+      setImagePreview(cert.image || null);
     } else {
       setEditingCert(null);
       setFormData({
@@ -114,6 +152,7 @@ export default function CertificatesPage() {
         pdfUrl: "",
         description: "",
       });
+      setImagePreview(null);
     }
     setIsModalOpen(true);
   };
@@ -121,6 +160,7 @@ export default function CertificatesPage() {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingCert(null);
+    setImagePreview(null);
   };
 
   return (
@@ -242,9 +282,53 @@ export default function CertificatesPage() {
           <Input
             label="Image URL (optional)"
             value={formData.image}
-            onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+            onChange={(e) => {
+              setFormData({ ...formData, image: e.target.value });
+              setImagePreview(e.target.value || null);
+            }}
             placeholder="https://..."
           />
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-foreground/80">
+              Or upload image
+            </label>
+            <div className="flex items-center gap-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+                id="image-upload"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className="flex items-center gap-2"
+              >
+                <Upload size={16} />
+                {isUploading ? "Uploading..." : "Choose File"}
+              </Button>
+            </div>
+            {imagePreview && (
+              <div className="relative inline-block mt-2">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-32 h-32 object-cover rounded-lg border border-glass-border"
+                />
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="absolute -top-2 -right-2 p-1 rounded-full bg-red-500 text-white hover:bg-red-600"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            )}
+          </div>
           <Input
             label="PDF URL (optional)"
             value={formData.pdfUrl}

@@ -10,8 +10,6 @@ import {
   Code2,
   FileText,
   Award,
-  MessageSquare,
-  Upload,
   Settings,
   LogOut,
   Menu,
@@ -23,10 +21,8 @@ const menuItems = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Projects", href: "/admin/projects", icon: FolderKanban },
   { name: "Skills", href: "/admin/skills", icon: Code2 },
-  { name: "Blogs", href: "/admin/blogs", icon: FileText },
   { name: "Certificates", href: "/admin/certificates", icon: Award },
-  { name: "Messages", href: "/admin/messages", icon: MessageSquare },
-  { name: "Media", href: "/admin/media", icon: Upload },
+  { name: "Content", href: "/admin/content", icon: FileText },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
