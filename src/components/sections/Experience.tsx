@@ -1,0 +1,158 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { Briefcase, Calendar, ExternalLink } from "lucide-react";
+import { GithubIcon } from "@/components/ui/SocialIcons";
+import GlassPanel from "@/components/ui/GlassPanel";
+
+const experiences = [
+  {
+    title: "Full Stack Developer Intern",
+    company: "Tech Company",
+    period: "2024 - Present",
+    description: "Developed and maintained web applications using React, Node.js, and PostgreSQL. Implemented RESTful APIs and integrated third-party services.",
+    technologies: ["React", "Node.js", "PostgreSQL", "TypeScript"],
+    achievements: [
+      "Built scalable REST APIs serving 10K+ requests daily",
+      "Implemented real-time features using WebSockets",
+      "Reduced load time by 40% through optimization"
+    ],
+    link: "#",
+    github: "#"
+  },
+  {
+    title: "Web Development Freelancer",
+    company: "Self-Employed",
+    period: "2023 - 2024",
+    description: "Provided web development services to small businesses and startups. Built responsive websites and web applications tailored to client needs.",
+    technologies: ["React", "Next.js", "Tailwind CSS", "MongoDB"],
+    achievements: [
+      "Delivered 10+ successful projects",
+      "Maintained 100% client satisfaction rate",
+      "Specialized in modern, responsive designs"
+    ],
+    link: "#",
+    github: "#"
+  },
+  {
+    title: "Open Source Contributor",
+    company: "Various Projects",
+    period: "2023 - Present",
+    description: "Active contributor to open source projects. Contributed bug fixes, new features, and documentation improvements to various repositories.",
+    technologies: ["Python", "JavaScript", "Git", "GitHub"],
+    achievements: [
+      "50+ contributions on GitHub",
+      "Merged 10+ pull requests",
+      "Mentored new contributors"
+    ],
+    link: "#",
+    github: "#"
+  }
+];
+
+export default function Experience() {
+  return (
+    <section id="experience" className="py-20 relative">
+      <div className="container mx-auto px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            <span className="gradient-text">Experience</span>
+          </h2>
+          <p className="text-foreground/60 max-w-2xl mx-auto">
+            My professional journey and development experience
+          </p>
+        </motion.div>
+
+        <div className="relative">
+          <div className="absolute left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-gradient-to-b from-primary via-accent to-secondary hidden lg:block" />
+
+          <div className="space-y-12">
+            {experiences.map((exp, index) => (
+              <motion.div
+                key={exp.title}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                className={`flex flex-col lg:flex-row gap-8 ${
+                  index % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"
+                }`}
+              >
+                <div className={`lg:w-1/2 ${index % 2 === 0 ? "lg:text-right" : "lg:text-left"}`}>
+                  <GlassPanel hover glow="primary" className="h-full">
+                    <div className="flex items-center gap-2 mb-2 text-primary">
+                      <Briefcase size={18} />
+                      <span className="text-sm font-medium">{exp.company}</span>
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">{exp.title}</h3>
+                    <div className="flex items-center gap-2 text-foreground/60 text-sm mb-4">
+                      <Calendar size={14} />
+                      <span>{exp.period}</span>
+                    </div>
+                    <p className="text-foreground/70 mb-4">{exp.description}</p>
+
+                    <div className="mb-4">
+                      <h4 className="text-sm font-semibold mb-2 text-foreground/80">Achievements:</h4>
+                      <ul className="space-y-1">
+                        {exp.achievements.map((achievement) => (
+                          <li key={achievement} className="text-sm text-foreground/60 flex items-start gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2 flex-shrink-0" />
+                            {achievement}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {exp.technologies.map((tech) => (
+                        <span
+                          key={tech}
+                          className="px-3 py-1 rounded-full bg-glass-bg text-xs text-foreground/70"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="flex gap-4">
+                      <a
+                        href={exp.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors"
+                      >
+                        <ExternalLink size={14} />
+                        Live Demo
+                      </a>
+                      <a
+                        href={exp.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-sm text-foreground/60 hover:text-foreground transition-colors"
+                      >
+                        <GithubIcon size={14} />
+                        Code
+                      </a>
+                    </div>
+                  </GlassPanel>
+                </div>
+
+                <div className="hidden lg:flex lg:w-1/2 items-start justify-center">
+                  <div className="w-4 h-4 rounded-full bg-primary border-4 border-background relative z-10" />
+                </div>
+
+                <div className="lg:w-1/2" />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
