@@ -14,7 +14,9 @@ function createPrismaClient(): PrismaClient {
     );
   }
   // Remove sslmode from connection string to avoid pg SSL warnings
-  connectionString = connectionString.replace(/[?&]sslmode=[^&]+/, "").replace(/\?sslmode=[^&]+/, "?");
+  const url = new URL(connectionString);
+  url.searchParams.delete("sslmode");
+  connectionString = url.toString();
   const pool = new pg.Pool({
     connectionString,
     ssl: { rejectUnauthorized: false },
