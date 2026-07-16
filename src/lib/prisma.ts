@@ -6,25 +6,36 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+function cleanConnectionString(url: string): string {
+  const questionMarkIndex = url.indexOf("?");
+  if (questionMarkIndex === -1) return url;
+
+  const base = url.substring(0, questionMarkIndex);
+  const params = new URLSearchParams(url.substring(questionMarkIndex + 1));
+  params.delete("sslmode");
+  const remaining = params.toString();
+  return remaining ? `${base}?${remaining}` : base;
+}
+
 function createPrismaClient(): PrismaClient {
-  let connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
+  const rawUrl = process.env.DATABASE_URL;
+  if (!rawUrl) {
     throw new Error(
       "DATABASE_URL environment variable is not set. Set it in your Vercel project settings."
     );
   }
-  // Remove sslmode param to avoid pg SSL alias warnings
-  connectionString = connectionString.replace(/sslmode=[^&]*&?/, "").replace(/\?$/, "");
+
+  const connectionString = cleanConnectionString(rawUrl);
+
   const pool = new pg.Pool({
     connectionString,
     ssl: { rejectUnauthorized: false },
   });
+
   const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter });
 }
 
-// Lazy getter: defers creation until first actual use at runtime,
-// so build-time static analysis won't crash when DATABASE_URL is absent.
 export function getPrisma(): PrismaClient {
   if (!globalForPrisma.prisma) {
     globalForPrisma.prisma = createPrismaClient();
@@ -32,7 +43,6 @@ export function getPrisma(): PrismaClient {
   return globalForPrisma.prisma;
 }
 
-// Keep backward-compatible export
 export const prisma = new Proxy({} as PrismaClient, {
   get(_target, prop, receiver) {
     const client = getPrisma();
