@@ -104,10 +104,18 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-white/[0.05] text-center">
+        <div className="mt-12 pt-8 border-t border-white/[0.05] flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-foreground/30 text-sm">
             &copy; {new Date().getFullYear()} Raj Tiwari. All rights reserved.
           </p>
+          <div className="flex gap-6">
+            <Link href="/terms" className="text-foreground/30 hover:text-foreground/60 text-sm transition-colors">
+              Terms & Conditions
+            </Link>
+            <Link href="/privacy" className="text-foreground/30 hover:text-foreground/60 text-sm transition-colors">
+              Privacy Policy
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
