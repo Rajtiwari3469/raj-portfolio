@@ -94,11 +94,11 @@ export default function Footer() {
             <ul className="space-y-2">
               <li className="flex items-center gap-2 text-foreground/40 text-sm">
                 <Mail size={14} />
-                <span>raj@example.com</span>
+                <span>{socialLinks.email || "raj@example.com"}</span>
               </li>
               <li className="flex items-center gap-2 text-foreground/40 text-sm">
                 <MapPin size={14} />
-                <span>India</span>
+                <span>{socialLinks.location || "India"}</span>
               </li>
             </ul>
           </div>
