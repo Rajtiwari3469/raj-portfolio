@@ -56,7 +56,7 @@ export default function Hero({ profileImage, heroTitle, heroSubtitle }: HeroProp
             transition={{ delay: 0.2 }}
             className="text-lg md:text-xl text-foreground/60 mb-4"
           >
-            Welcome to my universe
+            Welcome to my portfolio
           </motion.p>
 
           <motion.h1
