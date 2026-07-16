@@ -13,10 +13,8 @@ function createPrismaClient(): PrismaClient {
       "DATABASE_URL environment variable is not set. Set it in your Vercel project settings."
     );
   }
-  // Remove sslmode from connection string to avoid pg SSL warnings
-  const url = new URL(connectionString);
-  url.searchParams.delete("sslmode");
-  connectionString = url.toString();
+  // Remove sslmode param to avoid pg SSL alias warnings
+  connectionString = connectionString.replace(/sslmode=[^&]*&?/, "").replace(/\?$/, "");
   const pool = new pg.Pool({
     connectionString,
     ssl: { rejectUnauthorized: false },
