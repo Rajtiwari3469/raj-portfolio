@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
-import { ExternalLink, Folder, CheckCircle, Clock } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ExternalLink, Folder, CheckCircle, Clock, X, Github } from "lucide-react";
 import { GithubIcon } from "@/components/ui/SocialIcons";
 import GlassPanel from "@/components/ui/GlassPanel";
 
@@ -24,6 +24,7 @@ export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   const fetchProjects = useCallback(async () => {
     try {
@@ -127,7 +128,12 @@ export default function Projects() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
               >
-                <GlassPanel hover glow="primary" className="h-full flex flex-col">
+                <GlassPanel
+                  hover
+                  glow="primary"
+                  className="h-full flex flex-col cursor-pointer"
+                  onClick={() => setSelectedProject(project)}
+                >
                   <div className="relative h-48 rounded-xl overflow-hidden mb-4 bg-glass-bg">
                     <div className="absolute inset-0 flex items-center justify-center">
                       <Folder size={48} className="text-primary/40" />
@@ -190,26 +196,16 @@ export default function Projects() {
 
                   <div className="flex gap-4 pt-4 border-t border-glass-border">
                     {project.githubUrl && (
-                      <a
-                        href={project.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-sm text-foreground/60 hover:text-foreground transition-colors"
-                      >
+                      <span className="flex items-center gap-1 text-sm text-foreground/60">
                         <GithubIcon size={16} />
                         Code
-                      </a>
+                      </span>
                     )}
                     {project.liveUrl && (
-                      <a
-                        href={project.liveUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors"
-                      >
+                      <span className="flex items-center gap-1 text-sm text-primary">
                         <ExternalLink size={16} />
                         Live Demo
-                      </a>
+                      </span>
                     )}
                   </div>
                 </GlassPanel>
@@ -236,6 +232,130 @@ export default function Projects() {
           </a>
         </motion.div>
       </div>
+
+      <AnimatePresence>
+        {selectedProject && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+            onClick={() => setSelectedProject(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.3 }}
+              className="w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <GlassPanel className="relative">
+                <button
+                  onClick={() => setSelectedProject(null)}
+                  className="absolute top-4 right-4 p-2 rounded-xl bg-glass-bg hover:bg-red-500/20 hover:text-red-400 transition-colors z-10"
+                >
+                  <X size={20} />
+                </button>
+
+                <div className="relative h-64 rounded-xl overflow-hidden mb-6 bg-glass-bg">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Folder size={64} className="text-primary/30" />
+                  </div>
+                  {selectedProject.image && (
+                    <img
+                      src={selectedProject.image}
+                      alt={selectedProject.title}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                  <div className="absolute top-4 right-4">
+                    <span className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm ${
+                      selectedProject.status === "active"
+                        ? "bg-green-500/30 text-green-300 border border-green-500/30"
+                        : selectedProject.status === "in-progress"
+                        ? "bg-yellow-500/30 text-yellow-300 border border-yellow-500/30"
+                        : "bg-blue-500/30 text-blue-300 border border-blue-500/30"
+                    }`}>
+                      {selectedProject.status === "active" ? (
+                        <>
+                          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                          Active
+                        </>
+                      ) : selectedProject.status === "in-progress" ? (
+                        <>
+                          <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
+                          In Progress
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle size={14} />
+                          Completed
+                        </>
+                      )}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex items-center gap-3 mb-2">
+                      <h2 className="text-2xl font-bold">{selectedProject.title}</h2>
+                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary">
+                        {selectedProject.category}
+                      </span>
+                    </div>
+                    <p className="text-foreground/70 leading-relaxed">
+                      {selectedProject.description}
+                    </p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground/60 mb-3">Technologies Used</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedProject.technology.map((tech) => (
+                        <span
+                          key={tech}
+                          className="px-3 py-1.5 rounded-lg bg-glass-bg text-sm text-foreground/70 border border-glass-border"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {(selectedProject.githubUrl || selectedProject.liveUrl) && (
+                    <div className="flex gap-4 pt-4 border-t border-glass-border">
+                      {selectedProject.githubUrl && (
+                        <a
+                          href={selectedProject.githubUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-glass-bg hover:bg-foreground/10 transition-colors"
+                        >
+                          <Github size={18} />
+                          <span className="font-medium">View Source Code</span>
+                        </a>
+                      )}
+                      {selectedProject.liveUrl && (
+                        <a
+                          href={selectedProject.liveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/20 hover:bg-primary/30 text-primary transition-colors"
+                        >
+                          <ExternalLink size={18} />
+                          <span className="font-medium">Live Demo</span>
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </GlassPanel>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
