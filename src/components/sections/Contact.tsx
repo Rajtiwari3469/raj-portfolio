@@ -214,7 +214,7 @@ export default function Contact() {
                     }`}
                   >
                     {submitStatus === "success"
-                      ? "Message sent successfully! I'll get back to you soon."
+                      ? "Message sent successfully! Please check your email, we'll touch you through email. If you've provided your contact number, we'll reach out to you as well."
                       : "Failed to send message. Please try again."}
                   </motion.div>
                 )}
