@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Download, Eye, FileText } from "lucide-react";
+import { Eye, FileText } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 
@@ -137,14 +137,6 @@ export default function ResumeSection() {
                 )}
 
                 <div className="flex gap-3 mt-4 justify-center">
-                  {selectedResume.pdfUrl && (
-                    <a href={selectedResume.pdfUrl} download>
-                      <Button variant="primary" className="flex items-center gap-2">
-                        <Download size={16} />
-                        Download PDF
-                      </Button>
-                    </a>
-                  )}
                   <Button variant="ghost" onClick={() => setShowPreview(false)}>
                     Close
                   </Button>
