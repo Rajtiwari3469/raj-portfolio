@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Edit, Trash2, ExternalLink, Image as ImageIcon, Loader2 } from "lucide-react";
+import { Plus, Edit, Trash2, ExternalLink, Image as ImageIcon, Loader2, FolderKanban } from "lucide-react";
 import { GithubIcon } from "@/components/ui/SocialIcons";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
@@ -405,15 +405,5 @@ export default function ProjectsPage() {
         loading={isDeleting}
       />
     </div>
-  );
-}
-
-function FolderKanban({ size, className }: { size: number; className?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-      <path d="M3 9h18" />
-      <path d="M9 21V9" />
-    </svg>
   );
 }

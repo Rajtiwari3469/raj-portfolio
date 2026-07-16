@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   MessageCircle,
   Mail,
+  PenTool,
 } from "lucide-react";
 
 const menuItems = [
@@ -25,7 +26,7 @@ const menuItems = [
   { name: "Skills", href: "/admin/skills", icon: Code2 },
   { name: "Certificates", href: "/admin/certificates", icon: Award },
   { name: "Resume", href: "/admin/resume", icon: FileText },
-  { name: "Content", href: "/admin/content", icon: FileText },
+  { name: "Content", href: "/admin/content", icon: PenTool },
   { name: "Touch Messages", href: "/admin/touch-messages", icon: Mail },
   { name: "Chat", href: "/admin/chat", icon: MessageCircle },
   { name: "Settings", href: "/admin/settings", icon: Settings },

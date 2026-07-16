@@ -6,6 +6,7 @@ import { Send, MessageCircle, ArrowLeft, Image as ImageIcon, Smile, Mic, MicOff,
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import { useToast } from "@/components/ui/Toast";
 
 interface ChatMsg {
   id: string;
@@ -27,6 +28,7 @@ interface Session {
 const EMOJI_LIST = ["😊", "😂", "❤️", "👍", "🎉", "🔥", "💯", "✨", "🙏", "😎", "🤔", "💪", "🚀", "⭐", "😍", "🙌", "👏", "💻", "🎯", "🌟"];
 
 export default function AdminChat() {
+  const { toast } = useToast();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [activeSession, setActiveSession] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
@@ -102,8 +104,10 @@ export default function AdminChat() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ aiEnabled: newState }),
       });
+      toast(newState ? "AI auto-reply enabled" : "AI auto-reply disabled");
     } catch {
       setAiEnabled(!newState);
+      toast("Failed to toggle AI", "error");
     }
   };
 
@@ -114,7 +118,10 @@ export default function AdminChat() {
       await fetch(`/api/chat?sessionId=${deleteSessionId}`, { method: "DELETE" });
       setActiveSession(null);
       fetchSessions();
-    } catch {} finally {
+      toast("Chat deleted");
+    } catch {
+      toast("Failed to delete chat", "error");
+    } finally {
       setIsDeleting(false);
       setDeleteSessionId(null);
     }
@@ -134,7 +141,9 @@ export default function AdminChat() {
       });
       fetchMessages(activeSession);
       fetchSessions();
-    } catch {}
+    } catch {
+      toast("Failed to send message", "error");
+    }
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,8 +157,12 @@ export default function AdminChat() {
       if (res.ok) {
         const data = await res.json();
         await sendReply(data.url, "image");
+      } else {
+        toast("Upload failed", "error");
       }
-    } catch {}
+    } catch {
+      toast("Upload failed", "error");
+    }
     setUploading(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
