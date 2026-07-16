@@ -99,6 +99,12 @@ export default function Hero({ profileImage, heroTitle, heroSubtitle }: HeroProp
                 View Projects
               </a>
             </Button>
+
+            <Button variant="outline" size="lg">
+              <a href="#resume" className="flex items-center gap-2">
+                View Resume
+              </a>
+            </Button>
           </motion.div>
         </motion.div>
       </div>
