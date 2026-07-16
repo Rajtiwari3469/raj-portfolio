@@ -1,27 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
 import crypto from "crypto";
+import { Resend } from "resend";
 
 function generateResetCode(): string {
   return crypto.randomInt(100000, 999999).toString();
 }
 
 async function sendResetEmail(email: string, code: string): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.error("RESEND_API_KEY not set");
+    return false;
+  }
+
   try {
-    const response = await fetch("https://api.web3forms.com/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        access_key: process.env.WEB3FORMS_ACCESS_KEY || "",
-        subject: "Portfolio Admin - Password Reset Code",
-        from_name: "Portfolio Admin",
-        to: email,
-        message: `Your password reset code is: ${code}\n\nThis code expires in 10 minutes.\n\nIf you did not request this, ignore this email.`,
-      }),
+    const resend = new Resend(apiKey);
+    await resend.emails.send({
+      from: "Portfolio Admin <onboarding@resend.dev>",
+      to: email,
+      subject: "Portfolio Admin - Password Reset Code",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #6366f1;">Password Reset Code</h2>
+          <p>Your reset code is:</p>
+          <div style="background: #f3f4f6; padding: 15px; text-align: center; border-radius: 8px; margin: 20px 0;">
+            <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #111827;">${code}</span>
+          </div>
+          <p style="color: #6b7280; font-size: 14px;">This code expires in 10 minutes.</p>
+          <p style="color: #6b7280; font-size: 14px;">If you did not request this, ignore this email.</p>
+        </div>
+      `,
     });
-    return response.ok;
-  } catch {
-    console.error("Failed to send reset email");
+    return true;
+  } catch (error) {
+    console.error("Failed to send reset email:", error);
     return false;
   }
 }
@@ -63,9 +76,8 @@ export async function POST(request: NextRequest) {
 
     if (!emailSent) {
       return NextResponse.json({
-        message: "Reset code generated. Email could not be sent. Please check server logs.",
-        code: code,
-      });
+        error: "Failed to send email. Make sure RESEND_API_KEY is set in Vercel environment variables.",
+      }, { status: 500 });
     }
 
     return NextResponse.json({ message: "Reset code sent to your email" });
