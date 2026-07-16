@@ -7,12 +7,14 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 function createPrismaClient(): PrismaClient {
-  const connectionString = process.env.DATABASE_URL;
+  let connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     throw new Error(
       "DATABASE_URL environment variable is not set. Set it in your Vercel project settings."
     );
   }
+  // Remove sslmode from connection string to avoid pg SSL warnings
+  connectionString = connectionString.replace(/[?&]sslmode=[^&]+/, "").replace(/\?sslmode=[^&]+/, "?");
   const pool = new pg.Pool({
     connectionString,
     ssl: { rejectUnauthorized: false },
