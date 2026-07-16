@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, Folder, CheckCircle, Clock, X, Github } from "lucide-react";
+import { ExternalLink, Folder, CheckCircle, Clock, X } from "lucide-react";
 import { GithubIcon } from "@/components/ui/SocialIcons";
 import GlassPanel from "@/components/ui/GlassPanel";
 
@@ -333,7 +333,7 @@ export default function Projects() {
                           rel="noopener noreferrer"
                           className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-glass-bg hover:bg-foreground/10 transition-colors"
                         >
-                          <Github size={18} />
+                          <GithubIcon size={18} />
                           <span className="font-medium">View Source Code</span>
                         </a>
                       )}
