@@ -73,7 +73,7 @@ export default function Education() {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: false, amount: 0.2 }}
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
@@ -90,7 +90,7 @@ export default function Education() {
           <motion.h3
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false, amount: 0.2 }}
             className="text-2xl font-semibold mb-8 flex items-center gap-3"
           >
             <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
@@ -105,7 +105,7 @@ export default function Education() {
                 key={edu.title}
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
+                viewport={{ once: false, amount: 0.2 }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
               >
                 <GlassPanel hover glow="primary">

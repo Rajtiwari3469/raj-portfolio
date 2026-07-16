@@ -41,7 +41,7 @@ export default function ResumeSection() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: false, amount: 0.2 }}
           className="text-center mb-16"
         >
           <p className="text-xs text-primary/60 tracking-[0.3em] uppercase mb-4">Career</p>
@@ -55,7 +55,7 @@ export default function ResumeSection() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false, amount: 0.2 }}
           >
             <GlassPanel className="max-w-4xl mx-auto border border-white/[0.06]">
               <div className="flex flex-col md:flex-row gap-6">

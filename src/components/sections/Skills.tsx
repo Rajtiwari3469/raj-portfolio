@@ -62,7 +62,7 @@ export default function Skills() {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: false, amount: 0.2 }}
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
@@ -88,7 +88,7 @@ export default function Skills() {
                 key={category}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                viewport={{ once: false, amount: 0.2 }}
                 transition={{ duration: 0.8, delay: catIndex * 0.2 }}
               >
                 <GlassPanel className="h-full">
@@ -101,7 +101,7 @@ export default function Skills() {
                         key={skill.id}
                         initial={{ opacity: 0, x: -20 }}
                         whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
+                        viewport={{ once: false, amount: 0.2 }}
                         transition={{ duration: 0.5, delay: skillIndex * 0.1 }}
                       >
                         <div className="flex justify-between mb-2">
@@ -112,7 +112,7 @@ export default function Skills() {
                           <motion.div
                             initial={{ width: 0 }}
                             whileInView={{ width: `${skill.level}%` }}
-                            viewport={{ once: true }}
+                            viewport={{ once: false, amount: 0.2 }}
                             transition={{ duration: 1, delay: 0.5 + skillIndex * 0.1 }}
                             className="h-full bg-gradient-to-r from-primary via-accent to-secondary rounded-full shadow-[0_0_10px_var(--primary-glow)]"
                           />
@@ -129,7 +129,7 @@ export default function Skills() {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: false, amount: 0.2 }}
           transition={{ duration: 0.8, delay: 0.4 }}
         >
           <GlassPanel>
@@ -142,7 +142,7 @@ export default function Skills() {
                   key={tech}
                   initial={{ opacity: 0, scale: 0.8 }}
                   whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
+                  viewport={{ once: false, amount: 0.2 }}
                   transition={{ duration: 0.3, delay: 0.5 + index * 0.05 }}
                   className="px-5 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground/60 hover:border-primary/30 hover:text-primary hover:bg-primary/5 hover:shadow-[0_0_15px_rgba(0,212,255,0.1)] transition-all duration-500 cursor-default tracking-wide text-sm"
                 >
