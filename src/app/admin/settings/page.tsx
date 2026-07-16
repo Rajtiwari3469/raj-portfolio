@@ -49,10 +49,11 @@ export default function SettingsPage() {
   const [resetNewPassword, setResetNewPassword] = useState("");
   const [resetConfirmPassword, setResetConfirmPassword] = useState("");
   const [isSendingReset, setIsSendingReset] = useState(false);
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [forgotStatus, setForgotStatus] = useState<"success" | "error" | null>(null);
   const [forgotMessage, setForgotMessage] = useState("");
-  const [showResetForm, setShowResetForm] = useState(false);
+  const [resetStep, setResetStep] = useState<1 | 2 | 3>(1);
 
   const fetchSettings = async () => {
     try {
@@ -164,10 +165,7 @@ export default function SettingsPage() {
       if (response.ok) {
         setForgotStatus("success");
         setForgotMessage(data.message || "Reset code sent to your email");
-        if (data.code) {
-          setForgotMessage(`Email sending not configured. Your reset code is: ${data.code}`);
-        }
-        setShowResetForm(true);
+        setResetStep(2);
       } else {
         setForgotStatus("error");
         setForgotMessage(data.error || "Failed to send reset code");
@@ -177,6 +175,35 @@ export default function SettingsPage() {
       setForgotMessage("An error occurred. Please try again.");
     } finally {
       setIsSendingReset(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    setIsVerifyingCode(true);
+    setForgotStatus(null);
+    setForgotMessage("");
+
+    try {
+      const response = await fetch("/api/auth/verify-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: resetCode }),
+      });
+
+      if (response.ok) {
+        setForgotStatus("success");
+        setForgotMessage("Code verified! Now set your new credentials.");
+        setResetStep(3);
+      } else {
+        const data = await response.json();
+        setForgotStatus("error");
+        setForgotMessage(data.error || "Invalid code");
+      }
+    } catch {
+      setForgotStatus("error");
+      setForgotMessage("An error occurred. Please try again.");
+    } finally {
+      setIsVerifyingCode(false);
     }
   };
 
@@ -217,7 +244,7 @@ export default function SettingsPage() {
         setForgotMessage(data.message || "Reset successful!");
         setTimeout(() => {
           setShowForgotModal(false);
-          setShowResetForm(false);
+          setResetStep(1);
           setForgotEmail("");
           setResetCode("");
           setResetNewUsername("");
@@ -577,7 +604,7 @@ export default function SettingsPage() {
               <button
                 onClick={() => {
                   setShowForgotModal(false);
-                  setShowResetForm(false);
+                  setResetStep(1);
                   setForgotEmail("");
                   setResetCode("");
                   setResetNewUsername("");
@@ -593,15 +620,26 @@ export default function SettingsPage() {
 
               <div className="text-center mb-6">
                 <KeyRound className="mx-auto mb-4 text-primary" size={32} />
-                <h2 className="text-2xl font-bold">Forgot Password</h2>
+                <h2 className="text-2xl font-bold">
+                  {resetStep === 1 ? "Forgot Password" : resetStep === 2 ? "Verify Code" : "Set New Credentials"}
+                </h2>
                 <p className="text-foreground/60 mt-2">
-                  {showResetForm
-                    ? "Enter the reset code and new username/password"
-                    : "Enter your admin email to receive a reset code"}
+                  {resetStep === 1
+                    ? "Enter your admin email to receive a reset code"
+                    : resetStep === 2
+                    ? "Enter the 6-digit code sent to your email"
+                    : "Set your new username and/or password"}
                 </p>
+                {resetStep > 1 && (
+                  <div className="flex justify-center gap-2 mt-3">
+                    <div className={`w-8 h-1 rounded-full ${resetStep >= 1 ? "bg-primary" : "bg-white/20"}`} />
+                    <div className={`w-8 h-1 rounded-full ${resetStep >= 2 ? "bg-primary" : "bg-white/20"}`} />
+                    <div className={`w-8 h-1 rounded-full ${resetStep >= 3 ? "bg-primary" : "bg-white/20"}`} />
+                  </div>
+                )}
               </div>
 
-              {!showResetForm ? (
+              {resetStep === 1 && (
                 <div className="space-y-4">
                   <Input
                     label="Admin Email"
@@ -635,14 +673,53 @@ export default function SettingsPage() {
                     {isSendingReset ? "Sending..." : "Send Reset Code"}
                   </Button>
                 </div>
-              ) : (
+              )}
+
+              {resetStep === 2 && (
                 <div className="space-y-4">
                   <Input
                     label="Reset Code"
                     value={resetCode}
                     onChange={(e) => setResetCode(e.target.value)}
                     placeholder="Enter 6-digit code"
+                    maxLength={6}
                   />
+
+                  {forgotStatus && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className={`p-3 rounded-xl text-sm ${
+                        forgotStatus === "success"
+                          ? "bg-green-500/20 text-green-400"
+                          : "bg-red-500/20 text-red-400"
+                      }`}
+                    >
+                      {forgotMessage}
+                    </motion.div>
+                  )}
+
+                  <Button
+                    type="button"
+                    variant="primary"
+                    className="w-full"
+                    onClick={handleVerifyCode}
+                    disabled={isVerifyingCode || resetCode.length !== 6}
+                  >
+                    {isVerifyingCode ? "Verifying..." : "Verify Code"}
+                  </Button>
+
+                  <button
+                    onClick={() => { setResetStep(1); setForgotStatus(null); setForgotMessage(""); }}
+                    className="w-full text-sm text-foreground/60 hover:text-foreground"
+                  >
+                    ← Back to email
+                  </button>
+                </div>
+              )}
+
+              {resetStep === 3 && (
+                <div className="space-y-4">
                   <Input
                     label="New Username (optional)"
                     value={resetNewUsername}
@@ -685,16 +762,16 @@ export default function SettingsPage() {
                     variant="primary"
                     className="w-full"
                     onClick={handleResetPassword}
-                    disabled={isResettingPassword || !resetCode || (!resetNewUsername && !resetNewPassword)}
+                    disabled={isResettingPassword || (!resetNewUsername && !resetNewPassword)}
                   >
-                    {isResettingPassword ? "Resetting..." : "Reset Password"}
+                    {isResettingPassword ? "Resetting..." : "Reset Credentials"}
                   </Button>
 
                   <button
-                    onClick={() => setShowResetForm(false)}
+                    onClick={() => { setResetStep(2); setForgotStatus(null); setForgotMessage(""); }}
                     className="w-full text-sm text-foreground/60 hover:text-foreground"
                   >
-                    ← Back to send code
+                    ← Back to code
                   </button>
                 </div>
               )}
