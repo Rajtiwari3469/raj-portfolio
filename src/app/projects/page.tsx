@@ -1,15 +1,17 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Projects from "@/components/sections/Projects";
+import ChatWidget from "@/components/ui/ChatWidget";
 
 export default function ProjectsPage() {
   return (
-    <main className="flex-1">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
-      <div className="pt-20">
+      <main className="flex-1 pt-20">
         <Projects />
-      </div>
+      </main>
       <Footer />
-    </main>
+      <ChatWidget />
+    </div>
   );
 }

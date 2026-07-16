@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import ChatWidget from "@/components/ui/ChatWidget";
 
 const sections = [
   {
@@ -115,6 +116,7 @@ Any updates will be published on this page, and the "Last Updated" date will be 
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen flex flex-col">
+      <Navbar />
       <main className="flex-1 pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-12">
@@ -127,8 +129,14 @@ export default function PrivacyPage() {
           </div>
 
           <div className="space-y-6">
-            {sections.map((section) => (
-              <div key={section.title}>
+            {sections.map((section, index) => (
+              <motion.div
+                key={section.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, amount: 0.2 }}
+                transition={{ duration: 0.6, delay: index * 0.05 }}
+              >
                 <h2 className="text-xl font-semibold mb-3 gradient-text">
                   {section.title}
                 </h2>
@@ -139,11 +147,13 @@ export default function PrivacyPage() {
                     </p>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
       </main>
+      <Footer />
+      <ChatWidget />
     </div>
   );
 }

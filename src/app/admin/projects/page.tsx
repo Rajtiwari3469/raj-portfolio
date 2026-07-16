@@ -16,6 +16,7 @@ interface Project {
   title: string;
   description: string;
   image: string | null;
+  images: string[];
   githubUrl: string | null;
   liveUrl: string | null;
   technology: string[];
@@ -36,6 +37,7 @@ export default function ProjectsPage() {
     title: "",
     description: "",
     image: "",
+    images: [] as string[],
     githubUrl: "",
     liveUrl: "",
     technology: "",
@@ -131,6 +133,7 @@ export default function ProjectsPage() {
         title: project.title,
         description: project.description,
         image: project.image || "",
+        images: project.images || [],
         githubUrl: project.githubUrl || "",
         liveUrl: project.liveUrl || "",
         technology: project.technology.join(", "),
@@ -145,6 +148,7 @@ export default function ProjectsPage() {
         title: "",
         description: "",
         image: "",
+        images: [],
         githubUrl: "",
         liveUrl: "",
         technology: "",
@@ -160,6 +164,30 @@ export default function ProjectsPage() {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingProject(null);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: "image" | "images") => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const formDataUpload = new FormData();
+    formDataUpload.append("file", file);
+    toast("Uploading image...", "info");
+    const res = await fetch("/api/admin/upload", { method: "POST", body: formDataUpload });
+    if (res.ok) {
+      const data = await res.json();
+      if (target === "image") {
+        setFormData((prev) => ({ ...prev, image: data.url }));
+      } else {
+        setFormData((prev) => ({ ...prev, images: [...prev.images, data.url] }));
+      }
+      toast("Image uploaded");
+    } else {
+      toast("Upload failed", "error");
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setFormData((prev) => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
   };
 
   return (
@@ -279,8 +307,11 @@ export default function ProjectsPage() {
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             required
           />
+
           <div>
-            <label className="block text-sm font-medium mb-2">Project Image</label>
+            <label className="block text-sm font-medium mb-2">
+              Cover Image <span className="text-red-400">*</span>
+            </label>
             {formData.image ? (
               <div className="relative">
                 <img src={formData.image} alt="Preview" className="w-full h-40 object-cover rounded-xl" />
@@ -295,30 +326,49 @@ export default function ProjectsPage() {
             ) : (
               <label className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-primary/30 transition-colors">
                 <ImageIcon size={32} className="text-foreground/30 mb-2" />
-                <span className="text-sm text-foreground/40">Click to upload image</span>
+                <span className="text-sm text-foreground/40">Click to upload cover image</span>
                 <input
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    const formDataUpload = new FormData();
-                    formDataUpload.append("file", file);
-                    toast("Uploading image...", "info");
-                    const res = await fetch("/api/admin/upload", { method: "POST", body: formDataUpload });
-                    if (res.ok) {
-                      const data = await res.json();
-                      setFormData({ ...formData, image: data.url });
-                      toast("Image uploaded");
-                    } else {
-                      toast("Upload failed", "error");
-                    }
-                  }}
+                  onChange={(e) => handleImageUpload(e, "image")}
                 />
               </label>
             )}
           </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Additional Images <span className="text-foreground/40">(optional)</span>
+            </label>
+            {formData.images.length > 0 && (
+              <div className="grid grid-cols-3 gap-3 mb-3">
+                {formData.images.map((img, i) => (
+                  <div key={i} className="relative group">
+                    <img src={img} alt={`Image ${i + 1}`} className="w-full h-24 object-cover rounded-lg" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(i)}
+                      className="absolute top-1 right-1 p-1 bg-red-500 rounded-md text-white hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <label className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-primary/30 transition-colors">
+              <ImageIcon size={24} className="text-foreground/30 mb-1" />
+              <span className="text-xs text-foreground/40">Add more images</span>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleImageUpload(e, "images")}
+              />
+            </label>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <Input
               label="GitHub URL"

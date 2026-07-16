@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Briefcase, Calendar } from "lucide-react";
-import { GithubIcon } from "@/components/ui/SocialIcons";
 import GlassPanel from "@/components/ui/GlassPanel";
 
 interface ExperienceEntry {
@@ -13,8 +12,6 @@ interface ExperienceEntry {
   description: string;
   technologies: string[];
   achievements: string[];
-  link: string;
-  github: string;
 }
 
 const defaultExperiences: ExperienceEntry[] = [
@@ -29,8 +26,6 @@ const defaultExperiences: ExperienceEntry[] = [
       "Implemented real-time features using WebSockets",
       "Reduced load time by 40% through optimization"
     ],
-    link: "#",
-    github: "#"
   },
   {
     title: "Web Development Freelancer",
@@ -43,8 +38,6 @@ const defaultExperiences: ExperienceEntry[] = [
       "Maintained 100% client satisfaction rate",
       "Specialized in modern, responsive designs"
     ],
-    link: "#",
-    github: "#"
   },
   {
     title: "Open Source Contributor",
@@ -57,8 +50,6 @@ const defaultExperiences: ExperienceEntry[] = [
       "Merged 10+ pull requests",
       "Mentored new contributors"
     ],
-    link: "#",
-    github: "#"
   }
 ];
 
@@ -146,18 +137,6 @@ export default function Experience() {
                           {tech}
                         </span>
                       ))}
-                    </div>
-
-                    <div className="flex gap-4">
-                      <a
-                        href={exp.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-sm text-foreground/40 hover:text-foreground/70 transition-colors"
-                      >
-                        <GithubIcon size={14} />
-                        Code
-                      </a>
                     </div>
                   </GlassPanel>
                 </div>

@@ -20,6 +20,7 @@ model Project {
   title        String
   description  String
   image        String?
+  images       String[]
   githubUrl    String?
   liveUrl      String?
   technology   String[]

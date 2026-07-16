@@ -4,18 +4,23 @@ import About from "@/components/sections/About";
 import Education from "@/components/sections/Education";
 import Experience from "@/components/sections/Experience";
 import Skills from "@/components/sections/Skills";
+import ChatWidget from "@/components/ui/ChatWidget";
 
 export default function AboutPage() {
   return (
-    <main className="flex-1">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
-      <div className="pt-20">
+      <main className="flex-1 pt-20">
         <About />
+        <div className="section-divider mx-auto max-w-4xl" />
         <Skills />
+        <div className="section-divider mx-auto max-w-4xl" />
         <Education />
+        <div className="section-divider mx-auto max-w-4xl" />
         <Experience />
-      </div>
+      </main>
       <Footer />
-    </main>
+      <ChatWidget />
+    </div>
   );
 }

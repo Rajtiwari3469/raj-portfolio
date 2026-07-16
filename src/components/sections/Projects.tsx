@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, Folder, CheckCircle, Clock, X } from "lucide-react";
+import { ExternalLink, Folder, CheckCircle, Clock, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { GithubIcon } from "@/components/ui/SocialIcons";
 import GlassPanel from "@/components/ui/GlassPanel";
 
@@ -11,6 +11,7 @@ interface Project {
   title: string;
   description: string;
   image: string | null;
+  images: string[];
   githubUrl: string | null;
   liveUrl: string | null;
   technology: string[];
@@ -25,6 +26,7 @@ export default function Projects() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [modalImageIndex, setModalImageIndex] = useState(0);
 
   const fetchProjects = useCallback(async () => {
     try {
@@ -59,6 +61,18 @@ export default function Projects() {
     { id: "in-progress", label: "In Progress", count: inProgressProjects.length, icon: <Clock size={14} /> },
     { id: "completed", label: "Completed", count: completedProjects.length, icon: <CheckCircle size={14} /> },
   ];
+
+  const getAllImages = (project: Project): string[] => {
+    const imgs: string[] = [];
+    if (project.image) imgs.push(project.image);
+    if (project.images) imgs.push(...project.images);
+    return imgs;
+  };
+
+  const openModal = (project: Project) => {
+    setSelectedProject(project);
+    setModalImageIndex(0);
+  };
 
   return (
     <section id="projects" className="py-24 relative">
@@ -120,52 +134,205 @@ export default function Projects() {
           </GlassPanel>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProjects.map((project, index) => (
-              <motion.div
-                key={project.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: false, amount: 0.2 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-              >
-                <GlassPanel
-                  hover
-                  glow="primary"
-                  className="h-full flex flex-col cursor-pointer"
-                  onClick={() => setSelectedProject(project)}
+            {filteredProjects.map((project, index) => {
+              const allImages = getAllImages(project);
+              return (
+                <motion.div
+                  key={project.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: false, amount: 0.2 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
                 >
-                  <div className="relative h-48 rounded-xl overflow-hidden mb-4 bg-white/[0.02] border border-white/[0.04]">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Folder size={40} className="text-primary/20" />
+                  <GlassPanel
+                    hover
+                    glow="primary"
+                    className="h-full flex flex-col cursor-pointer"
+                    onClick={() => openModal(project)}
+                  >
+                    <div className="relative h-48 rounded-xl overflow-hidden mb-4 bg-white/[0.02] border border-white/[0.04]">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Folder size={40} className="text-primary/20" />
+                      </div>
+                      {project.image && (
+                        <img
+                          src={project.image}
+                          alt={project.title}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                      {allImages.length > 1 && (
+                        <div className="absolute bottom-3 left-3 px-2 py-1 rounded-lg bg-black/60 backdrop-blur-sm text-xs text-white/80">
+                          1/{allImages.length} photos
+                        </div>
+                      )}
+                      <div className="absolute top-3 right-3">
+                        <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-xl ${
+                          project.status === "active"
+                            ? "bg-green-500/20 text-green-300 border border-green-500/20"
+                            : project.status === "in-progress"
+                            ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/20"
+                            : "bg-blue-500/20 text-blue-300 border border-blue-500/20"
+                        }`}>
+                          {project.status === "active" ? (
+                            <>
+                              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                              Active
+                            </>
+                          ) : project.status === "in-progress" ? (
+                            <>
+                              <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
+                              In Progress
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle size={12} />
+                              Completed
+                            </>
+                          )}
+                        </span>
+                      </div>
                     </div>
-                    {project.image && (
+
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-lg font-semibold">{project.title}</h3>
+                        <span className="text-xs text-foreground/30">{project.category}</span>
+                      </div>
+                      <p className="text-foreground/50 text-sm mb-4 line-clamp-3">
+                        {project.description}
+                      </p>
+
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {project.technology.map((tech) => (
+                          <span
+                            key={tech}
+                            className="px-2.5 py-1 rounded-lg bg-white/[0.03] border border-white/[0.05] text-xs text-foreground/50"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4 pt-4 border-t border-white/[0.05]">
+                      {project.githubUrl && (
+                        <span className="flex items-center gap-1.5 text-sm text-foreground/40 hover:text-foreground/70 transition-colors">
+                          <GithubIcon size={14} />
+                          Code
+                        </span>
+                      )}
+                      {project.liveUrl && (
+                        <span className="flex items-center gap-1.5 text-sm text-primary">
+                          <ExternalLink size={14} />
+                          Live Demo
+                        </span>
+                      )}
+                    </div>
+                  </GlassPanel>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+
+      </div>
+
+      <AnimatePresence>
+        {selectedProject && (() => {
+          const allImages = getAllImages(selectedProject);
+          return (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-[#050510]/80 backdrop-blur-md p-4"
+              onClick={() => setSelectedProject(null)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ duration: 0.3 }}
+                className="w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <GlassPanel className="relative border border-white/[0.08] shadow-[0_0_60px_rgba(0,212,255,0.08)]">
+                  <button
+                    onClick={() => setSelectedProject(null)}
+                    className="absolute top-4 right-4 p-2 rounded-xl bg-white/[0.03] hover:bg-red-500/10 hover:text-red-400 transition-colors z-10"
+                  >
+                    <X size={20} />
+                  </button>
+
+                  <div className="relative h-64 rounded-xl overflow-hidden mb-6 bg-white/[0.02] border border-white/[0.04]">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Folder size={56} className="text-primary/15" />
+                    </div>
+                    {allImages.length > 0 ? (
                       <img
-                        src={project.image}
-                        alt={project.title}
+                        src={allImages[modalImageIndex]}
+                        alt={selectedProject.title}
                         className="w-full h-full object-cover"
                       />
+                    ) : null}
+                    {allImages.length > 1 && (
+                      <>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setModalImageIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1));
+                          }}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 backdrop-blur-sm text-white hover:bg-black/70 transition-colors"
+                        >
+                          <ChevronLeft size={20} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setModalImageIndex((prev) => (prev === allImages.length - 1 ? 0 : prev + 1));
+                          }}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 backdrop-blur-sm text-white hover:bg-black/70 transition-colors"
+                        >
+                          <ChevronRight size={20} />
+                        </button>
+                        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                          {allImages.map((_, i) => (
+                            <button
+                              key={i}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setModalImageIndex(i);
+                              }}
+                              className={`w-2 h-2 rounded-full transition-colors ${
+                                i === modalImageIndex ? "bg-white" : "bg-white/40"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </>
                     )}
-                    <div className="absolute top-3 right-3">
-                      <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-xl ${
-                        project.status === "active"
+                    <div className="absolute top-4 right-4">
+                      <span className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium backdrop-blur-xl ${
+                        selectedProject.status === "active"
                           ? "bg-green-500/20 text-green-300 border border-green-500/20"
-                          : project.status === "in-progress"
+                          : selectedProject.status === "in-progress"
                           ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/20"
                           : "bg-blue-500/20 text-blue-300 border border-blue-500/20"
                       }`}>
-                        {project.status === "active" ? (
+                        {selectedProject.status === "active" ? (
                           <>
-                            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                             Active
                           </>
-                        ) : project.status === "in-progress" ? (
+                        ) : selectedProject.status === "in-progress" ? (
                           <>
-                            <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
+                            <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
                             In Progress
                           </>
                         ) : (
                           <>
-                            <CheckCircle size={12} />
+                            <CheckCircle size={14} />
                             Completed
                           </>
                         )}
@@ -173,171 +340,65 @@ export default function Projects() {
                     </div>
                   </div>
 
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-semibold">{project.title}</h3>
-                      <span className="text-xs text-foreground/30">{project.category}</span>
-                    </div>
-                    <p className="text-foreground/50 text-sm mb-4 line-clamp-3">
-                      {project.description}
-                    </p>
-
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {project.technology.map((tech) => (
-                        <span
-                          key={tech}
-                          className="px-2.5 py-1 rounded-lg bg-white/[0.03] border border-white/[0.05] text-xs text-foreground/50"
-                        >
-                          {tech}
+                  <div className="space-y-6">
+                    <div>
+                      <div className="flex items-center gap-3 mb-3">
+                        <h2 className="text-2xl font-bold">{selectedProject.title}</h2>
+                        <span className="px-3 py-1 rounded-lg text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                          {selectedProject.category}
                         </span>
-                      ))}
+                      </div>
+                      <p className="text-foreground/60 leading-relaxed">
+                        {selectedProject.description}
+                      </p>
                     </div>
-                  </div>
 
-                  <div className="flex gap-4 pt-4 border-t border-white/[0.05]">
-                    {project.githubUrl && (
-                      <span className="flex items-center gap-1.5 text-sm text-foreground/40 hover:text-foreground/70 transition-colors">
-                        <GithubIcon size={14} />
-                        Code
-                      </span>
-                    )}
-                    {project.liveUrl && (
-                      <span className="flex items-center gap-1.5 text-sm text-primary">
-                        <ExternalLink size={14} />
-                        Live Demo
-                      </span>
+                    <div>
+                      <h3 className="text-sm font-semibold text-foreground/40 mb-3 tracking-wide uppercase">Technologies Used</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedProject.technology.map((tech) => (
+                          <span
+                            key={tech}
+                            className="px-3 py-1.5 rounded-lg bg-white/[0.03] text-sm text-foreground/60 border border-white/[0.05]"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {(selectedProject.githubUrl || selectedProject.liveUrl) && (
+                      <div className="flex gap-4 pt-4 border-t border-white/[0.05]">
+                        {selectedProject.githubUrl && (
+                          <a
+                            href={selectedProject.githubUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.06] transition-colors"
+                          >
+                            <GithubIcon size={18} />
+                            <span className="font-medium">View Source Code</span>
+                          </a>
+                        )}
+                        {selectedProject.liveUrl && (
+                          <a
+                            href={selectedProject.liveUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 transition-colors"
+                          >
+                            <ExternalLink size={18} />
+                            <span className="font-medium">Live Demo</span>
+                          </a>
+                        )}
+                      </div>
                     )}
                   </div>
                 </GlassPanel>
               </motion.div>
-            ))}
-          </div>
-        )}
-
-      </div>
-
-      <AnimatePresence>
-        {selectedProject && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[#050510]/80 backdrop-blur-md p-4"
-            onClick={() => setSelectedProject(null)}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ duration: 0.3 }}
-              className="w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <GlassPanel className="relative border border-white/[0.08] shadow-[0_0_60px_rgba(0,212,255,0.08)]">
-                <button
-                  onClick={() => setSelectedProject(null)}
-                  className="absolute top-4 right-4 p-2 rounded-xl bg-white/[0.03] hover:bg-red-500/10 hover:text-red-400 transition-colors z-10"
-                >
-                  <X size={20} />
-                </button>
-
-                <div className="relative h-64 rounded-xl overflow-hidden mb-6 bg-white/[0.02] border border-white/[0.04]">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Folder size={56} className="text-primary/15" />
-                  </div>
-                  {selectedProject.image && (
-                    <img
-                      src={selectedProject.image}
-                      alt={selectedProject.title}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                  <div className="absolute top-4 right-4">
-                    <span className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium backdrop-blur-xl ${
-                      selectedProject.status === "active"
-                        ? "bg-green-500/20 text-green-300 border border-green-500/20"
-                        : selectedProject.status === "in-progress"
-                        ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/20"
-                        : "bg-blue-500/20 text-blue-300 border border-blue-500/20"
-                    }`}>
-                      {selectedProject.status === "active" ? (
-                        <>
-                          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                          Active
-                        </>
-                      ) : selectedProject.status === "in-progress" ? (
-                        <>
-                          <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
-                          In Progress
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle size={14} />
-                          Completed
-                        </>
-                      )}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex items-center gap-3 mb-3">
-                      <h2 className="text-2xl font-bold">{selectedProject.title}</h2>
-                      <span className="px-3 py-1 rounded-lg text-xs font-medium bg-primary/10 text-primary border border-primary/20">
-                        {selectedProject.category}
-                      </span>
-                    </div>
-                    <p className="text-foreground/60 leading-relaxed">
-                      {selectedProject.description}
-                    </p>
-                  </div>
-
-                  <div>
-                    <h3 className="text-sm font-semibold text-foreground/40 mb-3 tracking-wide uppercase">Technologies Used</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedProject.technology.map((tech) => (
-                        <span
-                          key={tech}
-                          className="px-3 py-1.5 rounded-lg bg-white/[0.03] text-sm text-foreground/60 border border-white/[0.05]"
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {(selectedProject.githubUrl || selectedProject.liveUrl) && (
-                    <div className="flex gap-4 pt-4 border-t border-white/[0.05]">
-                      {selectedProject.githubUrl && (
-                        <a
-                          href={selectedProject.githubUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.06] transition-colors"
-                        >
-                          <GithubIcon size={18} />
-                          <span className="font-medium">View Source Code</span>
-                        </a>
-                      )}
-                      {selectedProject.liveUrl && (
-                        <a
-                          href={selectedProject.liveUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 transition-colors"
-                        >
-                          <ExternalLink size={18} />
-                          <span className="font-medium">Live Demo</span>
-                        </a>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </GlassPanel>
             </motion.div>
-          </motion.div>
-        )}
+          );
+        })()}
       </AnimatePresence>
     </section>
   );

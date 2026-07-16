@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, description, image, githubUrl, liveUrl, technology, category, status, featured, order } = body;
+    const { title, description, image, images, githubUrl, liveUrl, technology, category, status, featured, order } = body;
 
     if (!title || !description) {
       return NextResponse.json(
@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
         title,
         description,
         image: image || null,
+        images: images || [],
         githubUrl: githubUrl || null,
         liveUrl: liveUrl || null,
         technology: technology || [],
