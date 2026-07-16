@@ -101,7 +101,7 @@ export default function Hero({ profileImage, heroTitle, heroSubtitle }: HeroProp
             </Button>
 
             <Button variant="outline" size="lg">
-              <a href="#resume" className="flex items-center gap-2">
+              <a href="#resume" className="flex items-center gap-2 font-bold">
                 View Resume
               </a>
             </Button>
