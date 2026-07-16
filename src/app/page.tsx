@@ -9,12 +9,34 @@ import Skills from "@/components/sections/Skills";
 import Experience from "@/components/sections/Experience";
 import Contact from "@/components/sections/Contact";
 import ChatWidget from "@/components/ui/ChatWidget";
+import { getPrisma } from "@/lib/prisma";
 
-export default function Home() {
+async function getProfileImage(): Promise<string | null> {
+  try {
+    const prisma = getPrisma();
+    const setting = await prisma.setting.findUnique({
+      where: { key: "profileImage" },
+    });
+    if (setting?.value) {
+      try {
+        return JSON.parse(setting.value);
+      } catch {
+        return setting.value;
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export default async function Home() {
+  const profileImage = await getProfileImage();
+
   return (
     <main className="flex-1">
       <Navbar />
-      <Hero />
+      <Hero profileImage={profileImage} />
       <About />
       <Projects />
       <Certificates />

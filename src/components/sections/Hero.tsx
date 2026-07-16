@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowDown, Download } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/SocialIcons";
@@ -13,17 +12,7 @@ const SpaceBackground = dynamic(() => import("@/components/three/SpaceBackground
   loading: () => <div className="fixed inset-0 -z-10 bg-background" />,
 });
 
-export default function Hero() {
-  const [profileImage, setProfileImage] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch("/api/admin/sections")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.profileImage) setProfileImage(data.profileImage);
-      })
-      .catch(() => {});
-  }, []);
+export default function Hero({ profileImage }: { profileImage: string | null }) {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
