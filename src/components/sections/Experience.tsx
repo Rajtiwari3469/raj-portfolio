@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Briefcase, Calendar, ExternalLink } from "lucide-react";
+import { Briefcase, Calendar } from "lucide-react";
 import { GithubIcon } from "@/components/ui/SocialIcons";
 import GlassPanel from "@/components/ui/GlassPanel";
 
@@ -149,15 +149,6 @@ export default function Experience() {
                     </div>
 
                     <div className="flex gap-4">
-                      <a
-                        href={exp.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors"
-                      >
-                        <ExternalLink size={14} />
-                        Live Demo
-                      </a>
                       <a
                         href={exp.github}
                         target="_blank"
