@@ -1,4 +1,6 @@
 import { ImageResponse } from "next/og";
+import { readFile } from "fs/promises";
+import { join } from "path";
 
 export const size = {
   width: 64,
@@ -7,8 +9,7 @@ export const size = {
 export const contentType = "image/png";
 
 export default async function Icon() {
-  const imageUrl = "https://kommodo.ai/i/VA46IgrKxTXibZ05QiCY";
-  const imageData = await fetch(imageUrl).then((res) => res.arrayBuffer());
+  const imageData = await readFile(join(process.cwd(), "public", "favicon.png"));
 
   return new ImageResponse(
     (
@@ -25,7 +26,7 @@ export default async function Icon() {
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={imageUrl}
+          src={`data:image/png;base64,${imageData.toString("base64")}`}
           alt="RT"
           style={{
             width: "100%",
