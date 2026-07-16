@@ -83,9 +83,11 @@ export default function Footer() {
             <h4 className="font-semibold tracking-wide text-sm">Services</h4>
             <ul className="space-y-2">
               <li className="text-foreground/40 text-sm">Web Development</li>
+              <li className="text-foreground/40 text-sm">Application Development</li>
               <li className="text-foreground/40 text-sm">Software Development</li>
               <li className="text-foreground/40 text-sm">AI Solutions</li>
               <li className="text-foreground/40 text-sm">Full Stack Apps</li>
+              <li className="text-foreground/40 text-sm">UI/UX Design</li>
             </ul>
           </div>
 
