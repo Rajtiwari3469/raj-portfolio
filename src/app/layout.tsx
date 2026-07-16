@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Raj Tiwari | Portfolio",
   description: "Portfolio of Raj Tiwari - BCA CS & IT Student specializing in Software Development, AI Technology, and Modern Web Applications",
+  icons: {
+    icon: "/favicon.svg",
+  },
   keywords: [
     "Raj Tiwari",
     "Software Developer",
