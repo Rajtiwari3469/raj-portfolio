@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, Loader2, Code2 } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import { useToast } from "@/components/ui/Toast";
 
 interface Skill {
   id: string;
@@ -19,10 +20,12 @@ interface Skill {
 }
 
 export default function SkillsPage() {
+  const { toast } = useToast();
   const [skills, setSkills] = useState<Skill[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     category: "Programming",
@@ -48,36 +51,45 @@ export default function SkillsPage() {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSkills();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
     try {
       const payload = {
         ...formData,
         icon: formData.icon || null,
       };
 
+      let res;
       if (editingSkill) {
-        await fetch("/api/admin/skills", {
+        res = await fetch("/api/admin/skills", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: editingSkill.id, ...payload }),
         });
       } else {
-        await fetch("/api/admin/skills", {
+        res = await fetch("/api/admin/skills", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
       }
 
-      fetchSkills();
-      closeModal();
+      if (res.ok) {
+        toast(editingSkill ? "Skill updated" : "Skill created");
+        await fetchSkills();
+        closeModal();
+      } else {
+        toast("Failed to save skill", "error");
+      }
     } catch (error) {
       console.error("Failed to save skill:", error);
+      toast("Failed to save skill", "error");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -85,10 +97,16 @@ export default function SkillsPage() {
     if (!deleteId) return;
     setIsDeleting(true);
     try {
-      await fetch(`/api/admin/skills?id=${deleteId}`, { method: "DELETE" });
-      fetchSkills();
+      const res = await fetch(`/api/admin/skills?id=${deleteId}`, { method: "DELETE" });
+      if (res.ok) {
+        setSkills((prev) => prev.filter((s) => s.id !== deleteId));
+        toast("Skill deleted");
+      } else {
+        toast("Failed to delete skill", "error");
+      }
     } catch (error) {
       console.error("Failed to delete skill:", error);
+      toast("Failed to delete skill", "error");
     } finally {
       setIsDeleting(false);
       setDeleteId(null);
@@ -129,7 +147,7 @@ export default function SkillsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Skills</h1>
+          <h1 className="text-3xl font-bold gradient-text">Skills</h1>
           <p className="text-foreground/60 mt-1">Manage your skills and expertise</p>
         </div>
         <Button onClick={() => openModal()} className="flex items-center gap-2">
@@ -139,9 +157,12 @@ export default function SkillsPage() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12">Loading skills...</div>
+        <div className="flex items-center justify-center py-20">
+          <Loader2 size={32} className="animate-spin text-primary" />
+        </div>
       ) : skills.length === 0 ? (
-        <GlassPanel className="text-center py-12">
+        <GlassPanel className="text-center py-16">
+          <Code2 size={48} className="mx-auto mb-4 text-foreground/20" />
           <p className="text-foreground/60">No skills yet. Add your first skill!</p>
         </GlassPanel>
       ) : (
@@ -159,29 +180,31 @@ export default function SkillsPage() {
                         layout
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
+                        exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
                       >
                         <GlassPanel hover className="flex items-center justify-between">
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0">
                             <h3 className="font-medium">{skill.name}</h3>
-                            <div className="mt-2 h-2 bg-glass-bg rounded-full overflow-hidden">
-                              <div
+                            <div className="mt-2 h-2 bg-white/5 rounded-full overflow-hidden">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${skill.level}%` }}
+                                transition={{ duration: 0.8, ease: "easeOut" }}
                                 className="h-full bg-gradient-to-r from-primary to-accent rounded-full"
-                                style={{ width: `${skill.level}%` }}
                               />
                             </div>
                             <p className="text-xs text-foreground/60 mt-1">{skill.level}%</p>
                           </div>
-                          <div className="flex gap-2 ml-4">
+                          <div className="flex gap-1 ml-4">
                             <button
                               onClick={() => openModal(skill)}
-                              className="p-2 rounded-lg hover:bg-primary/20 text-primary"
+                              className="p-2 rounded-lg hover:bg-primary/10 text-foreground/40 hover:text-primary transition-colors"
                             >
                               <Edit size={16} />
                             </button>
                             <button
                               onClick={() => setDeleteId(skill.id)}
-                              className="p-2 rounded-lg hover:bg-red-500/20 text-red-400"
+                              className="p-2 rounded-lg hover:bg-red-500/10 text-foreground/40 hover:text-red-400 transition-colors"
                             >
                               <Trash2 size={16} />
                             </button>
@@ -213,7 +236,7 @@ export default function SkillsPage() {
             <select
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-glass-bg border border-glass-border"
+              className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
             >
               <option value="Programming">Programming</option>
               <option value="Framework">Framework</option>
@@ -232,7 +255,7 @@ export default function SkillsPage() {
               max="100"
               value={formData.level}
               onChange={(e) => setFormData({ ...formData, level: parseInt(e.target.value) })}
-              className="w-full"
+              className="w-full accent-primary"
             />
           </div>
           <Input
@@ -251,8 +274,15 @@ export default function SkillsPage() {
             <Button type="button" variant="ghost" onClick={closeModal}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary">
-              {editingSkill ? "Update" : "Create"}
+            <Button type="submit" variant="primary" disabled={isSaving}>
+              {isSaving ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 size={16} className="animate-spin" />
+                  Saving...
+                </span>
+              ) : (
+                editingSkill ? "Update" : "Create"
+              )}
             </Button>
           </div>
         </form>

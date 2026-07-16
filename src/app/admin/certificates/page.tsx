@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Edit, Trash2, Award, Upload, X } from "lucide-react";
+import { Plus, Edit, Trash2, Award, Upload, X, Loader2 } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import { useToast } from "@/components/ui/Toast";
 
 interface Certificate {
   id: string;
@@ -20,10 +21,12 @@ interface Certificate {
 }
 
 export default function CertificatesPage() {
+  const { toast } = useToast();
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCert, setEditingCert] = useState<Certificate | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     organization: "",
@@ -53,7 +56,6 @@ export default function CertificatesPage() {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCertificates();
   }, []);
 
@@ -75,9 +77,11 @@ export default function CertificatesPage() {
       if (data.url) {
         setFormData({ ...formData, image: data.url });
         setImagePreview(data.url);
+        toast("Image uploaded");
       }
     } catch (error) {
       console.error("Failed to upload image:", error);
+      toast("Upload failed", "error");
     } finally {
       setIsUploading(false);
     }
@@ -93,6 +97,7 @@ export default function CertificatesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
     try {
       const payload = {
         ...formData,
@@ -101,24 +106,33 @@ export default function CertificatesPage() {
         description: formData.description || null,
       };
 
+      let res;
       if (editingCert) {
-        await fetch("/api/admin/certificates", {
+        res = await fetch("/api/admin/certificates", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: editingCert.id, ...payload }),
         });
       } else {
-        await fetch("/api/admin/certificates", {
+        res = await fetch("/api/admin/certificates", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
       }
 
-      fetchCertificates();
-      closeModal();
+      if (res.ok) {
+        toast(editingCert ? "Certificate updated" : "Certificate created");
+        await fetchCertificates();
+        closeModal();
+      } else {
+        toast("Failed to save certificate", "error");
+      }
     } catch (error) {
       console.error("Failed to save certificate:", error);
+      toast("Failed to save certificate", "error");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -126,10 +140,16 @@ export default function CertificatesPage() {
     if (!deleteId) return;
     setIsDeleting(true);
     try {
-      await fetch(`/api/admin/certificates?id=${deleteId}`, { method: "DELETE" });
-      fetchCertificates();
+      const res = await fetch(`/api/admin/certificates?id=${deleteId}`, { method: "DELETE" });
+      if (res.ok) {
+        setCertificates((prev) => prev.filter((c) => c.id !== deleteId));
+        toast("Certificate deleted");
+      } else {
+        toast("Failed to delete certificate", "error");
+      }
     } catch (error) {
       console.error("Failed to delete certificate:", error);
+      toast("Failed to delete certificate", "error");
     } finally {
       setIsDeleting(false);
       setDeleteId(null);
@@ -173,7 +193,7 @@ export default function CertificatesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Certificates</h1>
+          <h1 className="text-3xl font-bold gradient-text">Certificates</h1>
           <p className="text-foreground/60 mt-1">Manage your certifications</p>
         </div>
         <Button onClick={() => openModal()} className="flex items-center gap-2">
@@ -183,9 +203,12 @@ export default function CertificatesPage() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12">Loading certificates...</div>
+        <div className="flex items-center justify-center py-20">
+          <Loader2 size={32} className="animate-spin text-primary" />
+        </div>
       ) : certificates.length === 0 ? (
-        <GlassPanel className="text-center py-12">
+        <GlassPanel className="text-center py-16">
+          <Award size={48} className="mx-auto mb-4 text-foreground/20" />
           <p className="text-foreground/60">No certificates yet. Add your first certificate!</p>
         </GlassPanel>
       ) : (
@@ -197,14 +220,14 @@ export default function CertificatesPage() {
                 layout
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
+                exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
               >
                 <GlassPanel hover className="h-full flex flex-col">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-3 rounded-xl bg-gold/20 text-gold">
+                    <div className="p-3 rounded-xl bg-yellow-500/10 text-gold border border-yellow-500/10">
                       <Award size={24} />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <h3 className="font-semibold line-clamp-1">{cert.name}</h3>
                       <p className="text-sm text-foreground/60">{cert.organization}</p>
                     </div>
@@ -224,29 +247,29 @@ export default function CertificatesPage() {
                       })}
                     </p>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-glass-border">
+                    <div className="flex items-center justify-between pt-4 border-t border-white/5">
                       <div className="flex gap-2">
                         {cert.pdfUrl && (
                           <a
                             href={cert.pdfUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm text-primary hover:text-primary/80"
+                            className="text-sm text-primary hover:text-primary/80 transition-colors"
                           >
                             View PDF
                           </a>
                         )}
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-1">
                         <button
                           onClick={() => openModal(cert)}
-                          className="p-2 rounded-lg hover:bg-primary/20 text-primary"
+                          className="p-2 rounded-lg hover:bg-primary/10 text-foreground/40 hover:text-primary transition-colors"
                         >
                           <Edit size={16} />
                         </button>
                         <button
                           onClick={() => setDeleteId(cert.id)}
-                          className="p-2 rounded-lg hover:bg-red-500/20 text-red-400"
+                          className="p-2 rounded-lg hover:bg-red-500/10 text-foreground/40 hover:text-red-400 transition-colors"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -314,7 +337,7 @@ export default function CertificatesPage() {
                 disabled={isUploading}
                 className="flex items-center gap-2"
               >
-                <Upload size={16} />
+                {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
                 {isUploading ? "Uploading..." : "Choose File"}
               </Button>
             </div>
@@ -323,12 +346,12 @@ export default function CertificatesPage() {
                 <img
                   src={imagePreview}
                   alt="Preview"
-                  className="w-32 h-32 object-cover rounded-lg border border-glass-border"
+                  className="w-32 h-32 object-cover rounded-lg border border-white/10"
                 />
                 <button
                   type="button"
                   onClick={handleRemoveImage}
-                  className="absolute -top-2 -right-2 p-1 rounded-full bg-red-500 text-white hover:bg-red-600"
+                  className="absolute -top-2 -right-2 p-1 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
                 >
                   <X size={14} />
                 </button>
@@ -351,8 +374,15 @@ export default function CertificatesPage() {
             <Button type="button" variant="ghost" onClick={closeModal}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary">
-              {editingCert ? "Update" : "Create"}
+            <Button type="submit" variant="primary" disabled={isSaving}>
+              {isSaving ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 size={16} className="animate-spin" />
+                  Saving...
+                </span>
+              ) : (
+                editingCert ? "Update" : "Create"
+              )}
             </Button>
           </div>
         </form>

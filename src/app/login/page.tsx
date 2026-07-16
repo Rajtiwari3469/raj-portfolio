@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Lock, User, Eye, EyeOff, KeyRound } from "lucide-react";
+import { Lock, User, Eye, EyeOff, KeyRound, Loader2 } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -35,9 +35,7 @@ export default function LoginPage() {
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
 
@@ -203,11 +201,8 @@ export default function LoginPage() {
               disabled={isLoading}
             >
               {isLoading ? (
-                <span className="flex items-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
+                <span className="flex items-center gap-2 justify-center">
+                  <Loader2 className="animate-spin h-5 w-5" />
                   Signing in...
                 </span>
               ) : (
@@ -294,7 +289,12 @@ export default function LoginPage() {
                     onClick={handleSendResetCode}
                     disabled={isSendingReset || !forgotEmail}
                   >
-                    {isSendingReset ? "Sending..." : "Send Reset Code"}
+                    {isSendingReset ? (
+                      <span className="flex items-center gap-2 justify-center">
+                        <Loader2 size={16} className="animate-spin" />
+                        Sending...
+                      </span>
+                    ) : "Send Reset Code"}
                   </Button>
                 </div>
               ) : (
@@ -341,7 +341,12 @@ export default function LoginPage() {
                     onClick={handleResetPassword}
                     disabled={isResettingPassword || !resetCode || !resetNewPassword || !resetConfirmPassword}
                   >
-                    {isResettingPassword ? "Resetting..." : "Reset Password"}
+                    {isResettingPassword ? (
+                      <span className="flex items-center gap-2 justify-center">
+                        <Loader2 size={16} className="animate-spin" />
+                        Resetting...
+                      </span>
+                    ) : "Reset Password"}
                   </Button>
 
                   <button

@@ -10,12 +10,14 @@ import {
   Save,
   Plus,
   Trash2,
-  AlertCircle,
   Camera,
+  Loader2,
+  CheckCircle2,
 } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
+import { useToast } from "@/components/ui/Toast";
 
 interface AboutContent {
   bio: string[];
@@ -86,6 +88,7 @@ const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
 ];
 
 export default function ContentPage() {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<Tab>("profile");
   const [profileImage, setProfileImage] = useState<string>("");
   const [about, setAbout] = useState<AboutContent>(defaultAbout);
@@ -94,7 +97,7 @@ export default function ContentPage() {
   const [experience, setExperience] = useState<ExperienceEntry[]>(defaultExperience);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<"success" | "error" | null>(null);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
   const fetchContent = useCallback(async () => {
     try {
@@ -113,14 +116,11 @@ export default function ContentPage() {
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchContent();
   }, [fetchContent]);
 
   const handleSave = async () => {
     setIsSaving(true);
-    setSaveStatus(null);
-
     try {
       const response = await fetch("/api/admin/sections", {
         method: "PUT",
@@ -135,13 +135,14 @@ export default function ContentPage() {
       });
 
       if (response.ok) {
-        setSaveStatus("success");
-        setTimeout(() => setSaveStatus(null), 3000);
+        toast("Content saved successfully");
+        setShowSaveSuccess(true);
+        setTimeout(() => setShowSaveSuccess(false), 2000);
       } else {
-        setSaveStatus("error");
+        toast("Failed to save content", "error");
       }
     } catch {
-      setSaveStatus("error");
+      toast("Failed to save content", "error");
     } finally {
       setIsSaving(false);
     }
@@ -156,7 +157,11 @@ export default function ContentPage() {
   };
 
   if (isLoading) {
-    return <div className="text-center py-12">Loading content...</div>;
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 size={32} className="animate-spin text-primary" />
+      </div>
+    );
   }
 
   return (
@@ -167,17 +172,19 @@ export default function ContentPage() {
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-3xl font-bold">Content Management</h1>
+          <h1 className="text-3xl font-bold gradient-text">Content Management</h1>
           <p className="text-foreground/60 mt-1">Edit section content for your portfolio</p>
         </div>
         <Button onClick={handleSave} variant="primary" disabled={isSaving}>
           {isSaving ? (
             <span className="flex items-center gap-2">
-              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
+              <Loader2 className="animate-spin h-5 w-5" />
               Saving...
+            </span>
+          ) : showSaveSuccess ? (
+            <span className="flex items-center gap-2 text-green-400">
+              <CheckCircle2 size={20} />
+              Saved!
             </span>
           ) : (
             <span className="flex items-center gap-2">
@@ -188,19 +195,6 @@ export default function ContentPage() {
         </Button>
       </motion.div>
 
-      {saveStatus && (
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          className={`flex items-center gap-2 text-sm ${
-            saveStatus === "success" ? "text-green-400" : "text-red-400"
-          }`}
-        >
-          <AlertCircle size={16} />
-          {saveStatus === "success" ? "Content saved successfully!" : "Failed to save content"}
-        </motion.div>
-      )}
-
       <div className="flex flex-wrap gap-2">
         {tabs.map((tab) => (
           <button
@@ -208,8 +202,8 @@ export default function ContentPage() {
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-200 ${
               activeTab === tab.id
-                ? "bg-primary/20 text-primary"
-                : "text-foreground/60 hover:bg-glass-bg hover:text-foreground"
+                ? "bg-primary/15 text-primary border border-primary/20 shadow-[0_0_15px_rgba(0,212,255,0.05)]"
+                : "text-foreground/60 hover:bg-white/[0.03] hover:text-foreground/80 border border-transparent"
             }`}
           >
             {tab.icon}
@@ -235,7 +229,7 @@ export default function ContentPage() {
 
               {profileImage && (
                 <div className="flex justify-center">
-                  <div className="relative w-40 h-40 rounded-full overflow-hidden border-2 border-primary/30">
+                  <div className="relative w-40 h-40 rounded-full overflow-hidden border-2 border-primary/20 shadow-[0_0_30px_rgba(0,212,255,0.1)]">
                     <img
                       src={profileImage}
                       alt="Profile"
@@ -253,13 +247,15 @@ export default function ContentPage() {
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
+                    toast("Uploading...", "info");
                     const reader = new FileReader();
                     reader.onload = () => {
                       setProfileImage(reader.result as string);
+                      toast("Profile image updated");
                     };
                     reader.readAsDataURL(file);
                   }}
-                  className="block w-full text-sm text-foreground/60 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-primary/20 file:text-primary hover:file:bg-primary/30 cursor-pointer"
+                  className="block w-full text-sm text-foreground/60 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-primary/15 file:text-primary hover:file:bg-primary/25 file:transition-colors cursor-pointer"
                 />
               </div>
             </GlassPanel>
@@ -288,7 +284,7 @@ export default function ContentPage() {
                         onClick={() => {
                           setAbout({ ...about, bio: about.bio.filter((_, i) => i !== index) });
                         }}
-                        className="p-2 rounded-lg hover:bg-red-500/20 text-red-400 self-start mt-1"
+                        className="p-2 rounded-lg hover:bg-red-500/10 text-red-400 self-start mt-1 transition-colors"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -325,7 +321,7 @@ export default function ContentPage() {
                         onClick={() => {
                           setAbout({ ...about, careerGoals: about.careerGoals.filter((_, i) => i !== index) });
                         }}
-                        className="p-2 rounded-lg hover:bg-red-500/20 text-red-400"
+                        className="p-2 rounded-lg hover:bg-red-500/10 text-red-400 transition-colors"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -371,7 +367,7 @@ export default function ContentPage() {
                         onClick={() => {
                           setTechStack({ ...techStack, tags: techStack.tags.filter((_, i) => i !== index) });
                         }}
-                        className="p-2 rounded-lg hover:bg-red-500/20 text-red-400"
+                        className="p-2 rounded-lg hover:bg-red-500/10 text-red-400 transition-colors"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -419,133 +415,136 @@ export default function ContentPage() {
                 </Button>
               </div>
 
-              {education.map((edu, eduIndex) => (
-                <motion.div
-                  key={eduIndex}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <GlassPanel className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-foreground/80">
-                        Education {eduIndex + 1}
-                      </h3>
-                      {education.length > 1 && (
-                        <button
-                          onClick={() => removeListItem(setEducation, eduIndex)}
-                          className="p-2 rounded-lg hover:bg-red-500/20 text-red-400"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      )}
-                    </div>
+              <AnimatePresence>
+                {education.map((edu, eduIndex) => (
+                  <motion.div
+                    key={eduIndex}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
+                  >
+                    <GlassPanel className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-foreground/80">
+                          Education {eduIndex + 1}
+                        </h3>
+                        {education.length > 1 && (
+                          <button
+                            onClick={() => removeListItem(setEducation, eduIndex)}
+                            className="p-2 rounded-lg hover:bg-red-500/10 text-red-400 transition-colors"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </div>
 
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <Input
-                        label="Title"
-                        value={edu.title}
-                        onChange={(e) => {
-                          const updated = [...education];
-                          updated[eduIndex] = { ...updated[eduIndex], title: e.target.value };
-                          setEducation(updated);
-                        }}
-                        placeholder="Bachelor of Computer Applications"
-                      />
-                      <Input
-                        label="Subtitle"
-                        value={edu.subtitle}
-                        onChange={(e) => {
-                          const updated = [...education];
-                          updated[eduIndex] = { ...updated[eduIndex], subtitle: e.target.value };
-                          setEducation(updated);
-                        }}
-                        placeholder="Computer Science & IT"
-                      />
-                      <Input
-                        label="Institution"
-                        value={edu.institution}
-                        onChange={(e) => {
-                          const updated = [...education];
-                          updated[eduIndex] = { ...updated[eduIndex], institution: e.target.value };
-                          setEducation(updated);
-                        }}
-                        placeholder="University Name"
-                      />
-                      <Input
-                        label="Year"
-                        value={edu.year}
-                        onChange={(e) => {
-                          const updated = [...education];
-                          updated[eduIndex] = { ...updated[eduIndex], year: e.target.value };
-                          setEducation(updated);
-                        }}
-                        placeholder="2022 - 2025"
-                      />
-                    </div>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <Input
+                          label="Title"
+                          value={edu.title}
+                          onChange={(e) => {
+                            const updated = [...education];
+                            updated[eduIndex] = { ...updated[eduIndex], title: e.target.value };
+                            setEducation(updated);
+                          }}
+                          placeholder="Bachelor of Computer Applications"
+                        />
+                        <Input
+                          label="Subtitle"
+                          value={edu.subtitle}
+                          onChange={(e) => {
+                            const updated = [...education];
+                            updated[eduIndex] = { ...updated[eduIndex], subtitle: e.target.value };
+                            setEducation(updated);
+                          }}
+                          placeholder="Computer Science & IT"
+                        />
+                        <Input
+                          label="Institution"
+                          value={edu.institution}
+                          onChange={(e) => {
+                            const updated = [...education];
+                            updated[eduIndex] = { ...updated[eduIndex], institution: e.target.value };
+                            setEducation(updated);
+                          }}
+                          placeholder="University Name"
+                        />
+                        <Input
+                          label="Year"
+                          value={edu.year}
+                          onChange={(e) => {
+                            const updated = [...education];
+                            updated[eduIndex] = { ...updated[eduIndex], year: e.target.value };
+                            setEducation(updated);
+                          }}
+                          placeholder="2022 - 2025"
+                        />
+                      </div>
 
-                    <Textarea
-                      label="Description"
-                      value={edu.description}
-                      onChange={(e) => {
-                        const updated = [...education];
-                        updated[eduIndex] = { ...updated[eduIndex], description: e.target.value };
-                        setEducation(updated);
-                      }}
-                      placeholder="Describe your education..."
-                      rows={3}
-                    />
+                      <Textarea
+                        label="Description"
+                        value={edu.description}
+                        onChange={(e) => {
+                          const updated = [...education];
+                          updated[eduIndex] = { ...updated[eduIndex], description: e.target.value };
+                          setEducation(updated);
+                        }}
+                        placeholder="Describe your education..."
+                        rows={3}
+                      />
 
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-foreground/80">Highlights</label>
-                      {edu.highlights.map((highlight, hIndex) => (
-                        <div key={hIndex} className="flex gap-2 mb-2">
-                          <Input
-                            value={highlight}
-                            onChange={(e) => {
-                              const updated = [...education];
-                              const newHighlights = [...updated[eduIndex].highlights];
-                              newHighlights[hIndex] = e.target.value;
-                              updated[eduIndex] = { ...updated[eduIndex], highlights: newHighlights };
-                              setEducation(updated);
-                            }}
-                            placeholder={`Highlight ${hIndex + 1}`}
-                          />
-                          {edu.highlights.length > 1 && (
-                            <button
-                              onClick={() => {
+                      <div>
+                        <label className="block text-sm font-medium mb-2 text-foreground/80">Highlights</label>
+                        {edu.highlights.map((highlight, hIndex) => (
+                          <div key={hIndex} className="flex gap-2 mb-2">
+                            <Input
+                              value={highlight}
+                              onChange={(e) => {
                                 const updated = [...education];
-                                const newHighlights = updated[eduIndex].highlights.filter((_, i) => i !== hIndex);
+                                const newHighlights = [...updated[eduIndex].highlights];
+                                newHighlights[hIndex] = e.target.value;
                                 updated[eduIndex] = { ...updated[eduIndex], highlights: newHighlights };
                                 setEducation(updated);
                               }}
-                              className="p-2 rounded-lg hover:bg-red-500/20 text-red-400"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          const updated = [...education];
-                          updated[eduIndex] = {
-                            ...updated[eduIndex],
-                            highlights: [...updated[eduIndex].highlights, ""],
-                          };
-                          setEducation(updated);
-                        }}
-                        className="flex items-center gap-2"
-                      >
-                        <Plus size={16} />
-                        Add Highlight
-                      </Button>
-                    </div>
-                  </GlassPanel>
-                </motion.div>
-              ))}
+                              placeholder={`Highlight ${hIndex + 1}`}
+                            />
+                            {edu.highlights.length > 1 && (
+                              <button
+                                onClick={() => {
+                                  const updated = [...education];
+                                  const newHighlights = updated[eduIndex].highlights.filter((_, i) => i !== hIndex);
+                                  updated[eduIndex] = { ...updated[eduIndex], highlights: newHighlights };
+                                  setEducation(updated);
+                                }}
+                                className="p-2 rounded-lg hover:bg-red-500/10 text-red-400 transition-colors"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const updated = [...education];
+                            updated[eduIndex] = {
+                              ...updated[eduIndex],
+                              highlights: [...updated[eduIndex].highlights, ""],
+                            };
+                            setEducation(updated);
+                          }}
+                          className="flex items-center gap-2"
+                        >
+                          <Plus size={16} />
+                          Add Highlight
+                        </Button>
+                      </div>
+                    </GlassPanel>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           )}
 
@@ -576,176 +575,179 @@ export default function ContentPage() {
                 </Button>
               </div>
 
-              {experience.map((exp, expIndex) => (
-                <motion.div
-                  key={expIndex}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <GlassPanel className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-foreground/80">
-                        Experience {expIndex + 1}
-                      </h3>
-                      {experience.length > 1 && (
-                        <button
-                          onClick={() => removeListItem(setExperience, expIndex)}
-                          className="p-2 rounded-lg hover:bg-red-500/20 text-red-400"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      )}
-                    </div>
+              <AnimatePresence>
+                {experience.map((exp, expIndex) => (
+                  <motion.div
+                    key={expIndex}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
+                  >
+                    <GlassPanel className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-foreground/80">
+                          Experience {expIndex + 1}
+                        </h3>
+                        {experience.length > 1 && (
+                          <button
+                            onClick={() => removeListItem(setExperience, expIndex)}
+                            className="p-2 rounded-lg hover:bg-red-500/10 text-red-400 transition-colors"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </div>
 
-                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <Input
+                          label="Title"
+                          value={exp.title}
+                          onChange={(e) => {
+                            const updated = [...experience];
+                            updated[expIndex] = { ...updated[expIndex], title: e.target.value };
+                            setExperience(updated);
+                          }}
+                          placeholder="Full Stack Developer"
+                        />
+                        <Input
+                          label="Company"
+                          value={exp.company}
+                          onChange={(e) => {
+                            const updated = [...experience];
+                            updated[expIndex] = { ...updated[expIndex], company: e.target.value };
+                            setExperience(updated);
+                          }}
+                          placeholder="Company Name"
+                        />
+                      </div>
+
                       <Input
-                        label="Title"
-                        value={exp.title}
+                        label="Period"
+                        value={exp.period}
                         onChange={(e) => {
                           const updated = [...experience];
-                          updated[expIndex] = { ...updated[expIndex], title: e.target.value };
+                          updated[expIndex] = { ...updated[expIndex], period: e.target.value };
                           setExperience(updated);
                         }}
-                        placeholder="Full Stack Developer"
+                        placeholder="2024 - Present"
                       />
-                      <Input
-                        label="Company"
-                        value={exp.company}
+
+                      <Textarea
+                        label="Description"
+                        value={exp.description}
                         onChange={(e) => {
                           const updated = [...experience];
-                          updated[expIndex] = { ...updated[expIndex], company: e.target.value };
+                          updated[expIndex] = { ...updated[expIndex], description: e.target.value };
                           setExperience(updated);
                         }}
-                        placeholder="Company Name"
+                        placeholder="Describe your role and responsibilities..."
+                        rows={3}
                       />
-                    </div>
 
-                    <Input
-                      label="Period"
-                      value={exp.period}
-                      onChange={(e) => {
-                        const updated = [...experience];
-                        updated[expIndex] = { ...updated[expIndex], period: e.target.value };
-                        setExperience(updated);
-                      }}
-                      placeholder="2024 - Present"
-                    />
-
-                    <Textarea
-                      label="Description"
-                      value={exp.description}
-                      onChange={(e) => {
-                        const updated = [...experience];
-                        updated[expIndex] = { ...updated[expIndex], description: e.target.value };
-                        setExperience(updated);
-                      }}
-                      placeholder="Describe your role and responsibilities..."
-                      rows={3}
-                    />
-
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-foreground/80">Technologies</label>
-                      <div className="flex flex-wrap gap-2">
-                        {exp.technologies.map((tech, tIndex) => (
-                          <div key={tIndex} className="flex items-center gap-1">
-                            <Input
-                              value={tech}
-                              onChange={(e) => {
-                                const updated = [...experience];
-                                const newTech = [...updated[expIndex].technologies];
-                                newTech[tIndex] = e.target.value;
-                                updated[expIndex] = { ...updated[expIndex], technologies: newTech };
-                                setExperience(updated);
-                              }}
-                              placeholder="Tech"
-                              className="w-32"
-                            />
-                            {exp.technologies.length > 1 && (
-                              <button
-                                onClick={() => {
+                      <div>
+                        <label className="block text-sm font-medium mb-2 text-foreground/80">Technologies</label>
+                        <div className="flex flex-wrap gap-2">
+                          {exp.technologies.map((tech, tIndex) => (
+                            <div key={tIndex} className="flex items-center gap-1">
+                              <Input
+                                value={tech}
+                                onChange={(e) => {
                                   const updated = [...experience];
-                                  const newTech = updated[expIndex].technologies.filter((_, i) => i !== tIndex);
+                                  const newTech = [...updated[expIndex].technologies];
+                                  newTech[tIndex] = e.target.value;
                                   updated[expIndex] = { ...updated[expIndex], technologies: newTech };
                                   setExperience(updated);
                                 }}
-                                className="p-1 rounded hover:bg-red-500/20 text-red-400"
+                                placeholder="Tech"
+                                className="w-32"
+                              />
+                              {exp.technologies.length > 1 && (
+                                <button
+                                  onClick={() => {
+                                    const updated = [...experience];
+                                    const newTech = updated[expIndex].technologies.filter((_, i) => i !== tIndex);
+                                    updated[expIndex] = { ...updated[expIndex], technologies: newTech };
+                                    setExperience(updated);
+                                  }}
+                                  className="p-1 rounded hover:bg-red-500/10 text-red-400 transition-colors"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const updated = [...experience];
+                            updated[expIndex] = {
+                              ...updated[expIndex],
+                              technologies: [...updated[expIndex].technologies, ""],
+                            };
+                            setExperience(updated);
+                          }}
+                          className="flex items-center gap-2 mt-2"
+                        >
+                          <Plus size={16} />
+                          Add Tech
+                        </Button>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-2 text-foreground/80">Achievements</label>
+                        {exp.achievements.map((achievement, aIndex) => (
+                          <div key={aIndex} className="flex gap-2 mb-2">
+                            <Input
+                              value={achievement}
+                              onChange={(e) => {
+                                const updated = [...experience];
+                                const newAchievements = [...updated[expIndex].achievements];
+                                newAchievements[aIndex] = e.target.value;
+                                updated[expIndex] = { ...updated[expIndex], achievements: newAchievements };
+                                setExperience(updated);
+                              }}
+                              placeholder={`Achievement ${aIndex + 1}`}
+                            />
+                            {exp.achievements.length > 1 && (
+                              <button
+                                onClick={() => {
+                                  const updated = [...experience];
+                                  const newAchievements = updated[expIndex].achievements.filter((_, i) => i !== aIndex);
+                                  updated[expIndex] = { ...updated[expIndex], achievements: newAchievements };
+                                  setExperience(updated);
+                                }}
+                                className="p-2 rounded-lg hover:bg-red-500/10 text-red-400 transition-colors"
                               >
-                                <Trash2 size={14} />
+                                <Trash2 size={16} />
                               </button>
                             )}
                           </div>
                         ))}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const updated = [...experience];
+                            updated[expIndex] = {
+                              ...updated[expIndex],
+                              achievements: [...updated[expIndex].achievements, ""],
+                            };
+                            setExperience(updated);
+                          }}
+                          className="flex items-center gap-2"
+                        >
+                          <Plus size={16} />
+                          Add Achievement
+                        </Button>
                       </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          const updated = [...experience];
-                          updated[expIndex] = {
-                            ...updated[expIndex],
-                            technologies: [...updated[expIndex].technologies, ""],
-                          };
-                          setExperience(updated);
-                        }}
-                        className="flex items-center gap-2 mt-2"
-                      >
-                        <Plus size={16} />
-                        Add Tech
-                      </Button>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-foreground/80">Achievements</label>
-                      {exp.achievements.map((achievement, aIndex) => (
-                        <div key={aIndex} className="flex gap-2 mb-2">
-                          <Input
-                            value={achievement}
-                            onChange={(e) => {
-                              const updated = [...experience];
-                              const newAchievements = [...updated[expIndex].achievements];
-                              newAchievements[aIndex] = e.target.value;
-                              updated[expIndex] = { ...updated[expIndex], achievements: newAchievements };
-                              setExperience(updated);
-                            }}
-                            placeholder={`Achievement ${aIndex + 1}`}
-                          />
-                          {exp.achievements.length > 1 && (
-                            <button
-                              onClick={() => {
-                                const updated = [...experience];
-                                const newAchievements = updated[expIndex].achievements.filter((_, i) => i !== aIndex);
-                                updated[expIndex] = { ...updated[expIndex], achievements: newAchievements };
-                                setExperience(updated);
-                              }}
-                              className="p-2 rounded-lg hover:bg-red-500/20 text-red-400"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          const updated = [...experience];
-                          updated[expIndex] = {
-                            ...updated[expIndex],
-                            achievements: [...updated[expIndex].achievements, ""],
-                          };
-                          setExperience(updated);
-                        }}
-                        className="flex items-center gap-2"
-                      >
-                        <Plus size={16} />
-                        Add Achievement
-                      </Button>
-                    </div>
-                  </GlassPanel>
-                </motion.div>
-              ))}
+                    </GlassPanel>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           )}
         </motion.div>

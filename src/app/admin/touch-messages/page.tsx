@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Trash2, Eye, EyeOff, Search, MessageSquare, Calendar, Clock } from "lucide-react";
+import { Mail, Trash2, Eye, EyeOff, Search, MessageSquare, Calendar, Clock, Loader2 } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import { useToast } from "@/components/ui/Toast";
 
 interface Message {
   id: string;
@@ -19,6 +20,7 @@ interface Message {
 }
 
 export default function TouchMessagesPage() {
+  const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -55,8 +57,10 @@ export default function TouchMessagesPage() {
       setMessages((prev) =>
         prev.map((msg) => (msg.id === id ? { ...msg, read } : msg))
       );
+      toast(read ? "Marked as read" : "Marked as unread");
     } catch (error) {
       console.error("Failed to update message:", error);
+      toast("Failed to update message", "error");
     }
   };
 
@@ -64,11 +68,17 @@ export default function TouchMessagesPage() {
     if (!deleteId) return;
     setIsDeleting(true);
     try {
-      await fetch(`/api/admin/messages?id=${deleteId}`, { method: "DELETE" });
-      setMessages((prev) => prev.filter((msg) => msg.id !== deleteId));
-      if (selectedMessage?.id === deleteId) setSelectedMessage(null);
+      const res = await fetch(`/api/admin/messages?id=${deleteId}`, { method: "DELETE" });
+      if (res.ok) {
+        setMessages((prev) => prev.filter((msg) => msg.id !== deleteId));
+        if (selectedMessage?.id === deleteId) setSelectedMessage(null);
+        toast("Message deleted");
+      } else {
+        toast("Failed to delete message", "error");
+      }
     } catch (error) {
       console.error("Failed to delete message:", error);
+      toast("Failed to delete message", "error");
     } finally {
       setIsDeleting(false);
       setDeleteId(null);
@@ -118,17 +128,17 @@ export default function TouchMessagesPage() {
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-3xl font-bold">Touch Messages</h1>
+          <h1 className="text-3xl font-bold gradient-text">Touch Messages</h1>
           <p className="text-foreground/60 mt-1">
             Messages from your portfolio contact form
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="px-3 py-1.5 rounded-full text-sm font-medium bg-primary/20 text-primary">
+          <span className="px-3 py-1.5 rounded-full text-sm font-medium bg-primary/15 text-primary border border-primary/15">
             {messages.length} Total
           </span>
           {unreadCount > 0 && (
-            <span className="px-3 py-1.5 rounded-full text-sm font-medium bg-green-500/20 text-green-400">
+            <span className="px-3 py-1.5 rounded-full text-sm font-medium bg-green-500/15 text-green-400 border border-green-500/15">
               {unreadCount} Unread
             </span>
           )}
@@ -152,10 +162,10 @@ export default function TouchMessagesPage() {
             <button
               key={type}
               onClick={() => setFilterType(type)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                 filterType === type
-                  ? "bg-primary/20 text-primary border border-primary/30"
-                  : "text-foreground/60 hover:bg-glass-bg border border-transparent"
+                  ? "bg-primary/15 text-primary border border-primary/20 shadow-[0_0_10px_rgba(0,212,255,0.05)]"
+                  : "text-foreground/60 hover:bg-white/[0.03] border border-transparent"
               }`}
             >
               {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -165,10 +175,12 @@ export default function TouchMessagesPage() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12">Loading messages...</div>
+        <div className="flex items-center justify-center py-20">
+          <Loader2 size={32} className="animate-spin text-primary" />
+        </div>
       ) : filteredMessages.length === 0 ? (
-        <GlassPanel className="text-center py-12">
-          <MessageSquare size={48} className="mx-auto mb-4 text-foreground/30" />
+        <GlassPanel className="text-center py-16">
+          <MessageSquare size={48} className="mx-auto mb-4 text-foreground/20" />
           <p className="text-foreground/60">
             {messages.length === 0
               ? "No messages yet. Messages from your contact form will appear here."
@@ -184,7 +196,7 @@ export default function TouchMessagesPage() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-glass-border">
+                  <tr className="border-b border-white/5">
                     <th className="text-left px-4 py-3 text-sm font-semibold text-foreground/60">#</th>
                     <th className="text-left px-4 py-3 text-sm font-semibold text-foreground/60">Status</th>
                     <th className="text-left px-4 py-3 text-sm font-semibold text-foreground/60">Name</th>
@@ -202,9 +214,9 @@ export default function TouchMessagesPage() {
                       key={msg.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      transition={{ delay: index * 0.05 }}
-                      className={`border-b border-glass-border hover:bg-glass-bg/50 transition-colors cursor-pointer ${
-                        !msg.read ? "bg-primary/5" : ""
+                      transition={{ delay: index * 0.03 }}
+                      className={`border-b border-white/5 hover:bg-white/[0.02] transition-colors cursor-pointer ${
+                        !msg.read ? "bg-primary/[0.03]" : ""
                       }`}
                       onClick={() => {
                         setSelectedMessage(msg);
@@ -214,9 +226,9 @@ export default function TouchMessagesPage() {
                       <td className="px-4 py-3 text-sm text-foreground/50">{index + 1}</td>
                       <td className="px-4 py-3">
                         {!msg.read ? (
-                          <span className="w-2.5 h-2.5 rounded-full bg-green-400 block animate-pulse" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-green-400 block animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.4)]" />
                         ) : (
-                          <span className="w-2.5 h-2.5 rounded-full bg-foreground/20 block" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-foreground/15 block" />
                         )}
                       </td>
                       <td className="px-4 py-3 text-sm font-medium">{msg.name}</td>
@@ -243,14 +255,14 @@ export default function TouchMessagesPage() {
                         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                           <button
                             onClick={() => handleMarkAsRead(msg.id, !msg.read)}
-                            className="p-1.5 rounded-lg hover:bg-glass-bg text-foreground/60 hover:text-foreground transition-colors"
+                            className="p-1.5 rounded-lg hover:bg-white/5 text-foreground/40 hover:text-foreground transition-colors"
                             title={msg.read ? "Mark as unread" : "Mark as read"}
                           >
                             {msg.read ? <EyeOff size={16} /> : <Eye size={16} />}
                           </button>
                           <button
                             onClick={() => setDeleteId(msg.id)}
-                            className="p-1.5 rounded-lg hover:bg-red-500/20 text-foreground/60 hover:text-red-400 transition-colors"
+                            className="p-1.5 rounded-lg hover:bg-red-500/10 text-foreground/40 hover:text-red-400 transition-colors"
                             title="Delete"
                           >
                             <Trash2 size={16} />
@@ -285,14 +297,14 @@ export default function TouchMessagesPage() {
               <GlassPanel className="relative">
                 <button
                   onClick={() => setSelectedMessage(null)}
-                  className="absolute top-4 right-4 p-2 rounded-xl bg-glass-bg hover:bg-red-500/20 hover:text-red-400 transition-colors"
+                  className="absolute top-4 right-4 p-2 rounded-xl bg-white/5 hover:bg-red-500/10 hover:text-red-400 transition-colors"
                 >
                   ✕
                 </button>
 
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center border border-primary/10">
                       <Mail className="text-primary" size={24} />
                     </div>
                     <div>
@@ -321,12 +333,12 @@ export default function TouchMessagesPage() {
 
                   <div>
                     <p className="text-sm text-foreground/60 mb-1">Message</p>
-                    <p className="text-foreground/80 leading-relaxed whitespace-pre-wrap">
+                    <p className="text-foreground/80 leading-relaxed whitespace-pre-wrap bg-white/[0.02] p-4 rounded-xl border border-white/5">
                       {selectedMessage.message}
                     </p>
                   </div>
 
-                  <div className="flex gap-3 pt-4 border-t border-glass-border">
+                  <div className="flex gap-3 pt-4 border-t border-white/5">
                     <a
                       href={`mailto:${selectedMessage.email}?subject=Re: ${selectedMessage.subject || "Your message"}`}
                       className="flex-1"

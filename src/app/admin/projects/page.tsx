@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Edit, Trash2, ExternalLink, Image as ImageIcon } from "lucide-react";
+import { Plus, Edit, Trash2, ExternalLink, Image as ImageIcon, Loader2 } from "lucide-react";
 import { GithubIcon } from "@/components/ui/SocialIcons";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import { useToast } from "@/components/ui/Toast";
 
 interface Project {
   id: string;
@@ -25,10 +26,12 @@ interface Project {
 }
 
 export default function ProjectsPage() {
+  const { toast } = useToast();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -59,36 +62,45 @@ export default function ProjectsPage() {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProjects();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
     try {
       const payload = {
         ...formData,
         technology: formData.technology.split(",").map((t) => t.trim()),
       };
 
+      let res;
       if (editingProject) {
-        await fetch("/api/admin/projects", {
+        res = await fetch("/api/admin/projects", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: editingProject.id, ...payload }),
         });
       } else {
-        await fetch("/api/admin/projects", {
+        res = await fetch("/api/admin/projects", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
       }
 
-      fetchProjects();
-      closeModal();
+      if (res.ok) {
+        toast(editingProject ? "Project updated" : "Project created");
+        await fetchProjects();
+        closeModal();
+      } else {
+        toast("Failed to save project", "error");
+      }
     } catch (error) {
       console.error("Failed to save project:", error);
+      toast("Failed to save project", "error");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -96,10 +108,16 @@ export default function ProjectsPage() {
     if (!deleteId) return;
     setIsDeleting(true);
     try {
-      await fetch(`/api/admin/projects?id=${deleteId}`, { method: "DELETE" });
-      fetchProjects();
+      const res = await fetch(`/api/admin/projects?id=${deleteId}`, { method: "DELETE" });
+      if (res.ok) {
+        setProjects((prev) => prev.filter((p) => p.id !== deleteId));
+        toast("Project deleted");
+      } else {
+        toast("Failed to delete project", "error");
+      }
     } catch (error) {
       console.error("Failed to delete project:", error);
+      toast("Failed to delete project", "error");
     } finally {
       setIsDeleting(false);
       setDeleteId(null);
@@ -148,7 +166,7 @@ export default function ProjectsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Projects</h1>
+          <h1 className="text-3xl font-bold gradient-text">Projects</h1>
           <p className="text-foreground/60 mt-1">Manage your portfolio projects</p>
         </div>
         <Button onClick={() => openModal()} className="flex items-center gap-2">
@@ -158,9 +176,12 @@ export default function ProjectsPage() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12">Loading projects...</div>
+        <div className="flex items-center justify-center py-20">
+          <Loader2 size={32} className="animate-spin text-primary" />
+        </div>
       ) : projects.length === 0 ? (
-        <GlassPanel className="text-center py-12">
+        <GlassPanel className="text-center py-16">
+          <FolderKanban size={48} className="mx-auto mb-4 text-foreground/20" />
           <p className="text-foreground/60">No projects yet. Create your first project!</p>
         </GlassPanel>
       ) : (
@@ -172,16 +193,18 @@ export default function ProjectsPage() {
                 layout
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
+                exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
               >
-                <GlassPanel hover className="h-full flex flex-col">
+                <GlassPanel hover className="h-full flex flex-col group">
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="font-semibold">{project.title}</h3>
                       <span className={`px-2 py-1 rounded-full text-xs ${
                         project.status === "active"
-                          ? "bg-green-500/20 text-green-400"
-                          : "bg-yellow-500/20 text-yellow-400"
+                          ? "bg-green-500/20 text-green-400 border border-green-500/20"
+                          : project.status === "in-progress"
+                          ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/20"
+                          : "bg-primary/20 text-primary border border-primary/20"
                       }`}>
                         {project.status}
                       </span>
@@ -191,41 +214,41 @@ export default function ProjectsPage() {
                     </p>
                     <div className="flex flex-wrap gap-1 mb-3">
                       {project.technology.slice(0, 3).map((tech) => (
-                        <span key={tech} className="px-2 py-1 bg-glass-bg rounded text-xs">
+                        <span key={tech} className="px-2 py-1 bg-white/5 rounded-lg text-xs border border-white/5">
                           {tech}
                         </span>
                       ))}
                       {project.technology.length > 3 && (
-                        <span className="px-2 py-1 bg-glass-bg rounded text-xs">
+                        <span className="px-2 py-1 bg-white/5 rounded-lg text-xs border border-white/5">
                           +{project.technology.length - 3}
                         </span>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-glass-border">
-                    <div className="flex gap-2">
+                  <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                    <div className="flex gap-1">
                       {project.githubUrl && (
-                        <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg hover:bg-glass-bg">
+                        <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg hover:bg-white/5 text-foreground/40 hover:text-foreground transition-colors">
                           <GithubIcon size={16} />
                         </a>
                       )}
                       {project.liveUrl && (
-                        <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg hover:bg-glass-bg">
+                        <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg hover:bg-white/5 text-foreground/40 hover:text-foreground transition-colors">
                           <ExternalLink size={16} />
                         </a>
                       )}
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
                       <button
                         onClick={() => openModal(project)}
-                        className="p-2 rounded-lg hover:bg-primary/20 text-primary"
+                        className="p-2 rounded-lg hover:bg-primary/10 text-foreground/40 hover:text-primary transition-colors"
                       >
                         <Edit size={16} />
                       </button>
                       <button
                         onClick={() => setDeleteId(project.id)}
-                        className="p-2 rounded-lg hover:bg-red-500/20 text-red-400"
+                        className="p-2 rounded-lg hover:bg-red-500/10 text-foreground/40 hover:text-red-400 transition-colors"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -264,14 +287,14 @@ export default function ProjectsPage() {
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, image: "" })}
-                  className="absolute top-2 right-2 p-1.5 bg-red-500 rounded-lg text-white hover:bg-red-600"
+                  className="absolute top-2 right-2 p-1.5 bg-red-500 rounded-lg text-white hover:bg-red-600 transition-colors"
                 >
                   <Trash2 size={14} />
                 </button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-white/20 rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
-                <ImageIcon size={32} className="text-foreground/40 mb-2" />
+              <label className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-primary/30 transition-colors">
+                <ImageIcon size={32} className="text-foreground/30 mb-2" />
                 <span className="text-sm text-foreground/40">Click to upload image</span>
                 <input
                   type="file"
@@ -282,10 +305,14 @@ export default function ProjectsPage() {
                     if (!file) return;
                     const formDataUpload = new FormData();
                     formDataUpload.append("file", file);
+                    toast("Uploading image...", "info");
                     const res = await fetch("/api/admin/upload", { method: "POST", body: formDataUpload });
                     if (res.ok) {
                       const data = await res.json();
                       setFormData({ ...formData, image: data.url });
+                      toast("Image uploaded");
+                    } else {
+                      toast("Upload failed", "error");
                     }
                   }}
                 />
@@ -318,7 +345,7 @@ export default function ProjectsPage() {
               <select
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-glass-bg border border-glass-border"
+                className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
               >
                 <option value="Full Stack">Full Stack</option>
                 <option value="Frontend">Frontend</option>
@@ -333,7 +360,7 @@ export default function ProjectsPage() {
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-glass-bg border border-glass-border"
+                className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
               >
                 <option value="active">Active</option>
                 <option value="completed">Completed</option>
@@ -347,7 +374,7 @@ export default function ProjectsPage() {
               id="featured"
               checked={formData.featured}
               onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-              className="rounded border-glass-border"
+              className="rounded border-white/20"
             />
             <label htmlFor="featured" className="text-sm">Featured Project</label>
           </div>
@@ -355,8 +382,15 @@ export default function ProjectsPage() {
             <Button type="button" variant="ghost" onClick={closeModal}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary">
-              {editingProject ? "Update" : "Create"}
+            <Button type="submit" variant="primary" disabled={isSaving}>
+              {isSaving ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 size={16} className="animate-spin" />
+                  Saving...
+                </span>
+              ) : (
+                editingProject ? "Update" : "Create"
+              )}
             </Button>
           </div>
         </form>
@@ -371,5 +405,15 @@ export default function ProjectsPage() {
         loading={isDeleting}
       />
     </div>
+  );
+}
+
+function FolderKanban({ size, className }: { size: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+      <path d="M3 9h18" />
+      <path d="M9 21V9" />
+    </svg>
   );
 }

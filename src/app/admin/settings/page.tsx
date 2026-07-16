@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Save, Palette, Link as LinkIcon, Shield, Eye, EyeOff, KeyRound } from "lucide-react";
+import { Save, Palette, Link as LinkIcon, Shield, Eye, EyeOff, KeyRound, Loader2, CheckCircle2 } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { useToast } from "@/components/ui/Toast";
 
 interface Settings {
   [key: string]: string;
@@ -26,10 +27,11 @@ const defaultSettings = {
 };
 
 export default function SettingsPage() {
+  const { toast } = useToast();
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<"success" | "error" | null>(null);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
   const [oldUsername, setOldUsername] = useState("");
   const [oldPassword, setOldPassword] = useState("");
@@ -68,14 +70,12 @@ export default function SettingsPage() {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSettings();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    setSaveStatus(null);
 
     try {
       const response = await fetch("/api/admin/settings", {
@@ -85,13 +85,14 @@ export default function SettingsPage() {
       });
 
       if (response.ok) {
-        setSaveStatus("success");
-        setTimeout(() => setSaveStatus(null), 3000);
+        toast("Settings saved successfully");
+        setShowSaveSuccess(true);
+        setTimeout(() => setShowSaveSuccess(false), 2000);
       } else {
-        setSaveStatus("error");
+        toast("Failed to save settings", "error");
       }
     } catch {
-      setSaveStatus("error");
+      toast("Failed to save settings", "error");
     } finally {
       setIsSaving(false);
     }
@@ -127,6 +128,7 @@ export default function SettingsPage() {
       if (response.ok) {
         setCredentialStatus("success");
         setCredentialMessage("Credentials updated successfully!");
+        toast("Credentials updated");
         setOldUsername("");
         setOldPassword("");
         setNewUsername("");
@@ -242,6 +244,7 @@ export default function SettingsPage() {
       if (response.ok) {
         setForgotStatus("success");
         setForgotMessage(data.message || "Reset successful!");
+        toast("Credentials reset successfully");
         setTimeout(() => {
           setShowForgotModal(false);
           setResetStep(1);
@@ -266,14 +269,18 @@ export default function SettingsPage() {
   };
 
   if (isLoading) {
-    return <div className="text-center py-12">Loading settings...</div>;
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 size={32} className="animate-spin text-primary" />
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Settings</h1>
+          <h1 className="text-3xl font-bold gradient-text">Settings</h1>
           <p className="text-foreground/60 mt-1">Customize your portfolio</p>
         </div>
       </div>
@@ -298,7 +305,7 @@ export default function SettingsPage() {
                       type="color"
                       value={settings.primaryColor}
                       onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
-                      className="w-12 h-12 rounded-lg cursor-pointer"
+                      className="w-12 h-12 rounded-lg cursor-pointer border border-white/10"
                     />
                     <Input
                       value={settings.primaryColor}
@@ -315,7 +322,7 @@ export default function SettingsPage() {
                       type="color"
                       value={settings.accentColor}
                       onChange={(e) => setSettings({ ...settings, accentColor: e.target.value })}
-                      className="w-12 h-12 rounded-lg cursor-pointer"
+                      className="w-12 h-12 rounded-lg cursor-pointer border border-white/10"
                     />
                     <Input
                       value={settings.accentColor}
@@ -329,13 +336,13 @@ export default function SettingsPage() {
                   <p className="text-sm text-foreground/60 mb-2">Preview</p>
                   <div className="flex gap-3">
                     <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold"
+                      className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold shadow-lg"
                       style={{ backgroundColor: settings.primaryColor }}
                     >
                       A
                     </div>
                     <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold"
+                      className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold shadow-lg"
                       style={{ backgroundColor: settings.accentColor }}
                     >
                       B
@@ -343,7 +350,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-glass-border space-y-4">
+                <div className="pt-4 border-t border-white/5 space-y-4">
                   <h3 className="text-sm font-medium text-foreground/60">Hero Section</h3>
                   <Input
                     label="Title (e.g., BCA CS & IT Student)"
@@ -438,11 +445,13 @@ export default function SettingsPage() {
           <Button type="submit" variant="primary" disabled={isSaving}>
             {isSaving ? (
               <span className="flex items-center gap-2">
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
+                <Loader2 className="animate-spin h-5 w-5" />
                 Saving...
+              </span>
+            ) : showSaveSuccess ? (
+              <span className="flex items-center gap-2 text-green-400">
+                <CheckCircle2 size={20} />
+                Saved!
               </span>
             ) : (
               <span className="flex items-center gap-2">
@@ -451,18 +460,6 @@ export default function SettingsPage() {
               </span>
             )}
           </Button>
-
-          {saveStatus && (
-            <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              className={`text-sm ${
-                saveStatus === "success" ? "text-green-400" : "text-red-400"
-              }`}
-            >
-              {saveStatus === "success" ? "Settings saved successfully!" : "Failed to save settings"}
-            </motion.div>
-          )}
         </div>
       </form>
 
@@ -490,7 +487,7 @@ export default function SettingsPage() {
           </div>
 
           <form onSubmit={handleCredentialChange} className="space-y-4">
-            <div className="p-4 rounded-xl bg-foreground/5 border border-foreground/10">
+            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
               <p className="text-sm text-foreground/60 mb-4">Enter your current credentials to make changes</p>
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="relative">
@@ -514,7 +511,7 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={() => setShowOldPassword(!showOldPassword)}
-                    className="absolute right-3 top-9 text-foreground/40 hover:text-foreground"
+                    className="absolute right-3 top-9 text-foreground/40 hover:text-foreground transition-colors"
                   >
                     {showOldPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -522,7 +519,7 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
+            <div className="p-4 rounded-xl bg-primary/[0.03] border border-primary/10">
               <p className="text-sm text-foreground/60 mb-4">Enter new credentials (leave blank to keep current)</p>
               <div className="grid md:grid-cols-2 gap-4">
                 <Input
@@ -542,7 +539,7 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-9 text-foreground/40 hover:text-foreground"
+                    className="absolute right-3 top-9 text-foreground/40 hover:text-foreground transition-colors"
                   >
                     {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -563,10 +560,7 @@ export default function SettingsPage() {
               <Button type="submit" variant="primary" disabled={isChangingCredentials}>
                 {isChangingCredentials ? (
                   <span className="flex items-center gap-2">
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
+                    <Loader2 className="animate-spin h-5 w-5" />
                     Updating...
                   </span>
                 ) : (
@@ -613,7 +607,7 @@ export default function SettingsPage() {
                   setForgotStatus(null);
                   setForgotMessage("");
                 }}
-                className="absolute top-4 right-4 text-foreground/40 hover:text-foreground"
+                className="absolute top-4 right-4 text-foreground/40 hover:text-foreground transition-colors"
               >
                 ✕
               </button>
@@ -632,9 +626,9 @@ export default function SettingsPage() {
                 </p>
                 {resetStep > 1 && (
                   <div className="flex justify-center gap-2 mt-3">
-                    <div className={`w-8 h-1 rounded-full ${resetStep >= 1 ? "bg-primary" : "bg-white/20"}`} />
-                    <div className={`w-8 h-1 rounded-full ${resetStep >= 2 ? "bg-primary" : "bg-white/20"}`} />
-                    <div className={`w-8 h-1 rounded-full ${resetStep >= 3 ? "bg-primary" : "bg-white/20"}`} />
+                    <div className={`w-8 h-1 rounded-full transition-colors ${resetStep >= 1 ? "bg-primary" : "bg-white/10"}`} />
+                    <div className={`w-8 h-1 rounded-full transition-colors ${resetStep >= 2 ? "bg-primary" : "bg-white/10"}`} />
+                    <div className={`w-8 h-1 rounded-full transition-colors ${resetStep >= 3 ? "bg-primary" : "bg-white/10"}`} />
                   </div>
                 )}
               </div>
@@ -655,8 +649,8 @@ export default function SettingsPage() {
                       animate={{ opacity: 1 }}
                       className={`p-3 rounded-xl text-sm ${
                         forgotStatus === "success"
-                          ? "bg-green-500/20 text-green-400"
-                          : "bg-red-500/20 text-red-400"
+                          ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                          : "bg-red-500/10 text-red-400 border border-red-500/20"
                       }`}
                     >
                       {forgotMessage}
@@ -670,7 +664,12 @@ export default function SettingsPage() {
                     onClick={handleSendResetCode}
                     disabled={isSendingReset || !forgotEmail}
                   >
-                    {isSendingReset ? "Sending..." : "Send Reset Code"}
+                    {isSendingReset ? (
+                      <span className="flex items-center gap-2 justify-center">
+                        <Loader2 size={16} className="animate-spin" />
+                        Sending...
+                      </span>
+                    ) : "Send Reset Code"}
                   </Button>
                 </div>
               )}
@@ -691,8 +690,8 @@ export default function SettingsPage() {
                       animate={{ opacity: 1 }}
                       className={`p-3 rounded-xl text-sm ${
                         forgotStatus === "success"
-                          ? "bg-green-500/20 text-green-400"
-                          : "bg-red-500/20 text-red-400"
+                          ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                          : "bg-red-500/10 text-red-400 border border-red-500/20"
                       }`}
                     >
                       {forgotMessage}
@@ -706,12 +705,17 @@ export default function SettingsPage() {
                     onClick={handleVerifyCode}
                     disabled={isVerifyingCode || resetCode.length !== 6}
                   >
-                    {isVerifyingCode ? "Verifying..." : "Verify Code"}
+                    {isVerifyingCode ? (
+                      <span className="flex items-center gap-2 justify-center">
+                        <Loader2 size={16} className="animate-spin" />
+                        Verifying...
+                      </span>
+                    ) : "Verify Code"}
                   </Button>
 
                   <button
                     onClick={() => { setResetStep(1); setForgotStatus(null); setForgotMessage(""); }}
-                    className="w-full text-sm text-foreground/60 hover:text-foreground"
+                    className="w-full text-sm text-foreground/60 hover:text-foreground transition-colors"
                   >
                     ← Back to email
                   </button>
@@ -749,8 +753,8 @@ export default function SettingsPage() {
                       animate={{ opacity: 1 }}
                       className={`p-3 rounded-xl text-sm ${
                         forgotStatus === "success"
-                          ? "bg-green-500/20 text-green-400"
-                          : "bg-red-500/20 text-red-400"
+                          ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                          : "bg-red-500/10 text-red-400 border border-red-500/20"
                       }`}
                     >
                       {forgotMessage}
@@ -764,12 +768,17 @@ export default function SettingsPage() {
                     onClick={handleResetPassword}
                     disabled={isResettingPassword || (!resetNewUsername && !resetNewPassword)}
                   >
-                    {isResettingPassword ? "Resetting..." : "Reset Credentials"}
+                    {isResettingPassword ? (
+                      <span className="flex items-center gap-2 justify-center">
+                        <Loader2 size={16} className="animate-spin" />
+                        Resetting...
+                      </span>
+                    ) : "Reset Credentials"}
                   </Button>
 
                   <button
                     onClick={() => { setResetStep(2); setForgotStatus(null); setForgotMessage(""); }}
-                    className="w-full text-sm text-foreground/60 hover:text-foreground"
+                    className="w-full text-sm text-foreground/60 hover:text-foreground transition-colors"
                   >
                     ← Back to code
                   </button>
