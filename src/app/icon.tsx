@@ -17,7 +17,7 @@ export default function Icon() {
           alignItems: "center",
           justifyContent: "center",
           borderRadius: 14,
-          background: "linear-gradient(135deg, #0f0f23 0%, #1a1a3e 40%, #2d1b69 70%, #6366f1 100%)",
+          background: "linear-gradient(135deg, #050510 0%, #0a0a2e 40%, #0d1b3e 70%, #00d4ff 100%)",
           position: "relative",
           overflow: "hidden",
         }}
@@ -27,7 +27,7 @@ export default function Icon() {
             position: "absolute",
             width: "100%",
             height: "100%",
-            background: "radial-gradient(circle at 20% 30%, rgba(99,102,241,0.4) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(6,182,212,0.3) 0%, transparent 50%)",
+            background: "radial-gradient(circle at 20% 30%, rgba(0,212,255,0.4) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(139,92,246,0.3) 0%, transparent 50%)",
           }}
         />
         <div
@@ -46,7 +46,7 @@ export default function Icon() {
             fontFamily: "Arial",
             letterSpacing: "2px",
             zIndex: 1,
-            textShadow: "0 0 10px rgba(99,102,241,0.8), 0 0 20px rgba(6,182,212,0.5)",
+            textShadow: "0 0 10px rgba(0,212,255,0.8), 0 0 20px rgba(139,92,246,0.5)",
           }}
         >
           RT
