@@ -82,14 +82,6 @@ export default function ResumeSection() {
                   ) : null}
 
                   <div className="flex gap-3">
-                    {selectedResume.pdfUrl && (
-                      <a href={selectedResume.pdfUrl} download>
-                        <Button variant="primary" size="sm" className="flex items-center gap-2">
-                          <Download size={16} />
-                          Download PDF
-                        </Button>
-                      </a>
-                    )}
                     <Button
                       variant="outline"
                       size="sm"
