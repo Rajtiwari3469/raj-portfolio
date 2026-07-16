@@ -95,12 +95,15 @@ model Gallery {
 }
 
 model Resume {
-  id        String   @id @default(cuid())
-  name      String
-  url       String
-  size      Int
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
+  id             String   @id @default(cuid())
+  name           String
+  content        String   @default("")
+  url            String
+  pdfUrl         String?
+  candidatePhoto String?
+  size           Int
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
 }
 
 model Setting {

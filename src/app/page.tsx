@@ -8,41 +8,45 @@ import Education from "@/components/sections/Education";
 import Skills from "@/components/sections/Skills";
 import Experience from "@/components/sections/Experience";
 import Contact from "@/components/sections/Contact";
+import ResumeSection from "@/components/sections/Resume";
 import ChatWidget from "@/components/ui/ChatWidget";
 import { getPrisma } from "@/lib/prisma";
 
-async function getProfileImage(): Promise<string | null> {
+async function getSettings() {
   try {
     const prisma = getPrisma();
-    const setting = await prisma.setting.findUnique({
-      where: { key: "profileImage" },
-    });
-    if (setting?.value) {
-      try {
-        return JSON.parse(setting.value);
-      } catch {
-        return setting.value;
-      }
-    }
-    return null;
+    const settings = await prisma.setting.findMany();
+    const obj: Record<string, string> = {};
+    settings.forEach((s) => { obj[s.key] = s.value; });
+    return obj;
   } catch {
-    return null;
+    return {};
   }
 }
 
 export default async function Home() {
-  const profileImage = await getProfileImage();
+  const settings = await getSettings();
+
+  let profileImage: string | null = null;
+  if (settings.profileImage) {
+    try { profileImage = JSON.parse(settings.profileImage); } catch { profileImage = settings.profileImage; }
+  }
 
   return (
     <main className="flex-1">
       <Navbar />
-      <Hero profileImage={profileImage} />
+      <Hero
+        profileImage={profileImage}
+        heroTitle={settings.heroTitle || "BCA CS & IT Student"}
+        heroSubtitle={settings.heroSubtitle || "Software Development & AI Technology"}
+      />
       <About />
       <Projects />
       <Certificates />
       <Education />
       <Skills />
       <Experience />
+      <ResumeSection />
       <Contact />
       <Footer />
       <ChatWidget />

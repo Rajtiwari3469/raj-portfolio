@@ -12,7 +12,13 @@ const SpaceBackground = dynamic(() => import("@/components/three/SpaceBackground
   loading: () => <div className="fixed inset-0 -z-10 bg-background" />,
 });
 
-export default function Hero({ profileImage }: { profileImage: string | null }) {
+interface HeroProps {
+  profileImage: string | null;
+  heroTitle: string;
+  heroSubtitle: string;
+}
+
+export default function Hero({ profileImage, heroTitle, heroSubtitle }: HeroProps) {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -69,10 +75,10 @@ export default function Hero({ profileImage }: { profileImage: string | null }) 
             className="space-y-2 mb-8"
           >
             <p className="text-xl md:text-2xl text-foreground/80">
-              BCA CS & IT Student
+              {heroTitle}
             </p>
             <p className="text-lg md:text-xl text-foreground/60">
-              Software Development & AI Technology
+              {heroSubtitle}
             </p>
           </motion.div>
 
@@ -89,9 +95,9 @@ export default function Hero({ profileImage }: { profileImage: string | null }) 
             </Button>
 
             <Button variant="outline" size="lg">
-              <a href="/resume.pdf" download className="flex items-center gap-2">
+              <a href="#resume" className="flex items-center gap-2">
                 <Download size={20} />
-                Download Resume
+                View Resume
               </a>
             </Button>
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Edit, Trash2, ExternalLink } from "lucide-react";
+import { Plus, Edit, Trash2, ExternalLink, Image as ImageIcon } from "lucide-react";
 import { GithubIcon } from "@/components/ui/SocialIcons";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
@@ -250,12 +250,42 @@ export default function ProjectsPage() {
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             required
           />
-          <Input
-            label="Image URL"
-            value={formData.image}
-            onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-            placeholder="https://..."
-          />
+          <div>
+            <label className="block text-sm font-medium mb-2">Project Image</label>
+            {formData.image ? (
+              <div className="relative">
+                <img src={formData.image} alt="Preview" className="w-full h-40 object-cover rounded-xl" />
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, image: "" })}
+                  className="absolute top-2 right-2 p-1.5 bg-red-500 rounded-lg text-white hover:bg-red-600"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-white/20 rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
+                <ImageIcon size={32} className="text-foreground/40 mb-2" />
+                <span className="text-sm text-foreground/40">Click to upload image</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const formDataUpload = new FormData();
+                    formDataUpload.append("file", file);
+                    const res = await fetch("/api/admin/upload", { method: "POST", body: formDataUpload });
+                    if (res.ok) {
+                      const data = await res.json();
+                      setFormData({ ...formData, image: data.url });
+                    }
+                  }}
+                />
+              </label>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <Input
               label="GitHub URL"

@@ -21,6 +21,8 @@ const defaultSettings = {
   leetcode: "",
   email: "",
   location: "",
+  heroTitle: "BCA CS & IT Student",
+  heroSubtitle: "Software Development & AI Technology",
 };
 
 export default function SettingsPage() {
@@ -302,6 +304,22 @@ export default function SettingsPage() {
                       B
                     </div>
                   </div>
+                </div>
+
+                <div className="pt-4 border-t border-glass-border space-y-4">
+                  <h3 className="text-sm font-medium text-foreground/60">Hero Section</h3>
+                  <Input
+                    label="Title (e.g., BCA CS & IT Student)"
+                    value={settings.heroTitle}
+                    onChange={(e) => setSettings({ ...settings, heroTitle: e.target.value })}
+                    placeholder="BCA CS & IT Student"
+                  />
+                  <Input
+                    label="Subtitle (e.g., Software Development & AI Technology)"
+                    value={settings.heroSubtitle}
+                    onChange={(e) => setSettings({ ...settings, heroSubtitle: e.target.value })}
+                    placeholder="Software Development & AI Technology"
+                  />
                 </div>
               </div>
             </GlassPanel>

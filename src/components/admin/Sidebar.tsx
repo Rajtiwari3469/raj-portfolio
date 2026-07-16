@@ -24,6 +24,7 @@ const menuItems = [
   { name: "Projects", href: "/admin/projects", icon: FolderKanban },
   { name: "Skills", href: "/admin/skills", icon: Code2 },
   { name: "Certificates", href: "/admin/certificates", icon: Award },
+  { name: "Resume", href: "/admin/resume", icon: FileText },
   { name: "Content", href: "/admin/content", icon: FileText },
   { name: "Touch Messages", href: "/admin/touch-messages", icon: Mail },
   { name: "Chat", href: "/admin/chat", icon: MessageCircle },
