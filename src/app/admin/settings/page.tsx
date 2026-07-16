@@ -45,6 +45,7 @@ export default function SettingsPage() {
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [resetCode, setResetCode] = useState("");
+  const [resetNewUsername, setResetNewUsername] = useState("");
   const [resetNewPassword, setResetNewPassword] = useState("");
   const [resetConfirmPassword, setResetConfirmPassword] = useState("");
   const [isSendingReset, setIsSendingReset] = useState(false);
@@ -184,9 +185,16 @@ export default function SettingsPage() {
     setForgotStatus(null);
     setForgotMessage("");
 
-    if (resetNewPassword !== resetConfirmPassword) {
+    if (resetNewPassword && resetNewPassword !== resetConfirmPassword) {
       setForgotStatus("error");
       setForgotMessage("Passwords do not match");
+      setIsResettingPassword(false);
+      return;
+    }
+
+    if (!resetNewUsername && !resetNewPassword) {
+      setForgotStatus("error");
+      setForgotMessage("Enter a new username or new password");
       setIsResettingPassword(false);
       return;
     }
@@ -197,7 +205,8 @@ export default function SettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           code: resetCode,
-          newPassword: resetNewPassword,
+          newPassword: resetNewPassword || undefined,
+          newUsername: resetNewUsername || undefined,
         }),
       });
 
@@ -205,12 +214,13 @@ export default function SettingsPage() {
 
       if (response.ok) {
         setForgotStatus("success");
-        setForgotMessage("Password reset successfully! You can now login with your new password.");
+        setForgotMessage(data.message || "Reset successful!");
         setTimeout(() => {
           setShowForgotModal(false);
           setShowResetForm(false);
           setForgotEmail("");
           setResetCode("");
+          setResetNewUsername("");
           setResetNewPassword("");
           setResetConfirmPassword("");
           setForgotStatus(null);
@@ -218,7 +228,7 @@ export default function SettingsPage() {
         }, 2000);
       } else {
         setForgotStatus("error");
-        setForgotMessage(data.error || "Failed to reset password");
+        setForgotMessage(data.error || "Failed to reset");
       }
     } catch {
       setForgotStatus("error");
@@ -570,6 +580,7 @@ export default function SettingsPage() {
                   setShowResetForm(false);
                   setForgotEmail("");
                   setResetCode("");
+                  setResetNewUsername("");
                   setResetNewPassword("");
                   setResetConfirmPassword("");
                   setForgotStatus(null);
@@ -585,7 +596,7 @@ export default function SettingsPage() {
                 <h2 className="text-2xl font-bold">Forgot Password</h2>
                 <p className="text-foreground/60 mt-2">
                   {showResetForm
-                    ? "Enter the reset code and your new password"
+                    ? "Enter the reset code and new username/password"
                     : "Enter your admin email to receive a reset code"}
                 </p>
               </div>
@@ -633,19 +644,27 @@ export default function SettingsPage() {
                     placeholder="Enter 6-digit code"
                   />
                   <Input
-                    label="New Password"
+                    label="New Username (optional)"
+                    value={resetNewUsername}
+                    onChange={(e) => setResetNewUsername(e.target.value)}
+                    placeholder="Enter new username"
+                  />
+                  <Input
+                    label="New Password (optional)"
                     type="password"
                     value={resetNewPassword}
                     onChange={(e) => setResetNewPassword(e.target.value)}
                     placeholder="Enter new password"
                   />
-                  <Input
-                    label="Confirm New Password"
-                    type="password"
-                    value={resetConfirmPassword}
-                    onChange={(e) => setResetConfirmPassword(e.target.value)}
-                    placeholder="Confirm new password"
-                  />
+                  {resetNewPassword && (
+                    <Input
+                      label="Confirm New Password"
+                      type="password"
+                      value={resetConfirmPassword}
+                      onChange={(e) => setResetConfirmPassword(e.target.value)}
+                      placeholder="Confirm new password"
+                    />
+                  )}
 
                   {forgotStatus && (
                     <motion.div
@@ -666,7 +685,7 @@ export default function SettingsPage() {
                     variant="primary"
                     className="w-full"
                     onClick={handleResetPassword}
-                    disabled={isResettingPassword || !resetCode || !resetNewPassword || !resetConfirmPassword}
+                    disabled={isResettingPassword || !resetCode || (!resetNewUsername && !resetNewPassword)}
                   >
                     {isResettingPassword ? "Resetting..." : "Reset Password"}
                   </Button>

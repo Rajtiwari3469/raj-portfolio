@@ -5,10 +5,14 @@ import bcrypt from "bcryptjs";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { code, newPassword } = body;
+    const { code, newPassword, newUsername } = body;
 
-    if (!code || !newPassword) {
-      return NextResponse.json({ error: "Reset code and new password are required" }, { status: 400 });
+    if (!code) {
+      return NextResponse.json({ error: "Reset code is required" }, { status: 400 });
+    }
+
+    if (!newPassword && !newUsername) {
+      return NextResponse.json({ error: "Provide a new password or new username" }, { status: 400 });
     }
 
     const prisma = getPrisma();
@@ -29,18 +33,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Reset code has expired. Please request a new one." }, { status: 400 });
     }
 
-    const newHash = await bcrypt.hash(newPassword, 12);
-    await prisma.setting.upsert({
-      where: { key: "adminPasswordHash" },
-      update: { value: newHash },
-      create: { key: "adminPasswordHash", value: newHash },
-    });
+    if (newPassword) {
+      const newHash = await bcrypt.hash(newPassword, 12);
+      await prisma.setting.upsert({
+        where: { key: "adminPasswordHash" },
+        update: { value: newHash },
+        create: { key: "adminPasswordHash", value: newHash },
+      });
+    }
+
+    if (newUsername) {
+      await prisma.setting.upsert({
+        where: { key: "adminUsername" },
+        update: { value: newUsername },
+        create: { key: "adminUsername", value: newUsername },
+      });
+    }
 
     await prisma.setting.deleteMany({ where: { key: { in: ["passwordResetCode", "passwordResetExpiry"] } } });
 
-    return NextResponse.json({ message: "Password reset successfully" });
+    const messages = [];
+    if (newUsername) messages.push("username");
+    if (newPassword) messages.push("password");
+
+    return NextResponse.json({ message: `Reset successful! Updated: ${messages.join(" and ")}.` });
   } catch (error) {
     console.error("Reset password error:", error);
-    return NextResponse.json({ error: "Failed to reset password" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to reset" }, { status: 500 });
   }
 }
