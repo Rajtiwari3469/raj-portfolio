@@ -44,7 +44,6 @@ export default function ResumeSection() {
           viewport={{ once: false, amount: 0.2 }}
           className="text-center mb-16"
         >
-          <p className="text-xs text-primary/60 tracking-[0.3em] uppercase mb-4">Career</p>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             <span className="gradient-text">Resume</span>
           </h2>

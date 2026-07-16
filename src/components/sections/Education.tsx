@@ -77,7 +77,6 @@ export default function Education() {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <p className="text-xs text-primary/60 tracking-[0.3em] uppercase mb-4">Knowledge</p>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             <span className="gradient-text">Education & Learning</span>
           </h2>

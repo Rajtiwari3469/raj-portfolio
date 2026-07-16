@@ -48,7 +48,6 @@ export default function Certificates() {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <p className="text-xs text-primary/60 tracking-[0.3em] uppercase mb-4">Achievements</p>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             <span className="gradient-text">Certificates</span>
           </h2>
