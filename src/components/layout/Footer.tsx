@@ -106,7 +106,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-white/[0.05] flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="mt-12 pt-8 border-t border-white/[0.05] flex flex-col items-center gap-3">
           <p className="text-foreground/30 text-sm">
             &copy; {new Date().getFullYear()} Raj Tiwari. All rights reserved.
           </p>
