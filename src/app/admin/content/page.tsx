@@ -246,17 +246,7 @@ export default function ContentPage() {
               )}
 
               <div>
-                <label className="block text-sm font-medium mb-2 text-foreground/80">Image URL or Base64</label>
-                <Textarea
-                  value={profileImage}
-                  onChange={(e) => setProfileImage(e.target.value)}
-                  placeholder="Paste image URL or base64 data URL, or upload a file below"
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2 text-foreground/80">Or Upload Image</label>
+                <label className="block text-sm font-medium mb-2 text-foreground/80">Upload Image</label>
                 <input
                   type="file"
                   accept="image/*"
