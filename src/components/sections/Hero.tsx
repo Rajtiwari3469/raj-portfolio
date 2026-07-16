@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowDown, Download } from "lucide-react";
+import { ArrowDown } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/SocialIcons";
 import Button from "@/components/ui/Button";
 import dynamic from "next/dynamic";
@@ -101,24 +101,19 @@ export default function Hero({ profileImage, heroTitle, heroSubtitle }: HeroProp
               </a>
             </Button>
 
-            <Button variant="outline" size="lg">
-              <a href="#resume" className="flex items-center gap-2">
-                <Download size={20} />
-                View Resume
-              </a>
-            </Button>
+            <div className="flex gap-3 items-center">
+              <Button variant="ghost" size="lg">
+                <a href="https://github.com/rajtiwari" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                  <GithubIcon size={20} />
+                </a>
+              </Button>
 
-            <Button variant="ghost" size="lg">
-              <a href="https://github.com/rajtiwari" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                <GithubIcon size={20} />
+              <Button variant="ghost" size="lg">
+                <a href="https://linkedin.com/in/rajtiwari" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                  <LinkedinIcon size={20} />
               </a>
-            </Button>
-
-            <Button variant="ghost" size="lg">
-              <a href="https://linkedin.com/in/rajtiwari" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                <LinkedinIcon size={20} />
-              </a>
-            </Button>
+              </Button>
+            </div>
           </motion.div>
         </motion.div>
       </div>
