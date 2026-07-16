@@ -23,7 +23,9 @@ async function sendResetEmail(email: string, code: string): Promise<boolean> {
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 20px;">
-            <img src="https://plain-apac-prod-public.komododecks.com/202607/16/VA46IgrKxTXibZ05QiCY/image.png" alt="Logo" style="width: 64px; height: 64px; border-radius: 14px; object-fit: cover;" />
+            <div style="width: 64px; height: 64px; border-radius: 14px; background: linear-gradient(135deg, #6366f1, #06b6d4); display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+              <span style="color: white; font-size: 28px; font-weight: bold; font-family: Arial;">RT</span>
+            </div>
           </div>
           <h2 style="color: #6366f1; text-align: center;">Password Reset Code</h2>
           <p>Your reset code is:</p>
