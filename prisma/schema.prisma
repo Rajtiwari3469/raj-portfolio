@@ -122,6 +122,7 @@ model ChatMessage {
   sessionId   String
   sender      String
   message     String
+  messageType String   @default("text")
   read        Boolean  @default(false)
   createdAt   DateTime @default(now())
 }

@@ -2,14 +2,17 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send } from "lucide-react";
+import { MessageCircle, X, Send, Image as ImageIcon, Smile, Mic, MicOff } from "lucide-react";
 
 interface ChatMsg {
   id: string;
   sender: string;
   message: string;
+  messageType: string;
   createdAt: string;
 }
+
+const EMOJI_LIST = ["😊", "😂", "❤️", "👍", "🎉", "🔥", "💯", "✨", "🙏", "😎", "🤔", "💪", "🚀", "⭐", "😍", "🙌", "👏", "💻", "🎯", "🌟"];
 
 function getSessionId(): string {
   if (typeof window === "undefined") return "";
@@ -27,8 +30,14 @@ export default function ChatWidget() {
   const [input, setInput] = useState("");
   const [sessionId, setSessionId] = useState("");
   const [unread, setUnread] = useState(0);
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   useEffect(() => {
     setSessionId(getSessionId());
@@ -49,7 +58,8 @@ export default function ChatWidget() {
           setUnread(0);
         } else {
           const adminMsgs = data.filter(
-            (m) => m.sender === "admin" && new Date(m.createdAt) > new Date(Date.now() - 30000)
+            (m) => (m.sender === "admin" || m.sender === "ai" || m.sender === "system") &&
+            new Date(m.createdAt) > new Date(Date.now() - 30000)
           );
           setUnread(adminMsgs.length);
         }
@@ -69,24 +79,80 @@ export default function ChatWidget() {
     scrollToBottom();
   }, [messages]);
 
-  const sendMessage = async () => {
-    if (!input.trim() || !sessionId) return;
-    const msg = input.trim();
-    setInput("");
-
+  const sendMessage = async (msg: string, type: string = "text") => {
+    if (!msg.trim() || !sessionId) return;
     try {
       await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, sender: "visitor", message: msg }),
+        body: JSON.stringify({ sessionId, sender: "visitor", message: msg, messageType: type }),
       });
+      setInput("");
+      setShowEmoji(false);
       fetchMessages();
     } catch {}
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/chat/upload", { method: "POST", body: formData });
+      if (res.ok) {
+        const data = await res.json();
+        await sendMessage(data.url, "image");
+      }
+    } catch {}
+    setUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => audioChunksRef.current.push(e.data);
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const base64 = reader.result as string;
+          await sendMessage(base64, "voice");
+        };
+        reader.readAsDataURL(audioBlob);
+        stream.getTracks().forEach((t) => t.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch {}
+  };
+
+  const stopRecording = () => {
+    mediaRecorderRef.current?.stop();
+    setIsRecording(false);
+  };
+
+  const renderMessage = (msg: ChatMsg) => {
+    if (msg.messageType === "image") {
+      return <img src={msg.message} alt="Chat image" className="max-w-[200px] rounded-lg" />;
+    }
+    if (msg.messageType === "voice") {
+      return <audio controls src={msg.message} className="max-w-[200px] h-8" />;
+    }
+    return msg.message;
   };
 
   return (
     <>
       <motion.button
+        id="chat-widget-btn"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 2, type: "spring" }}
@@ -132,35 +198,99 @@ export default function ChatWidget() {
               {messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`flex ${msg.sender === "visitor" ? "justify-end" : "justify-start"}`}
+                  className={`flex ${msg.sender === "visitor" ? "justify-end" : msg.sender === "system" ? "justify-center" : "justify-start"}`}
                 >
-                  <div
-                    className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm ${
-                      msg.sender === "visitor"
-                        ? "bg-primary text-white rounded-br-md"
-                        : "bg-white/10 text-foreground/90 rounded-bl-md"
-                    }`}
-                  >
-                    {msg.message}
-                  </div>
+                  {msg.sender === "system" ? (
+                    <div className="bg-yellow-500/20 text-yellow-300 text-xs px-3 py-1.5 rounded-full text-center max-w-[90%]">
+                      {msg.message}
+                    </div>
+                  ) : (
+                    <div
+                      className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm ${
+                        msg.sender === "visitor"
+                          ? "bg-primary text-white rounded-br-md"
+                          : "bg-white/10 text-foreground/90 rounded-bl-md"
+                      }`}
+                    >
+                      {renderMessage(msg)}
+                      {msg.sender === "ai" && (
+                        <p className="text-[10px] text-foreground/40 mt-1">AI Assistant</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
               <div ref={messagesEndRef} />
             </div>
 
+            <AnimatePresence>
+              {showEmoji && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="p-3 border-t border-white/10 bg-black/30"
+                >
+                  <div className="flex flex-wrap gap-1">
+                    {EMOJI_LIST.map((emoji) => (
+                      <button
+                        key={emoji}
+                        onClick={() => setInput((prev) => prev + emoji)}
+                        className="w-8 h-8 flex items-center justify-center rounded hover:bg-white/10 text-lg"
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <div className="p-3 border-t border-white/10">
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-center">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="w-9 h-9 rounded-lg flex items-center justify-center text-foreground/50 hover:text-primary hover:bg-white/5 transition-colors"
+                  title="Upload image"
+                >
+                  <ImageIcon size={18} />
+                </button>
+                <button
+                  onClick={() => setShowEmoji(!showEmoji)}
+                  className="w-9 h-9 rounded-lg flex items-center justify-center text-foreground/50 hover:text-primary hover:bg-white/5 transition-colors"
+                  title="Emoji"
+                >
+                  <Smile size={18} />
+                </button>
+                <button
+                  onClick={isRecording ? stopRecording : startRecording}
+                  className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${
+                    isRecording ? "text-red-400 bg-red-500/20 animate-pulse" : "text-foreground/50 hover:text-primary hover:bg-white/5"
+                  }`}
+                  title={isRecording ? "Stop recording" : "Voice message"}
+                >
+                  {isRecording ? <MicOff size={18} /> : <Mic size={18} />}
+                </button>
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                  placeholder="Type a message..."
+                  onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
+                  placeholder={uploading ? "Uploading..." : "Type a message..."}
+                  disabled={uploading}
                   className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary/50 transition-colors"
                 />
                 <button
-                  onClick={sendMessage}
-                  disabled={!input.trim()}
+                  onClick={() => sendMessage(input)}
+                  disabled={!input.trim() || uploading}
                   className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center disabled:opacity-40 hover:scale-105 transition-transform"
                 >
                   <Send size={16} />

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Send, MessageCircle, ArrowLeft } from "lucide-react";
+import { Send, MessageCircle, ArrowLeft, Image as ImageIcon, Smile, Mic, MicOff, Bot, Trash2 } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 
@@ -11,6 +11,7 @@ interface ChatMsg {
   sessionId: string;
   sender: string;
   message: string;
+  messageType: string;
   read: boolean;
   createdAt: string;
 }
@@ -22,13 +23,22 @@ interface Session {
   unreadCount: number;
 }
 
+const EMOJI_LIST = ["😊", "😂", "❤️", "👍", "🎉", "🔥", "💯", "✨", "🙏", "😎", "🤔", "💪", "🚀", "⭐", "😍", "🙌", "👏", "💻", "🎯", "🌟"];
+
 export default function AdminChat() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [activeSession, setActiveSession] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [reply, setReply] = useState("");
   const [loading, setLoading] = useState(true);
+  const [aiEnabled, setAiEnabled] = useState(false);
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   const fetchSessions = useCallback(async () => {
     try {
@@ -40,11 +50,25 @@ export default function AdminChat() {
     setLoading(false);
   }, []);
 
+  const fetchAiStatus = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/settings");
+      if (res.ok) {
+        const data = await res.json();
+        setAiEnabled(data?.chatAIEnabled === "true");
+      }
+    } catch {}
+  }, []);
+
   useEffect(() => {
     fetchSessions();
-    const interval = setInterval(fetchSessions, 5000);
+    fetchAiStatus();
+    const interval = setInterval(() => {
+      fetchSessions();
+      fetchAiStatus();
+    }, 5000);
     return () => clearInterval(interval);
-  }, [fetchSessions]);
+  }, [fetchSessions, fetchAiStatus]);
 
   const fetchMessages = useCallback(async (sessionId: string) => {
     try {
@@ -66,36 +90,125 @@ export default function AdminChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendReply = async () => {
-    if (!reply.trim() || !activeSession) return;
-    const msg = reply.trim();
+  const toggleAI = async () => {
+    const newState = !aiEnabled;
+    setAiEnabled(newState);
+    try {
+      await fetch("/api/admin/chat/messages", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ aiEnabled: newState }),
+      });
+    } catch {
+      setAiEnabled(!newState);
+    }
+  };
+
+  const deleteChat = async (sessionId: string) => {
+    if (!confirm("Delete this entire chat session?")) return;
+    try {
+      await fetch(`/api/chat?sessionId=${sessionId}`, { method: "DELETE" });
+      setActiveSession(null);
+      fetchSessions();
+    } catch {}
+  };
+
+  const sendReply = async (msg: string, type: string = "text") => {
+    if (!msg.trim() || !activeSession) return;
+    const message = msg.trim();
     setReply("");
+    setShowEmoji(false);
 
     try {
       await fetch("/api/admin/chat/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId: activeSession, message: msg }),
+        body: JSON.stringify({ sessionId: activeSession, message, messageType: type }),
       });
       fetchMessages(activeSession);
       fetchSessions();
     } catch {}
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
+      if (res.ok) {
+        const data = await res.json();
+        await sendReply(data.url, "image");
+      }
+    } catch {}
+    setUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => audioChunksRef.current.push(e.data);
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const base64 = reader.result as string;
+          await sendReply(base64, "voice");
+        };
+        reader.readAsDataURL(audioBlob);
+        stream.getTracks().forEach((t) => t.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch {}
+  };
+
+  const stopRecording = () => {
+    mediaRecorderRef.current?.stop();
+    setIsRecording(false);
+  };
+
+  const renderMessage = (msg: ChatMsg) => {
+    if (msg.messageType === "image") {
+      return <img src={msg.message} alt="Chat image" className="max-w-[200px] rounded-lg" />;
+    }
+    if (msg.messageType === "voice") {
+      return <audio controls src={msg.message} className="max-w-[200px] h-8" />;
+    }
+    return msg.message;
+  };
+
   if (activeSession) {
     return (
       <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setActiveSession(null)}
-            className="p-2 rounded-lg hover:bg-glass-bg transition-colors"
-          >
-            <ArrowLeft size={20} />
-          </button>
-          <div>
-            <h2 className="text-xl font-bold">Chat Session</h2>
-            <p className="text-foreground/50 text-sm">{activeSession}</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setActiveSession(null)}
+              className="p-2 rounded-lg hover:bg-glass-bg transition-colors"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div>
+              <h2 className="text-xl font-bold">Chat Session</h2>
+              <p className="text-foreground/50 text-sm">{activeSession}</p>
+            </div>
           </div>
+          <button
+            onClick={() => deleteChat(activeSession)}
+            className="p-2 rounded-lg hover:bg-red-500/20 text-red-400 transition-colors"
+            title="Delete chat"
+          >
+            <Trash2 size={18} />
+          </button>
         </div>
 
         <GlassPanel className="h-[500px] flex flex-col">
@@ -106,40 +219,100 @@ export default function AdminChat() {
             {messages.map((msg) => (
               <div
                 key={msg.id}
-                className={`flex ${msg.sender === "admin" ? "justify-end" : "justify-start"}`}
+                className={`flex ${
+                  msg.sender === "admin" ? "justify-end" : msg.sender === "system" ? "justify-center" : "justify-start"
+                }`}
               >
-                <div className="max-w-[75%]">
-                  <p className="text-xs text-foreground/40 mb-1">
-                    {msg.sender === "admin" ? "You" : "Visitor"} ·{" "}
-                    {new Date(msg.createdAt).toLocaleTimeString()}
-                  </p>
-                  <div
-                    className={`px-4 py-2.5 rounded-2xl text-sm ${
-                      msg.sender === "admin"
-                        ? "bg-primary text-white rounded-br-md"
-                        : "bg-white/10 text-foreground/90 rounded-bl-md"
-                    }`}
-                  >
+                {msg.sender === "system" ? (
+                  <div className="bg-yellow-500/20 text-yellow-300 text-xs px-3 py-1.5 rounded-full text-center max-w-[90%]">
                     {msg.message}
                   </div>
-                </div>
+                ) : (
+                  <div className="max-w-[75%]">
+                    <p className="text-xs text-foreground/40 mb-1">
+                      {msg.sender === "admin" ? "You" : msg.sender === "ai" ? "AI Assistant" : "Visitor"} ·{" "}
+                      {new Date(msg.createdAt).toLocaleTimeString()}
+                    </p>
+                    <div
+                      className={`px-4 py-2.5 rounded-2xl text-sm ${
+                        msg.sender === "admin"
+                          ? "bg-primary text-white rounded-br-md"
+                          : msg.sender === "ai"
+                          ? "bg-purple-500/20 text-purple-300 rounded-bl-md"
+                          : "bg-white/10 text-foreground/90 rounded-bl-md"
+                      }`}
+                    >
+                      {renderMessage(msg)}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="p-4 border-t border-glass-border flex gap-2">
-            <input
-              type="text"
-              value={reply}
-              onChange={(e) => setReply(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && sendReply()}
-              placeholder="Type a reply..."
-              className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary/50 transition-colors"
-            />
-            <Button onClick={sendReply} variant="primary" disabled={!reply.trim()}>
-              <Send size={16} />
-            </Button>
+          {showEmoji && (
+            <div className="px-4 py-2 border-t border-glass-border bg-black/30">
+              <div className="flex flex-wrap gap-1">
+                {EMOJI_LIST.map((emoji) => (
+                  <button
+                    key={emoji}
+                    onClick={() => setReply((prev) => prev + emoji)}
+                    className="w-8 h-8 flex items-center justify-center rounded hover:bg-white/10 text-lg"
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="p-4 border-t border-glass-border">
+            <div className="flex gap-2 items-center">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                accept="image/*"
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-foreground/50 hover:text-primary hover:bg-white/5 transition-colors"
+                title="Upload image"
+              >
+                <ImageIcon size={18} />
+              </button>
+              <button
+                onClick={() => setShowEmoji(!showEmoji)}
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-foreground/50 hover:text-primary hover:bg-white/5 transition-colors"
+                title="Emoji"
+              >
+                <Smile size={18} />
+              </button>
+              <button
+                onClick={isRecording ? stopRecording : startRecording}
+                className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${
+                  isRecording ? "text-red-400 bg-red-500/20 animate-pulse" : "text-foreground/50 hover:text-primary hover:bg-white/5"
+                }`}
+                title={isRecording ? "Stop recording" : "Voice message"}
+              >
+                {isRecording ? <MicOff size={18} /> : <Mic size={18} />}
+              </button>
+              <input
+                type="text"
+                value={reply}
+                onChange={(e) => setReply(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && sendReply(reply)}
+                placeholder={uploading ? "Uploading..." : "Type a reply..."}
+                disabled={uploading}
+                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary/50 transition-colors"
+              />
+              <Button onClick={() => sendReply(reply)} variant="primary" disabled={!reply.trim() || uploading}>
+                <Send size={16} />
+              </Button>
+            </div>
           </div>
         </GlassPanel>
       </div>
@@ -151,10 +324,30 @@ export default function AdminChat() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between"
       >
-        <h1 className="text-3xl font-bold">Live Chat</h1>
-        <p className="text-foreground/60 mt-1">View and reply to visitor messages</p>
+        <div>
+          <h1 className="text-3xl font-bold">Live Chat</h1>
+          <p className="text-foreground/60 mt-1">View and reply to visitor messages</p>
+        </div>
+        <button
+          onClick={toggleAI}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all ${
+            aiEnabled
+              ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+              : "bg-white/5 text-foreground/60 border border-white/10 hover:border-white/20"
+          }`}
+        >
+          <Bot size={18} />
+          AI {aiEnabled ? "Active" : "Off"}
+        </button>
       </motion.div>
+
+      {aiEnabled && (
+        <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-3 text-sm text-purple-300">
+          AI auto-reply is ON. The AI assistant is responding to visitors on your behalf.
+        </div>
+      )}
 
       {loading ? (
         <p className="text-foreground/40 py-8 text-center">Loading sessions...</p>
