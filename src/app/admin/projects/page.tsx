@@ -339,7 +339,7 @@ export default function ProjectsPage() {
 
           <div>
             <label className="block text-sm font-medium mb-2">
-              Additional Images <span className="text-foreground/40">(optional)</span>
+              Additional Images <span className="text-foreground/40">(up to 3, optional)</span>
             </label>
             {formData.images.length > 0 && (
               <div className="grid grid-cols-3 gap-3 mb-3">
@@ -353,20 +353,25 @@ export default function ProjectsPage() {
                     >
                       <Trash2 size={12} />
                     </button>
+                    <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/60 text-[10px] text-white/70">
+                      {i + 1}
+                    </div>
                   </div>
                 ))}
               </div>
             )}
-            <label className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-primary/30 transition-colors">
-              <ImageIcon size={24} className="text-foreground/30 mb-1" />
-              <span className="text-xs text-foreground/40">Add more images</span>
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => handleImageUpload(e, "images")}
-              />
-            </label>
+            {formData.images.length < 3 && (
+              <label className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-primary/30 transition-colors">
+                <ImageIcon size={24} className="text-foreground/30 mb-1" />
+                <span className="text-xs text-foreground/40">Add image ({formData.images.length}/3)</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleImageUpload(e, "images")}
+                />
+              </label>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
