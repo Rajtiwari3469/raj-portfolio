@@ -214,23 +214,6 @@ export default function Projects() {
           </div>
         )}
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.2 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          className="text-center mt-12"
-        >
-          <a
-            href="https://github.com/rajtiwari"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-primary/70 hover:text-primary transition-colors tracking-wide text-sm"
-          >
-            <GithubIcon size={18} />
-            View More on GitHub
-          </a>
-        </motion.div>
       </div>
 
       <AnimatePresence>
