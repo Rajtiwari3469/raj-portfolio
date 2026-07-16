@@ -18,7 +18,7 @@ interface Project {
   status: string;
 }
 
-type FilterType = "all" | "active" | "completed";
+type FilterType = "all" | "active" | "in-progress" | "completed";
 
 export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -49,12 +49,14 @@ export default function Projects() {
   });
 
   const activeProjects = projects.filter((p) => p.status === "active");
+  const inProgressProjects = projects.filter((p) => p.status === "in-progress");
   const completedProjects = projects.filter((p) => p.status === "completed");
 
   const filters: { id: FilterType; label: string; count: number; icon: React.ReactNode }[] = [
     { id: "all", label: "All Projects", count: projects.length, icon: <Folder size={16} /> },
-    { id: "active", label: "Active Projects", count: activeProjects.length, icon: <Clock size={16} /> },
-    { id: "completed", label: "Completed Projects", count: completedProjects.length, icon: <CheckCircle size={16} /> },
+    { id: "active", label: "Active", count: activeProjects.length, icon: <Clock size={16} /> },
+    { id: "in-progress", label: "In Progress", count: inProgressProjects.length, icon: <Clock size={16} /> },
+    { id: "completed", label: "Completed", count: completedProjects.length, icon: <CheckCircle size={16} /> },
   ];
 
   return (
@@ -141,12 +143,19 @@ export default function Projects() {
                       <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm ${
                         project.status === "active"
                           ? "bg-green-500/30 text-green-300 border border-green-500/30"
+                          : project.status === "in-progress"
+                          ? "bg-yellow-500/30 text-yellow-300 border border-yellow-500/30"
                           : "bg-blue-500/30 text-blue-300 border border-blue-500/30"
                       }`}>
                         {project.status === "active" ? (
                           <>
                             <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
                             Active
+                          </>
+                        ) : project.status === "in-progress" ? (
+                          <>
+                            <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
+                            In Progress
                           </>
                         ) : (
                           <>
