@@ -8,6 +8,16 @@ import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 
+interface SettingsData {
+  email?: string;
+  location?: string;
+  github?: string;
+  linkedin?: string;
+  instagram?: string;
+  x?: string;
+  leetcode?: string;
+}
+
 export default function Contact() {
   const [formData, setFormData] = useState({
     name: "",
@@ -17,12 +27,12 @@ export default function Contact() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"success" | "error" | null>(null);
-  const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
+  const [settings, setSettings] = useState<SettingsData>({});
 
   useEffect(() => {
     fetch("/api/admin/settings")
       .then((res) => res.json())
-      .then((data) => setSocialLinks(data))
+      .then((data) => setSettings(data))
       .catch(() => {});
   }, []);
 
@@ -88,7 +98,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <p className="text-foreground/60 text-sm">Email</p>
-                    <p className="font-medium">raj@example.com</p>
+                    <p className="font-medium">{settings.email || "raj@example.com"}</p>
                   </div>
                 </div>
 
@@ -98,7 +108,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <p className="text-foreground/60 text-sm">Location</p>
-                    <p className="font-medium">India</p>
+                    <p className="font-medium">{settings.location || "India"}</p>
                   </div>
                 </div>
 
@@ -122,28 +132,28 @@ export default function Contact() {
               <div className="mt-8 pt-8 border-t border-glass-border">
                 <p className="text-foreground/60 mb-4">Connect with me</p>
                 <div className="flex gap-4">
-                  {socialLinks.github && (
-                    <a href={socialLinks.github} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-primary/20 hover:text-primary transition-colors">
+                  {settings.github && (
+                    <a href={settings.github} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-primary/20 hover:text-primary transition-colors">
                       <GithubIcon size={20} />
                     </a>
                   )}
-                  {socialLinks.linkedin && (
-                    <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-accent/20 hover:text-accent transition-colors">
+                  {settings.linkedin && (
+                    <a href={settings.linkedin} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-accent/20 hover:text-accent transition-colors">
                       <LinkedinIcon size={20} />
                     </a>
                   )}
-                  {socialLinks.instagram && (
-                    <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-pink-500/20 hover:text-pink-500 transition-colors">
+                  {settings.instagram && (
+                    <a href={settings.instagram} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-pink-500/20 hover:text-pink-500 transition-colors">
                       <InstagramIcon size={20} />
                     </a>
                   )}
-                  {socialLinks.x && (
-                    <a href={socialLinks.x} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-black/20 hover:text-black transition-colors">
+                  {settings.x && (
+                    <a href={settings.x} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-black/20 hover:text-black transition-colors">
                       <XIcon size={20} />
                     </a>
                   )}
-                  {socialLinks.leetcode && (
-                    <a href={socialLinks.leetcode} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-yellow-500/20 hover:text-yellow-500 transition-colors">
+                  {settings.leetcode && (
+                    <a href={settings.leetcode} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-yellow-500/20 hover:text-yellow-500 transition-colors">
                       <LeetcodeIcon size={20} />
                     </a>
                   )}

@@ -6,10 +6,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category");
     const featured = searchParams.get("featured");
+    const status = searchParams.get("status");
 
-    const where: Record<string, unknown> = {
-      status: "active",
-    };
+    const where: Record<string, unknown> = {};
 
     if (category && category !== "All") {
       where.category = category;
@@ -17,6 +16,10 @@ export async function GET(request: NextRequest) {
 
     if (featured === "true") {
       where.featured = true;
+    }
+
+    if (status && status !== "all") {
+      where.status = status;
     }
 
     const projects = await prisma.project.findMany({
