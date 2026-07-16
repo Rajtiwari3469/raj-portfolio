@@ -7,6 +7,7 @@ import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface Skill {
   id: string;
@@ -25,10 +26,12 @@ export default function SkillsPage() {
   const [formData, setFormData] = useState({
     name: "",
     category: "Programming",
-    level: 80,
+    level: 50,
     icon: "",
     order: 0,
   });
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchSkills = async () => {
     try {
@@ -78,14 +81,17 @@ export default function SkillsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this skill?")) return;
-
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setIsDeleting(true);
     try {
-      await fetch(`/api/admin/skills?id=${id}`, { method: "DELETE" });
+      await fetch(`/api/admin/skills?id=${deleteId}`, { method: "DELETE" });
       fetchSkills();
     } catch (error) {
       console.error("Failed to delete skill:", error);
+    } finally {
+      setIsDeleting(false);
+      setDeleteId(null);
     }
   };
 
@@ -174,7 +180,7 @@ export default function SkillsPage() {
                               <Edit size={16} />
                             </button>
                             <button
-                              onClick={() => handleDelete(skill.id)}
+                              onClick={() => setDeleteId(skill.id)}
                               className="p-2 rounded-lg hover:bg-red-500/20 text-red-400"
                             >
                               <Trash2 size={16} />
@@ -251,6 +257,15 @@ export default function SkillsPage() {
           </div>
         </form>
       </Modal>
+
+      <ConfirmModal
+        isOpen={!!deleteId}
+        title="Delete Skill"
+        message="Are you sure you want to delete this skill? This action cannot be undone."
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
+        loading={isDeleting}
+      />
     </div>
   );
 }

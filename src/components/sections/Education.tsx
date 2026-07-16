@@ -68,19 +68,20 @@ export default function Education() {
   }, []);
 
   return (
-    <section id="education" className="py-20 relative">
+    <section id="education" className="py-24 relative">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
+          <p className="text-xs text-primary/60 tracking-[0.3em] uppercase mb-4">Knowledge</p>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             <span className="gradient-text">Education & Learning</span>
           </h2>
-          <p className="text-foreground/60 max-w-2xl mx-auto">
+          <p className="text-foreground/40 max-w-2xl mx-auto tracking-wide">
             My academic journey and continuous learning path
           </p>
         </motion.div>
@@ -90,9 +91,11 @@ export default function Education() {
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="text-2xl font-semibold mb-8 flex items-center gap-2"
+            className="text-2xl font-semibold mb-8 flex items-center gap-3"
           >
-            <GraduationCap className="text-primary" />
+            <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
+              <GraduationCap className="text-primary w-5 h-5" />
+            </div>
             Education
           </motion.h3>
 
@@ -107,22 +110,22 @@ export default function Education() {
               >
                 <GlassPanel hover glow="primary">
                   <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-xl bg-primary/20 text-primary">
+                    <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 text-primary">
                       {getIcon(edu.icon)}
                     </div>
                     <div className="flex-1">
                       <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                         <h4 className="text-lg font-semibold">{edu.title}</h4>
-                        <span className="text-sm text-foreground/60">{edu.year}</span>
+                        <span className="text-sm text-foreground/40">{edu.year}</span>
                       </div>
-                      <p className="text-foreground/80 font-medium">{edu.subtitle}</p>
-                      <p className="text-foreground/60 text-sm mb-3">{edu.institution}</p>
-                      <p className="text-foreground/70 text-sm mb-4">{edu.description}</p>
+                      <p className="text-foreground/70 font-medium">{edu.subtitle}</p>
+                      <p className="text-foreground/40 text-sm mb-3">{edu.institution}</p>
+                      <p className="text-foreground/50 text-sm mb-4">{edu.description}</p>
                       <div className="flex flex-wrap gap-2">
                         {edu.highlights.map((highlight) => (
                           <span
                             key={highlight}
-                            className="px-3 py-1 rounded-full bg-glass-bg text-xs text-foreground/70"
+                            className="px-3 py-1 rounded-lg bg-white/[0.03] border border-white/[0.05] text-xs text-foreground/50"
                           >
                             {highlight}
                           </span>

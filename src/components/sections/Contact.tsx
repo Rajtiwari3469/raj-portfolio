@@ -64,24 +64,25 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="py-20 relative">
+    <section id="contact" className="py-24 relative">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
+          <p className="text-xs text-primary/60 tracking-[0.3em] uppercase mb-4">Reach out</p>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             <span className="gradient-text">Get In Touch</span>
           </h2>
-          <p className="text-foreground/60 max-w-2xl mx-auto">
+          <p className="text-foreground/40 max-w-2xl mx-auto tracking-wide">
             Have a project in mind? Let&apos;s work together
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-12">
+        <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -89,26 +90,26 @@ export default function Contact() {
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             <GlassPanel className="h-full">
-              <h3 className="text-2xl font-semibold mb-6">Contact Information</h3>
+              <h3 className="text-2xl font-semibold mb-8">Contact Information</h3>
 
               <div className="space-y-6">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-primary/20 text-primary">
+                  <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 text-primary">
                     <Mail size={20} />
                   </div>
                   <div>
-                    <p className="text-foreground/60 text-sm">Email</p>
-                    <p className="font-medium">{settings.email || "raj@example.com"}</p>
+                    <p className="text-foreground/40 text-sm">Email</p>
+                    <p className="font-medium tracking-wide">{settings.email || "raj@example.com"}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-gold/20 text-gold">
+                  <div className="p-3 rounded-xl bg-gold/10 border border-gold/20 text-gold">
                     <MapPin size={20} />
                   </div>
                   <div>
-                    <p className="text-foreground/60 text-sm">Location</p>
-                    <p className="font-medium">{settings.location || "India"}</p>
+                    <p className="text-foreground/40 text-sm">Location</p>
+                    <p className="font-medium tracking-wide">{settings.location || "India"}</p>
                   </div>
                 </div>
 
@@ -119,41 +120,41 @@ export default function Contact() {
                     if (el) el.click();
                   }}
                 >
-                  <div className="p-3 rounded-xl bg-green-500/20 text-green-400 group-hover:scale-110 transition-transform">
+                  <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 group-hover:scale-110 transition-transform">
                     <MessageCircle size={20} />
                   </div>
                   <div>
-                    <p className="text-foreground/60 text-sm">Live Chat</p>
-                    <p className="font-medium">Chat with me instantly</p>
+                    <p className="text-foreground/40 text-sm">Live Chat</p>
+                    <p className="font-medium tracking-wide">Chat with me instantly</p>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-8 pt-8 border-t border-glass-border">
-                <p className="text-foreground/60 mb-4">Connect with me</p>
-                <div className="flex gap-4">
+              <div className="mt-8 pt-8 border-t border-white/[0.05]">
+                <p className="text-foreground/40 mb-4 tracking-wide">Connect with me</p>
+                <div className="flex gap-3">
                   {settings.github && (
-                    <a href={settings.github} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-primary/20 hover:text-primary transition-colors">
+                    <a href={settings.github} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-primary/30 hover:text-primary transition-all">
                       <GithubIcon size={20} />
                     </a>
                   )}
                   {settings.linkedin && (
-                    <a href={settings.linkedin} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-accent/20 hover:text-accent transition-colors">
+                    <a href={settings.linkedin} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-accent/30 hover:text-accent transition-all">
                       <LinkedinIcon size={20} />
                     </a>
                   )}
                   {settings.instagram && (
-                    <a href={settings.instagram} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-pink-500/20 hover:text-pink-500 transition-colors">
+                    <a href={settings.instagram} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-pink-500/30 hover:text-pink-500 transition-all">
                       <InstagramIcon size={20} />
                     </a>
                   )}
                   {settings.x && (
-                    <a href={settings.x} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-black/20 hover:text-black transition-colors">
+                    <a href={settings.x} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-foreground/30 hover:text-foreground transition-all">
                       <XIcon size={20} />
                     </a>
                   )}
                   {settings.leetcode && (
-                    <a href={settings.leetcode} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-glass-bg hover:bg-yellow-500/20 hover:text-yellow-500 transition-colors">
+                    <a href={settings.leetcode} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-gold/30 hover:text-gold transition-all">
                       <LeetcodeIcon size={20} />
                     </a>
                   )}
@@ -207,10 +208,10 @@ export default function Contact() {
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className={`p-3 rounded-xl ${
+                    className={`p-3 rounded-xl text-sm ${
                       submitStatus === "success"
-                        ? "bg-green-500/20 text-green-400"
-                        : "bg-red-500/20 text-red-400"
+                        ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                        : "bg-red-500/10 text-red-400 border border-red-500/20"
                     }`}
                   >
                     {submitStatus === "success"

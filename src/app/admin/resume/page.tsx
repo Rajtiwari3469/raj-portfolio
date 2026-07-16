@@ -7,6 +7,7 @@ import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface Resume {
   id: string;
@@ -34,6 +35,8 @@ export default function ResumePage() {
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [previewResume, setPreviewResume] = useState<Resume | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchResumes = async () => {
     try {
@@ -77,12 +80,16 @@ export default function ResumePage() {
     } catch {}
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this resume?")) return;
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setIsDeleting(true);
     try {
-      await fetch(`/api/admin/resume?id=${id}`, { method: "DELETE" });
+      await fetch(`/api/admin/resume?id=${deleteId}`, { method: "DELETE" });
       fetchResumes();
-    } catch {}
+    } catch {} finally {
+      setIsDeleting(false);
+      setDeleteId(null);
+    }
   };
 
   const openModal = (resume?: Resume) => {
@@ -217,7 +224,7 @@ export default function ResumePage() {
                     <Edit size={16} />
                   </button>
                   <button
-                    onClick={() => handleDelete(resume.id)}
+                    onClick={() => setDeleteId(resume.id)}
                     className="p-2 rounded-lg hover:bg-red-500/20 text-red-400"
                   >
                     <Trash2 size={16} />
@@ -369,6 +376,15 @@ export default function ResumePage() {
           </motion.div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={!!deleteId}
+        title="Delete Resume"
+        message="Are you sure you want to delete this resume? This action cannot be undone."
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
+        loading={isDeleting}
+      />
     </div>
   );
 }

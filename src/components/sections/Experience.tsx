@@ -80,25 +80,26 @@ export default function Experience() {
     fetchExperience();
   }, []);
   return (
-    <section id="experience" className="py-20 relative">
+    <section id="experience" className="py-24 relative">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
+          <p className="text-xs text-primary/60 tracking-[0.3em] uppercase mb-4">My journey</p>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             <span className="gradient-text">Experience</span>
           </h2>
-          <p className="text-foreground/60 max-w-2xl mx-auto">
+          <p className="text-foreground/40 max-w-2xl mx-auto tracking-wide">
             My professional journey and development experience
           </p>
         </motion.div>
 
-        <div className="relative">
-          <div className="absolute left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-gradient-to-b from-primary via-accent to-secondary hidden lg:block" />
+        <div className="relative max-w-5xl mx-auto">
+          <div className="absolute left-1/2 transform -translate-x-1/2 w-px h-full bg-gradient-to-b from-primary/30 via-secondary/30 to-accent/30 hidden lg:block" />
 
           <div className="space-y-12">
             {experiences.map((exp, index) => (
@@ -114,23 +115,23 @@ export default function Experience() {
               >
                 <div className={`lg:w-1/2 ${index % 2 === 0 ? "lg:text-right" : "lg:text-left"}`}>
                   <GlassPanel hover glow="primary" className="h-full">
-                    <div className="flex items-center gap-2 mb-2 text-primary">
-                      <Briefcase size={18} />
-                      <span className="text-sm font-medium">{exp.company}</span>
+                    <div className={`flex items-center gap-2 mb-2 text-primary ${index % 2 === 0 ? "lg:justify-end" : ""}`}>
+                      <Briefcase size={16} />
+                      <span className="text-sm font-medium tracking-wide">{exp.company}</span>
                     </div>
                     <h3 className="text-xl font-bold mb-2">{exp.title}</h3>
-                    <div className="flex items-center gap-2 text-foreground/60 text-sm mb-4">
+                    <div className={`flex items-center gap-2 text-foreground/40 text-sm mb-4 ${index % 2 === 0 ? "lg:justify-end" : ""}`}>
                       <Calendar size={14} />
                       <span>{exp.period}</span>
                     </div>
-                    <p className="text-foreground/70 mb-4">{exp.description}</p>
+                    <p className="text-foreground/50 mb-4">{exp.description}</p>
 
                     <div className="mb-4">
-                      <h4 className="text-sm font-semibold mb-2 text-foreground/80">Achievements:</h4>
-                      <ul className="space-y-1">
+                      <h4 className="text-sm font-semibold mb-2 text-foreground/60 tracking-wide">Achievements:</h4>
+                      <ul className="space-y-1.5">
                         {exp.achievements.map((achievement) => (
-                          <li key={achievement} className="text-sm text-foreground/60 flex items-start gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2 flex-shrink-0" />
+                          <li key={achievement} className="text-sm text-foreground/40 flex items-start gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2 flex-shrink-0 shadow-[0_0_6px_var(--accent-glow)]" />
                             {achievement}
                           </li>
                         ))}
@@ -141,7 +142,7 @@ export default function Experience() {
                       {exp.technologies.map((tech) => (
                         <span
                           key={tech}
-                          className="px-3 py-1 rounded-full bg-glass-bg text-xs text-foreground/70"
+                          className="px-3 py-1 rounded-lg bg-white/[0.03] border border-white/[0.05] text-xs text-foreground/50"
                         >
                           {tech}
                         </span>
@@ -153,7 +154,7 @@ export default function Experience() {
                         href={exp.github}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-sm text-foreground/60 hover:text-foreground transition-colors"
+                        className="flex items-center gap-1.5 text-sm text-foreground/40 hover:text-foreground/70 transition-colors"
                       >
                         <GithubIcon size={14} />
                         Code
@@ -163,7 +164,7 @@ export default function Experience() {
                 </div>
 
                 <div className="hidden lg:flex lg:w-1/2 items-start justify-center">
-                  <div className="w-4 h-4 rounded-full bg-primary border-4 border-background relative z-10" />
+                  <div className="w-4 h-4 rounded-full bg-primary border-4 border-[#050510] relative z-10 shadow-[0_0_15px_var(--primary-glow)]" />
                 </div>
 
                 <div className="lg:w-1/2" />

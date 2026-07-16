@@ -135,25 +135,27 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 relative">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#050510] via-[#0a0a2e] to-[#050510]" />
+
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
-        <GlassPanel>
+        <GlassPanel className="border border-white/[0.08] shadow-[0_0_60px_rgba(0,212,255,0.08)]">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/20 flex items-center justify-center mx-auto mb-4 shadow-[0_0_20px_rgba(0,212,255,0.1)]">
               <Lock className="w-8 h-8 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold">Admin Login</h1>
-            <p className="text-foreground/60 mt-2">Enter your credentials to continue</p>
+            <h1 className="text-2xl font-bold tracking-tight">Admin Login</h1>
+            <p className="text-foreground/40 mt-2 tracking-wide text-sm">Enter your credentials to continue</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/40" size={18} />
+              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/30" size={18} />
               <Input
                 type="text"
                 placeholder="Username"
@@ -165,7 +167,7 @@ export default function LoginPage() {
             </div>
 
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/40" size={18} />
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/30" size={18} />
               <Input
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
@@ -177,7 +179,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-foreground/40 hover:text-foreground"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-foreground/30 hover:text-foreground/70 transition-colors"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -187,7 +189,7 @@ export default function LoginPage() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3 rounded-xl bg-red-500/20 text-red-400 text-sm"
+                className="p-3 rounded-xl bg-red-500/10 text-red-400 text-sm border border-red-500/20"
               >
                 {error}
               </motion.div>
@@ -217,7 +219,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowForgotModal(true)}
-                className="text-sm text-primary/80 hover:text-primary flex items-center gap-1.5 mx-auto"
+                className="text-sm text-primary/60 hover:text-primary flex items-center gap-1.5 mx-auto transition-colors"
               >
                 <KeyRound size={14} />
                 Forgot Password?
@@ -228,13 +230,13 @@ export default function LoginPage() {
       </motion.div>
 
       {showForgotModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#050510]/80 backdrop-blur-md p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-md mx-4"
+            className="w-full max-w-md mx-4 relative"
           >
-            <GlassPanel className="relative">
+            <GlassPanel className="relative border border-white/[0.08] shadow-[0_0_60px_rgba(0,212,255,0.08)]">
               <button
                 onClick={() => {
                   setShowForgotModal(false);
@@ -246,15 +248,15 @@ export default function LoginPage() {
                   setForgotStatus(null);
                   setForgotMessage("");
                 }}
-                className="absolute top-4 right-4 text-foreground/40 hover:text-foreground"
+                className="absolute top-4 right-4 text-foreground/30 hover:text-foreground/70 transition-colors"
               >
-                ✕
+                &#x2715;
               </button>
 
               <div className="text-center mb-6">
                 <KeyRound className="mx-auto mb-4 text-primary" size={32} />
-                <h2 className="text-2xl font-bold">Forgot Password</h2>
-                <p className="text-foreground/60 mt-2">
+                <h2 className="text-2xl font-bold tracking-tight">Forgot Password</h2>
+                <p className="text-foreground/40 mt-2 text-sm tracking-wide">
                   {showResetForm
                     ? "Enter the reset code and your new password"
                     : "Enter your admin email to receive a reset code"}
@@ -277,8 +279,8 @@ export default function LoginPage() {
                       animate={{ opacity: 1 }}
                       className={`p-3 rounded-xl text-sm ${
                         forgotStatus === "success"
-                          ? "bg-green-500/20 text-green-400"
-                          : "bg-red-500/20 text-red-400"
+                          ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                          : "bg-red-500/10 text-red-400 border border-red-500/20"
                       }`}
                     >
                       {forgotMessage}
@@ -324,8 +326,8 @@ export default function LoginPage() {
                       animate={{ opacity: 1 }}
                       className={`p-3 rounded-xl text-sm ${
                         forgotStatus === "success"
-                          ? "bg-green-500/20 text-green-400"
-                          : "bg-red-500/20 text-red-400"
+                          ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                          : "bg-red-500/10 text-red-400 border border-red-500/20"
                       }`}
                     >
                       {forgotMessage}
@@ -344,9 +346,9 @@ export default function LoginPage() {
 
                   <button
                     onClick={() => setShowResetForm(false)}
-                    className="w-full text-sm text-foreground/60 hover:text-foreground"
+                    className="w-full text-sm text-foreground/40 hover:text-foreground/70 transition-colors"
                   >
-                    ← Back to send code
+                    &larr; Back to send code
                   </button>
                 </div>
               )}

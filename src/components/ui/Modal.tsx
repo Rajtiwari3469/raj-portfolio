@@ -49,16 +49,17 @@ export default function Modal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-[#050510]/80 backdrop-blur-md"
             onClick={onClose}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: "spring", duration: 0.5 }}
             className={cn(
               "relative glass rounded-2xl p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto",
+              "border border-white/[0.08] shadow-[0_0_60px_rgba(0,212,255,0.1)]",
               className
             )}
           >
@@ -68,7 +69,7 @@ export default function Modal({
               )}
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg hover:bg-glass-bg transition-colors"
+                className="p-2 rounded-lg hover:bg-white/5 text-foreground/50 hover:text-foreground transition-colors"
               >
                 <X size={20} />
               </button>

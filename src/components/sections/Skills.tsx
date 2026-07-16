@@ -57,28 +57,29 @@ export default function Skills() {
   }, {} as Record<string, Skill[]>);
 
   return (
-    <section id="skills" className="py-20 relative">
+    <section id="skills" className="py-24 relative">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
+          <p className="text-xs text-primary/60 tracking-[0.3em] uppercase mb-4">My capabilities</p>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             <span className="gradient-text">Skills & Expertise</span>
           </h2>
-          <p className="text-foreground/60 max-w-2xl mx-auto">
+          <p className="text-foreground/40 max-w-2xl mx-auto tracking-wide">
             Technologies and tools I work with
           </p>
         </motion.div>
 
         {isLoading ? (
-          <div className="text-center py-12 text-foreground/60">Loading skills...</div>
+          <div className="text-center py-12 text-foreground/40">Loading skills...</div>
         ) : skills.length === 0 ? (
           <GlassPanel className="text-center py-12">
-            <p className="text-foreground/60">No skills yet. Add skills from the admin dashboard!</p>
+            <p className="text-foreground/50">No skills yet. Add skills from the admin dashboard!</p>
           </GlassPanel>
         ) : (
           <div className="grid lg:grid-cols-2 gap-8 mb-12">
@@ -91,7 +92,7 @@ export default function Skills() {
                 transition={{ duration: 0.8, delay: catIndex * 0.2 }}
               >
                 <GlassPanel className="h-full">
-                  <h3 className="text-xl font-semibold mb-6 gradient-text">
+                  <h3 className="text-xl font-semibold mb-6 gradient-text tracking-wide">
                     {category}
                   </h3>
                   <div className="space-y-4">
@@ -104,16 +105,16 @@ export default function Skills() {
                         transition={{ duration: 0.5, delay: skillIndex * 0.1 }}
                       >
                         <div className="flex justify-between mb-2">
-                          <span className="text-foreground/80">{skill.name}</span>
-                          <span className="text-foreground/60">{skill.level}%</span>
+                          <span className="text-foreground/70 tracking-wide">{skill.name}</span>
+                          <span className="text-foreground/40 text-sm">{skill.level}%</span>
                         </div>
-                        <div className="h-2 bg-glass-bg rounded-full overflow-hidden">
+                        <div className="h-1.5 bg-white/[0.03] rounded-full overflow-hidden border border-white/[0.05]">
                           <motion.div
                             initial={{ width: 0 }}
                             whileInView={{ width: `${skill.level}%` }}
                             viewport={{ once: true }}
                             transition={{ duration: 1, delay: 0.5 + skillIndex * 0.1 }}
-                            className="h-full bg-gradient-to-r from-primary to-accent rounded-full"
+                            className="h-full bg-gradient-to-r from-primary via-accent to-secondary rounded-full shadow-[0_0_10px_var(--primary-glow)]"
                           />
                         </div>
                       </motion.div>
@@ -132,7 +133,7 @@ export default function Skills() {
           transition={{ duration: 0.8, delay: 0.4 }}
         >
           <GlassPanel>
-            <h3 className="text-xl font-semibold mb-6 gradient-text text-center">
+            <h3 className="text-xl font-semibold mb-6 gradient-text text-center tracking-wide">
               Tech Stack
             </h3>
             <div className="flex flex-wrap justify-center gap-3">
@@ -143,7 +144,7 @@ export default function Skills() {
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.3, delay: 0.5 + index * 0.05 }}
-                  className="px-4 py-2 rounded-full bg-glass-bg border border-glass-border text-foreground/80 hover:border-primary hover:text-primary transition-colors duration-300 cursor-default"
+                  className="px-5 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground/60 hover:border-primary/30 hover:text-primary hover:bg-primary/5 hover:shadow-[0_0_15px_rgba(0,212,255,0.1)] transition-all duration-500 cursor-default tracking-wide text-sm"
                 >
                   {tech}
                 </motion.span>

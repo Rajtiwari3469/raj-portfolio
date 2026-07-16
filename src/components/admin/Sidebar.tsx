@@ -45,7 +45,7 @@ export default function AdminSidebar() {
     <>
       <button
         onClick={() => setIsMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg glass"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-xl glass border border-white/[0.08]"
       >
         <Menu size={24} />
       </button>
@@ -56,7 +56,7 @@ export default function AdminSidebar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="lg:hidden fixed inset-0 z-40 bg-black/60"
+            className="lg:hidden fixed inset-0 z-40 bg-[#050510]/80 backdrop-blur-md"
             onClick={() => setIsMobileOpen(false)}
           />
         )}
@@ -67,20 +67,20 @@ export default function AdminSidebar() {
         animate={{
           width: isOpen ? 280 : 80,
         }}
-        className={`fixed left-0 top-0 h-full glass z-50 flex flex-col transition-all duration-300 ${
+        className={`fixed left-0 top-0 h-full glass z-50 flex flex-col transition-all duration-300 border-r border-white/[0.05] ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
-        <div className="p-4 flex items-center justify-between border-b border-glass-border">
+        <div className="p-4 flex items-center justify-between border-b border-white/[0.05]">
           <Link href="/admin" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-              <span className="text-primary font-bold">RT</span>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/20 flex items-center justify-center">
+              <span className="text-primary font-bold text-sm">RT</span>
             </div>
             {isOpen && (
               <motion.span
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="font-semibold"
+                className="font-semibold tracking-wide"
               >
                 Admin Panel
               </motion.span>
@@ -88,13 +88,13 @@ export default function AdminSidebar() {
           </Link>
           <button
             onClick={() => setIsMobileOpen(false)}
-            className="lg:hidden p-1 rounded hover:bg-glass-bg"
+            className="lg:hidden p-1 rounded-lg hover:bg-white/5 text-foreground/40 hover:text-foreground transition-colors"
           >
             <X size={20} />
           </button>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 p-4 space-y-1">
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -104,8 +104,8 @@ export default function AdminSidebar() {
                 onClick={() => setIsMobileOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
                   isActive
-                    ? "bg-primary/20 text-primary"
-                    : "text-foreground/60 hover:bg-glass-bg hover:text-foreground"
+                    ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(0,212,255,0.05)]"
+                    : "text-foreground/40 hover:bg-white/[0.03] hover:text-foreground/70 border border-transparent"
                 }`}
               >
                 <item.icon size={20} />
@@ -113,7 +113,7 @@ export default function AdminSidebar() {
                   <motion.span
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="font-medium"
+                    className="font-medium tracking-wide text-sm"
                   >
                     {item.name}
                   </motion.span>
@@ -123,19 +123,19 @@ export default function AdminSidebar() {
           })}
         </nav>
 
-        <div className="p-4 border-t border-glass-border">
+        <div className="p-4 border-t border-white/[0.05]">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-foreground/60 hover:bg-red-500/20 hover:text-red-400 transition-all duration-200 w-full"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-foreground/40 hover:bg-red-500/10 hover:text-red-400 border border-transparent hover:border-red-500/20 transition-all duration-200 w-full"
           >
             <LogOut size={20} />
-            {isOpen && <span className="font-medium">Logout</span>}
+            {isOpen && <span className="font-medium text-sm tracking-wide">Logout</span>}
           </button>
         </div>
 
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="hidden lg:flex absolute -right-3 top-20 w-6 h-6 rounded-full bg-glass-bg border border-glass-border items-center justify-center hover:bg-primary/20 transition-colors"
+          className="hidden lg:flex absolute -right-3 top-20 w-6 h-6 rounded-full bg-white/[0.05] border border-white/[0.08] items-center justify-center hover:bg-primary/10 hover:border-primary/20 transition-all"
         >
           <ChevronLeft
             size={14}

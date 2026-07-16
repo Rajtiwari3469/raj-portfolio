@@ -7,24 +7,32 @@ import GlassPanel from "@/components/ui/GlassPanel";
 
 const highlights = [
   {
-    icon: <GraduationCap className="w-8 h-8" />,
+    icon: <GraduationCap className="w-7 h-7" />,
     title: "Education",
     description: "BCA Computer Science & Information Technology",
+    color: "text-primary",
+    glow: "primary" as const,
   },
   {
-    icon: <Code className="w-8 h-8" />,
+    icon: <Code className="w-7 h-7" />,
     title: "Development",
     description: "Full Stack Web & Software Development",
+    color: "text-accent",
+    glow: "accent" as const,
   },
   {
-    icon: <Cpu className="w-8 h-8" />,
+    icon: <Cpu className="w-7 h-7" />,
     title: "AI Technology",
     description: "Exploring AI & Machine Learning",
+    color: "text-neon-purple",
+    glow: "purple" as const,
   },
   {
-    icon: <Rocket className="w-8 h-8" />,
+    icon: <Rocket className="w-7 h-7" />,
     title: "Innovation",
     description: "Building Future-Ready Solutions",
+    color: "text-gold",
+    glow: "gold" as const,
   },
 ];
 
@@ -68,19 +76,20 @@ export default function About() {
   }, []);
 
   return (
-    <section id="about" className="py-20 relative">
+    <section id="about" className="py-24 relative">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
+          <p className="text-xs text-primary/60 tracking-[0.3em] uppercase mb-4">Get to know me</p>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             <span className="gradient-text">About Me</span>
           </h2>
-          <p className="text-foreground/60 max-w-2xl mx-auto">
+          <p className="text-foreground/40 max-w-2xl mx-auto tracking-wide">
             Passionate about creating innovative digital solutions
           </p>
         </motion.div>
@@ -96,11 +105,11 @@ export default function About() {
               {bio.map((paragraph, index) => (
                 <p
                   key={index}
-                  className={index === 0 ? "text-lg text-foreground/80 leading-relaxed" : "text-foreground/70 leading-relaxed"}
+                  className={index === 0 ? "text-lg text-foreground/70 leading-relaxed" : "text-foreground/50 leading-relaxed"}
                 >
                   {index === 0 ? (
                     <>
-                      I am <span className="text-primary font-semibold">Raj Tiwari</span>,{paragraph.replace("I am Raj Tiwari, a passionate BCA Computer Science & Information Technology student with a deep interest in software development, artificial intelligence, and modern technologies.", " a passionate BCA Computer Science & Information Technology student with a deep interest in software development, artificial intelligence, and modern technologies.")}
+                      I am <span className="text-primary font-semibold text-glow">Raj Tiwari</span>,{paragraph.replace("I am Raj Tiwari, a passionate BCA Computer Science & Information Technology student with a deep interest in software development, artificial intelligence, and modern technologies.", " a passionate BCA Computer Science & Information Technology student with a deep interest in software development, artificial intelligence, and modern technologies.")}
                     </>
                   ) : (
                     paragraph
@@ -110,11 +119,11 @@ export default function About() {
 
               <div className="pt-4">
                 <h3 className="text-xl font-semibold mb-4 gradient-text">Career Goals</h3>
-                <ul className="space-y-2 text-foreground/70">
+                <ul className="space-y-3 text-foreground/60">
                   {careerGoals.map((goal, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${goalColors[index % goalColors.length]}`}></span>
-                      {goal}
+                    <li key={index} className="flex items-center gap-3">
+                      <span className={`w-2 h-2 rounded-full ${goalColors[index % goalColors.length]} shadow-[0_0_8px_var(--primary-glow)]`}></span>
+                      <span className="tracking-wide">{goal}</span>
                     </li>
                   ))}
                 </ul>
@@ -137,12 +146,12 @@ export default function About() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
               >
-                <GlassPanel hover glow="primary" className="text-center h-full">
-                  <div className="text-primary mb-4 flex justify-center">
+                <GlassPanel hover glow={item.glow} className="text-center h-full">
+                  <div className={`${item.color} mb-4 flex justify-center`}>
                     {item.icon}
                   </div>
-                  <h3 className="font-semibold mb-2">{item.title}</h3>
-                  <p className="text-sm text-foreground/60">{item.description}</p>
+                  <h3 className="font-semibold mb-2 tracking-wide">{item.title}</h3>
+                  <p className="text-sm text-foreground/40">{item.description}</p>
                 </GlassPanel>
               </motion.div>
             ))}

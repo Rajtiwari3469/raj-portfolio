@@ -10,6 +10,7 @@ import Experience from "@/components/sections/Experience";
 import Contact from "@/components/sections/Contact";
 import ResumeSection from "@/components/sections/Resume";
 import ChatWidget from "@/components/ui/ChatWidget";
+import FloatingElements from "@/components/ui/FloatingElements";
 import { getPrisma } from "@/lib/prisma";
 
 async function getSettings() {
@@ -35,18 +36,26 @@ export default async function Home() {
   return (
     <main className="flex-1">
       <Navbar />
+      <FloatingElements />
       <Hero
         profileImage={profileImage}
         heroTitle={settings.heroTitle || "BCA CS & IT Student"}
         heroSubtitle={settings.heroSubtitle || "Software Development & AI Technology"}
       />
       <About />
+      <div className="section-divider mx-auto max-w-4xl" />
       <Projects />
+      <div className="section-divider mx-auto max-w-4xl" />
       <Certificates />
+      <div className="section-divider mx-auto max-w-4xl" />
       <Education />
+      <div className="section-divider mx-auto max-w-4xl" />
       <Skills />
+      <div className="section-divider mx-auto max-w-4xl" />
       <Experience />
+      <div className="section-divider mx-auto max-w-4xl" />
       <ResumeSection />
+      <div className="section-divider mx-auto max-w-4xl" />
       <Contact />
       <Footer />
       <ChatWidget />

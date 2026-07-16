@@ -39,28 +39,29 @@ export default function Certificates() {
   }, []);
 
   return (
-    <section id="certificates" className="py-20 relative">
+    <section id="certificates" className="py-24 relative">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
+          <p className="text-xs text-primary/60 tracking-[0.3em] uppercase mb-4">Achievements</p>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             <span className="gradient-text">Certificates</span>
           </h2>
-          <p className="text-foreground/60 max-w-2xl mx-auto">
+          <p className="text-foreground/40 max-w-2xl mx-auto tracking-wide">
             My professional certifications and achievements
           </p>
         </motion.div>
 
         {isLoading ? (
-          <div className="text-center py-12 text-foreground/60">Loading certificates...</div>
+          <div className="text-center py-12 text-foreground/40">Loading certificates...</div>
         ) : certificates.length === 0 ? (
           <GlassPanel className="text-center py-12">
-            <p className="text-foreground/60">No certificates yet. Add certificates from the admin dashboard!</p>
+            <p className="text-foreground/50">No certificates yet. Add certificates from the admin dashboard!</p>
           </GlassPanel>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -74,7 +75,7 @@ export default function Certificates() {
               >
                 <GlassPanel hover glow="accent" className="h-full flex flex-col">
                   {cert.image && (
-                    <div className="h-48 rounded-xl overflow-hidden mb-4 bg-glass-bg">
+                    <div className="h-48 rounded-xl overflow-hidden mb-4 bg-white/[0.02] border border-white/[0.04]">
                       <img
                         src={cert.image}
                         alt={cert.name}
@@ -84,8 +85,8 @@ export default function Certificates() {
                   )}
 
                   {!cert.image && (
-                    <div className="h-48 rounded-xl mb-4 bg-glass-bg flex items-center justify-center">
-                      <Award size={48} className="text-gold/40" />
+                    <div className="h-48 rounded-xl mb-4 bg-white/[0.02] border border-white/[0.04] flex items-center justify-center">
+                      <Award size={40} className="text-gold/30" />
                     </div>
                   )}
 
@@ -93,13 +94,13 @@ export default function Certificates() {
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-lg font-semibold line-clamp-1">{cert.name}</h3>
                     </div>
-                    <p className="text-sm text-foreground/60 mb-2">{cert.organization}</p>
+                    <p className="text-sm text-foreground/40 mb-2">{cert.organization}</p>
                     {cert.description && (
-                      <p className="text-sm text-foreground/70 line-clamp-2 mb-3">
+                      <p className="text-sm text-foreground/50 line-clamp-2 mb-3">
                         {cert.description}
                       </p>
                     )}
-                    <p className="text-xs text-foreground/50">
+                    <p className="text-xs text-foreground/30">
                       {new Date(cert.date).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
@@ -108,12 +109,12 @@ export default function Certificates() {
                   </div>
 
                   {cert.pdfUrl && (
-                    <div className="mt-4 pt-4 border-t border-glass-border">
+                    <div className="mt-4 pt-4 border-t border-white/[0.05]">
                       <a
                         href={cert.pdfUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors"
+                        className="flex items-center gap-1.5 text-sm text-primary/70 hover:text-primary transition-colors"
                       >
                         <ExternalLink size={14} />
                         View Certificate
@@ -135,13 +136,13 @@ export default function Certificates() {
             className="mt-12"
           >
             <GlassPanel className="text-center">
-              <p className="text-foreground/70 mb-4">
+              <p className="text-foreground/50 mb-4 tracking-wide">
                 Continuously learning and expanding my skill set
               </p>
               <div className="flex justify-center gap-4">
                 <div className="text-center">
                   <p className="text-3xl font-bold gradient-text">{certificates.length}+</p>
-                  <p className="text-sm text-foreground/60">Certifications</p>
+                  <p className="text-sm text-foreground/40">Certifications</p>
                 </div>
               </div>
             </GlassPanel>

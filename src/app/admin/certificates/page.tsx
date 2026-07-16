@@ -7,6 +7,7 @@ import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface Certificate {
   id: string;
@@ -34,6 +35,8 @@ export default function CertificatesPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchCertificates = async () => {
     try {
@@ -119,14 +122,17 @@ export default function CertificatesPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this certificate?")) return;
-
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setIsDeleting(true);
     try {
-      await fetch(`/api/admin/certificates?id=${id}`, { method: "DELETE" });
+      await fetch(`/api/admin/certificates?id=${deleteId}`, { method: "DELETE" });
       fetchCertificates();
     } catch (error) {
       console.error("Failed to delete certificate:", error);
+    } finally {
+      setIsDeleting(false);
+      setDeleteId(null);
     }
   };
 
@@ -239,7 +245,7 @@ export default function CertificatesPage() {
                           <Edit size={16} />
                         </button>
                         <button
-                          onClick={() => handleDelete(cert.id)}
+                          onClick={() => setDeleteId(cert.id)}
                           className="p-2 rounded-lg hover:bg-red-500/20 text-red-400"
                         >
                           <Trash2 size={16} />
@@ -351,6 +357,15 @@ export default function CertificatesPage() {
           </div>
         </form>
       </Modal>
+
+      <ConfirmModal
+        isOpen={!!deleteId}
+        title="Delete Certificate"
+        message="Are you sure you want to delete this certificate? This action cannot be undone."
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
+        loading={isDeleting}
+      />
     </div>
   );
 }

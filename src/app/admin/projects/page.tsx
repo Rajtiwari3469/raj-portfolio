@@ -8,6 +8,7 @@ import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface Project {
   id: string;
@@ -40,6 +41,8 @@ export default function ProjectsPage() {
     featured: false,
     order: 0,
   });
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchProjects = async () => {
     try {
@@ -89,14 +92,17 @@ export default function ProjectsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this project?")) return;
-
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setIsDeleting(true);
     try {
-      await fetch(`/api/admin/projects?id=${id}`, { method: "DELETE" });
+      await fetch(`/api/admin/projects?id=${deleteId}`, { method: "DELETE" });
       fetchProjects();
     } catch (error) {
       console.error("Failed to delete project:", error);
+    } finally {
+      setIsDeleting(false);
+      setDeleteId(null);
     }
   };
 
@@ -218,7 +224,7 @@ export default function ProjectsPage() {
                         <Edit size={16} />
                       </button>
                       <button
-                        onClick={() => handleDelete(project.id)}
+                        onClick={() => setDeleteId(project.id)}
                         className="p-2 rounded-lg hover:bg-red-500/20 text-red-400"
                       >
                         <Trash2 size={16} />
@@ -355,6 +361,15 @@ export default function ProjectsPage() {
           </div>
         </form>
       </Modal>
+
+      <ConfirmModal
+        isOpen={!!deleteId}
+        title="Delete Project"
+        message="Are you sure you want to delete this project? This action cannot be undone."
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
+        loading={isDeleting}
+      />
     </div>
   );
 }

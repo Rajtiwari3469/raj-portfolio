@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Send, MessageCircle, ArrowLeft, Image as ImageIcon, Smile, Mic, MicOff, Bot, Trash2 } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface ChatMsg {
   id: string;
@@ -35,6 +36,8 @@ export default function AdminChat() {
   const [showEmoji, setShowEmoji] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [deleteSessionId, setDeleteSessionId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -104,13 +107,17 @@ export default function AdminChat() {
     }
   };
 
-  const deleteChat = async (sessionId: string) => {
-    if (!confirm("Delete this entire chat session?")) return;
+  const deleteChat = async () => {
+    if (!deleteSessionId) return;
+    setIsDeleting(true);
     try {
-      await fetch(`/api/chat?sessionId=${sessionId}`, { method: "DELETE" });
+      await fetch(`/api/chat?sessionId=${deleteSessionId}`, { method: "DELETE" });
       setActiveSession(null);
       fetchSessions();
-    } catch {}
+    } catch {} finally {
+      setIsDeleting(false);
+      setDeleteSessionId(null);
+    }
   };
 
   const sendReply = async (msg: string, type: string = "text") => {
@@ -203,7 +210,7 @@ export default function AdminChat() {
             </div>
           </div>
           <button
-            onClick={() => deleteChat(activeSession)}
+            onClick={() => setDeleteSessionId(activeSession)}
             className="p-2 rounded-lg hover:bg-red-500/20 text-red-400 transition-colors"
             title="Delete chat"
           >
@@ -397,6 +404,15 @@ export default function AdminChat() {
           ))}
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={!!deleteSessionId}
+        title="Delete Chat Session"
+        message="Are you sure you want to delete this entire chat session? All messages will be lost."
+        onConfirm={deleteChat}
+        onCancel={() => setDeleteSessionId(null)}
+        loading={isDeleting}
+      />
     </div>
   );
 }

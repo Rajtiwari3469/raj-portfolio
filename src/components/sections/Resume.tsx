@@ -36,18 +36,19 @@ export default function ResumeSection() {
   if (resumes.length === 0) return null;
 
   return (
-    <section id="resume" className="py-20">
+    <section id="resume" className="py-24">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
+          <p className="text-xs text-primary/60 tracking-[0.3em] uppercase mb-4">Career</p>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             <span className="gradient-text">Resume</span>
           </h2>
-          <p className="text-foreground/60">View or download my resume</p>
+          <p className="text-foreground/40 tracking-wide">View or download my resume</p>
         </motion.div>
 
         {selectedResume && (
@@ -56,27 +57,27 @@ export default function ResumeSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <GlassPanel className="max-w-4xl mx-auto">
+            <GlassPanel className="max-w-4xl mx-auto border border-white/[0.06]">
               <div className="flex flex-col md:flex-row gap-6">
                 {selectedResume.candidatePhoto && (
                   <div className="flex-shrink-0">
                     <img
                       src={selectedResume.candidatePhoto}
                       alt={selectedResume.name}
-                      className="w-32 h-32 rounded-2xl object-cover border-2 border-primary/30"
+                      className="w-32 h-32 rounded-2xl object-cover border-2 border-primary/20 shadow-[0_0_20px_rgba(0,212,255,0.1)]"
                     />
                   </div>
                 )}
                 <div className="flex-1">
                   <h3 className="text-xl font-bold mb-2">{selectedResume.name}</h3>
-                  <p className="text-foreground/60 text-sm mb-4">
+                  <p className="text-foreground/40 text-sm mb-4">
                     Last updated: {new Date(selectedResume.createdAt).toLocaleDateString()}
                   </p>
 
                   {selectedResume.pdfUrl ? (
-                    <p className="text-sm text-foreground/60 mb-4">PDF resume available for download</p>
+                    <p className="text-sm text-foreground/40 mb-4">PDF resume available for download</p>
                   ) : selectedResume.content ? (
-                    <div className="text-sm text-foreground/70 line-clamp-4 mb-4 whitespace-pre-wrap">
+                    <div className="text-sm text-foreground/50 line-clamp-4 mb-4 whitespace-pre-wrap">
                       {selectedResume.content.substring(0, 300)}...
                     </div>
                   ) : null}
@@ -107,13 +108,13 @@ export default function ResumeSection() {
         )}
 
         {showPreview && selectedResume && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#050510]/80 backdrop-blur-md p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="w-full max-w-3xl max-h-[90vh] overflow-y-auto"
             >
-              <GlassPanel className="relative">
+              <GlassPanel className="relative border border-white/[0.08] shadow-[0_0_60px_rgba(0,212,255,0.08)]">
                 <button
                   onClick={() => setShowPreview(false)}
                   className="absolute top-4 right-4 text-foreground/40 hover:text-foreground text-xl z-10"
@@ -126,7 +127,7 @@ export default function ResumeSection() {
                     <img
                       src={selectedResume.candidatePhoto}
                       alt=""
-                      className="w-20 h-20 rounded-full object-cover border-2 border-primary/30"
+                      className="w-20 h-20 rounded-full object-cover border-2 border-primary/20 shadow-[0_0_15px_rgba(0,212,255,0.1)]"
                     />
                   </div>
                 )}
@@ -136,10 +137,10 @@ export default function ResumeSection() {
                 {selectedResume.pdfUrl ? (
                   <iframe
                     src={selectedResume.pdfUrl}
-                    className="w-full h-[500px] rounded-xl border border-white/10"
+                    className="w-full h-[500px] rounded-xl border border-white/[0.08]"
                   />
                 ) : (
-                  <div className="whitespace-pre-wrap text-sm text-foreground/80 bg-white/5 p-6 rounded-xl max-h-[500px] overflow-y-auto">
+                  <div className="whitespace-pre-wrap text-sm text-foreground/70 bg-white/[0.02] p-6 rounded-xl border border-white/[0.05] max-h-[500px] overflow-y-auto">
                     {selectedResume.content}
                   </div>
                 )}

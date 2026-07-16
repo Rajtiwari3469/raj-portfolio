@@ -6,6 +6,7 @@ import { Mail, Trash2, Eye, EyeOff, Search, MessageSquare, Calendar, Clock } fro
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface Message {
   id: string;
@@ -23,6 +24,8 @@ export default function TouchMessagesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [filterType, setFilterType] = useState<"all" | "unread" | "read">("all");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchMessages = useCallback(async () => {
     try {
@@ -57,14 +60,18 @@ export default function TouchMessagesPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this message?")) return;
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setIsDeleting(true);
     try {
-      await fetch(`/api/admin/messages?id=${id}`, { method: "DELETE" });
-      setMessages((prev) => prev.filter((msg) => msg.id !== id));
-      if (selectedMessage?.id === id) setSelectedMessage(null);
+      await fetch(`/api/admin/messages?id=${deleteId}`, { method: "DELETE" });
+      setMessages((prev) => prev.filter((msg) => msg.id !== deleteId));
+      if (selectedMessage?.id === deleteId) setSelectedMessage(null);
     } catch (error) {
       console.error("Failed to delete message:", error);
+    } finally {
+      setIsDeleting(false);
+      setDeleteId(null);
     }
   };
 
@@ -242,7 +249,7 @@ export default function TouchMessagesPage() {
                             {msg.read ? <EyeOff size={16} /> : <Eye size={16} />}
                           </button>
                           <button
-                            onClick={() => handleDelete(msg.id)}
+                            onClick={() => setDeleteId(msg.id)}
                             className="p-1.5 rounded-lg hover:bg-red-500/20 text-foreground/60 hover:text-red-400 transition-colors"
                             title="Delete"
                           >
@@ -331,7 +338,7 @@ export default function TouchMessagesPage() {
                     </a>
                     <Button
                       variant="ghost"
-                      onClick={() => handleDelete(selectedMessage.id)}
+                      onClick={() => { setSelectedMessage(null); setDeleteId(selectedMessage.id); }}
                     >
                       <Trash2 size={16} />
                     </Button>
@@ -342,6 +349,15 @@ export default function TouchMessagesPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ConfirmModal
+        isOpen={!!deleteId}
+        title="Delete Message"
+        message="Are you sure you want to delete this message? This action cannot be undone."
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
+        loading={isDeleting}
+      />
     </div>
   );
 }
