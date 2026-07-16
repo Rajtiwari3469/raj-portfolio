@@ -14,21 +14,15 @@ interface ChatMsg {
 
 const EMOJI_LIST = ["😊", "😂", "❤️", "👍", "🎉", "🔥", "💯", "✨", "🙏", "😎", "🤔", "💪", "🚀", "⭐", "😍", "🙌", "👏", "💻", "🎯", "🌟"];
 
-function getSessionId(): string {
-  if (typeof window === "undefined") return "";
-  let id = localStorage.getItem("chat-session-id");
-  if (!id) {
-    id = "visitor-" + Date.now() + "-" + Math.random().toString(36).substring(2, 8);
-    localStorage.setItem("chat-session-id", id);
-  }
-  return id;
+function generateSessionId(): string {
+  return "visitor-" + Date.now() + "-" + Math.random().toString(36).substring(2, 8);
 }
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
-  const [sessionId, setSessionId] = useState("");
+  const [sessionId] = useState(() => generateSessionId());
   const [unread, setUnread] = useState(0);
   const [showEmoji, setShowEmoji] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -38,10 +32,6 @@ export default function ChatWidget() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-
-  useEffect(() => {
-    setSessionId(getSessionId());
-  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
