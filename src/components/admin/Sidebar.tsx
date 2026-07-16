@@ -16,6 +16,7 @@ import {
   X,
   ChevronLeft,
   MessageCircle,
+  Mail,
 } from "lucide-react";
 
 const menuItems = [
@@ -24,6 +25,7 @@ const menuItems = [
   { name: "Skills", href: "/admin/skills", icon: Code2 },
   { name: "Certificates", href: "/admin/certificates", icon: Award },
   { name: "Content", href: "/admin/content", icon: FileText },
+  { name: "Touch Messages", href: "/admin/touch-messages", icon: Mail },
   { name: "Chat", href: "/admin/chat", icon: MessageCircle },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
