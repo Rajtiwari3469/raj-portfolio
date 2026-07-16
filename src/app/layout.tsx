@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Raj Tiwari | Software Developer & AI Technology",
+  title: "Raj Tiwari | Portfolio",
   description: "Portfolio of Raj Tiwari - BCA CS & IT Student specializing in Software Development, AI Technology, and Modern Web Applications",
   keywords: [
     "Raj Tiwari",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://rajbtiwari.dev",
     siteName: "Raj Tiwari Portfolio",
-    title: "Raj Tiwari | Software Developer & AI Technology",
+    title: "Raj Tiwari | Portfolio",
     description: "Portfolio of Raj Tiwari - BCA CS & IT Student specializing in Software Development, AI Technology, and Modern Web Applications",
     images: [
       {
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Raj Tiwari | Software Developer & AI Technology",
+    title: "Raj Tiwari | Portfolio",
     description: "Portfolio of Raj Tiwari - BCA CS & IT Student specializing in Software Development, AI Technology, and Modern Web Applications",
     images: ["/og-image.png"],
   },
