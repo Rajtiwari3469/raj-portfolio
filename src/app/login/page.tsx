@@ -72,9 +72,6 @@ export default function LoginPage() {
       if (response.ok) {
         setForgotStatus("success");
         setForgotMessage(data.message || "Reset code sent to your email");
-        if (data.code) {
-          setForgotMessage(`Email service not configured yet. Your reset code is: ${data.code}`);
-        }
         setShowResetForm(true);
       } else {
         setForgotStatus("error");
@@ -271,7 +268,7 @@ export default function LoginPage() {
                     type="email"
                     value={forgotEmail}
                     onChange={(e) => setForgotEmail(e.target.value)}
-                    placeholder="tiwariraj3469@gmail.com"
+                    placeholder="Enter your admin email"
                   />
 
                   {forgotStatus && (

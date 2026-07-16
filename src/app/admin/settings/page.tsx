@@ -646,7 +646,7 @@ export default function SettingsPage() {
                     type="email"
                     value={forgotEmail}
                     onChange={(e) => setForgotEmail(e.target.value)}
-                    placeholder="tiwariraj3469@gmail.com"
+                    placeholder="Enter your admin email"
                   />
 
                   {forgotStatus && (
