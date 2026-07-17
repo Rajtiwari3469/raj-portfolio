@@ -58,7 +58,7 @@ export default function About() {
   useEffect(() => {
     const fetchAbout = async () => {
       try {
-        const response = await fetch("/api/admin/sections");
+        const response = await fetch("/api/sections");
         const data = await response.json();
         if (data.aboutContent) {
           if (data.aboutContent.bio && data.aboutContent.bio.length > 0) {

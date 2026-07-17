@@ -4,6 +4,9 @@ import { isAuthenticated } from "@/lib/auth";
 
 export async function GET() {
   try {
+    const auth = await isAuthenticated();
+    if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const resumes = await prisma.resume.findMany({
       orderBy: { createdAt: "desc" },
     });

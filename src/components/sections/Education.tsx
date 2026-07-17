@@ -52,7 +52,7 @@ export default function Education() {
 
   const fetchEducation = async () => {
     try {
-      const response = await fetch("/api/admin/sections");
+      const response = await fetch("/api/sections");
       const data = await response.json();
       if (data.educationContent?.entries && data.educationContent.entries.length > 0) {
         setEducationData(data.educationContent.entries);

@@ -59,7 +59,7 @@ export default function Experience() {
   useEffect(() => {
     const fetchExperience = async () => {
       try {
-        const response = await fetch("/api/admin/sections");
+        const response = await fetch("/api/sections");
         const data = await response.json();
         if (data.experienceContent && data.experienceContent.entries && data.experienceContent.entries.length > 0) {
           setExperiences(data.experienceContent.entries);

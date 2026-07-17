@@ -30,7 +30,7 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/admin/settings")
+    fetch("/api/settings")
       .then((res) => res.json())
       .then((data) => setSocialLinks(data))
       .catch(() => {});

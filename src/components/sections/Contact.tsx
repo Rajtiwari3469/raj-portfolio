@@ -30,7 +30,7 @@ export default function Contact() {
   const [settings, setSettings] = useState<SettingsData>({});
 
   useEffect(() => {
-    fetch("/api/admin/settings")
+    fetch("/api/settings")
       .then((res) => res.json())
       .then((data) => setSettings(data))
       .catch(() => {});

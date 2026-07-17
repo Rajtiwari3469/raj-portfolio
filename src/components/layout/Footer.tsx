@@ -9,7 +9,7 @@ export default function Footer() {
   const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    fetch("/api/admin/settings")
+    fetch("/api/settings")
       .then((res) => res.json())
       .then((data) => setSocialLinks(data))
       .catch(() => {});

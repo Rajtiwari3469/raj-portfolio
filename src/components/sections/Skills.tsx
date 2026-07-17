@@ -27,7 +27,7 @@ export default function Skills() {
       try {
         const [skillsRes, sectionsRes] = await Promise.all([
           fetch("/api/skills"),
-          fetch("/api/admin/sections"),
+          fetch("/api/sections"),
         ]);
         
         const skillsData = await skillsRes.json();
@@ -36,8 +36,9 @@ export default function Skills() {
         }
 
         const sectionsData = await sectionsRes.json();
-        if (sectionsData.techStack && sectionsData.techStack.length > 0) {
-          setTechStack(sectionsData.techStack);
+        const tags = sectionsData.techStack?.tags;
+        if (Array.isArray(tags) && tags.length > 0) {
+          setTechStack(tags);
         }
       } catch (error) {
         console.error("Failed to fetch data:", error);
