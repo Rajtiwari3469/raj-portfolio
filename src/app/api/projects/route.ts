@@ -5,6 +5,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category");
+    const subCategory = searchParams.get("subCategory");
     const featured = searchParams.get("featured");
     const status = searchParams.get("status");
 
@@ -12,6 +13,10 @@ export async function GET(request: NextRequest) {
 
     if (category && category !== "All") {
       where.category = category;
+    }
+
+    if (subCategory && subCategory !== "All") {
+      where.subCategory = subCategory;
     }
 
     if (featured === "true") {

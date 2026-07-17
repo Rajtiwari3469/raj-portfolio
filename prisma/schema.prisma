@@ -25,6 +25,7 @@ model Project {
   liveUrl      String?
   technology   String[]
   category     String
+  subCategory  String?
   status       String   @default("active")
   featured     Boolean  @default(false)
   order        Int      @default(0)

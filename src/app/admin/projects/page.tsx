@@ -21,10 +21,23 @@ interface Project {
   liveUrl: string | null;
   technology: string[];
   category: string;
+  subCategory: string | null;
   status: string;
   featured: boolean;
   order: number;
 }
+
+const categoryMap: Record<string, string[]> = {
+  "Full Stack": ["Web App", "E-commerce", "Social Platform", "Dashboard", "CMS", "Portfolio", "SaaS"],
+  "Frontend": ["SPA", "Landing Page", "UI Component Library", "Progressive Web App"],
+  "Backend": ["REST API", "GraphQL API", "Microservices", "CLI Tool", "Serverless"],
+  "AI/ML": ["NLP", "Computer Vision", "Chatbot", "Data Analysis", "Recommendation System", "Deep Learning"],
+  "Mobile": ["Android", "iOS", "Cross-platform", "Flutter", "React Native"],
+  "Desktop": ["Windows", "macOS", "Linux", "Cross-platform", "Electron"],
+  "DevOps": ["CI/CD", "Docker/K8s", "Cloud Infrastructure", "Monitoring"],
+  "Database": ["Design", "Migration", "Optimization"],
+  "Other": ["Other"],
+};
 
 export default function ProjectsPage() {
   const { toast } = useToast();
@@ -42,6 +55,7 @@ export default function ProjectsPage() {
     liveUrl: "",
     technology: "",
     category: "Full Stack",
+    subCategory: "Web App",
     status: "active",
     featured: false,
     order: 0,
@@ -129,6 +143,7 @@ export default function ProjectsPage() {
   const openModal = (project?: Project) => {
     if (project) {
       setEditingProject(project);
+      const subCats = categoryMap[project.category] || [];
       setFormData({
         title: project.title,
         description: project.description,
@@ -138,6 +153,7 @@ export default function ProjectsPage() {
         liveUrl: project.liveUrl || "",
         technology: project.technology.join(", "),
         category: project.category,
+        subCategory: subCats.includes(project.subCategory || "") ? (project.subCategory || "") : (subCats[0] || ""),
         status: project.status,
         featured: project.featured,
         order: project.order,
@@ -153,6 +169,7 @@ export default function ProjectsPage() {
         liveUrl: "",
         technology: "",
         category: "Full Stack",
+        subCategory: "Web App",
         status: "active",
         featured: false,
         order: 0,
@@ -399,17 +416,36 @@ export default function ProjectsPage() {
               <label className="block text-sm font-medium mb-2">Category</label>
               <select
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                onChange={(e) => {
+                  const newCat = e.target.value;
+                  const newSubCats = categoryMap[newCat] || [];
+                  setFormData({
+                    ...formData,
+                    category: newCat,
+                    subCategory: newSubCats[0] || "",
+                  });
+                }}
                 className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
               >
-                <option value="Full Stack">Full Stack</option>
-                <option value="Frontend">Frontend</option>
-                <option value="Backend">Backend</option>
-                <option value="AI/ML">AI/ML</option>
-                <option value="Mobile">Mobile</option>
-                <option value="Other">Other</option>
+                {Object.keys(categoryMap).map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
               </select>
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Sub Category</label>
+              <select
+                value={formData.subCategory}
+                onChange={(e) => setFormData({ ...formData, subCategory: e.target.value })}
+                className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
+              >
+                {(categoryMap[formData.category] || []).map((sub) => (
+                  <option key={sub} value={sub}>{sub}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2">Status</label>
               <select

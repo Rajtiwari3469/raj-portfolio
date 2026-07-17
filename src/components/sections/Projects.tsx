@@ -16,6 +16,7 @@ interface Project {
   liveUrl: string | null;
   technology: string[];
   category: string;
+  subCategory: string | null;
   status: string;
 }
 
@@ -197,7 +198,15 @@ export default function Projects() {
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="text-lg font-semibold">{project.title}</h3>
-                        <span className="text-xs text-foreground/30">{project.category}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-foreground/30">{project.category}</span>
+                          {project.subCategory && (
+                            <>
+                              <span className="text-xs text-foreground/20">/</span>
+                              <span className="text-xs text-primary/60">{project.subCategory}</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                       <p className="text-foreground/50 text-sm mb-4 line-clamp-3">
                         {project.description}
@@ -344,9 +353,16 @@ export default function Projects() {
                     <div>
                       <div className="flex items-center gap-3 mb-3">
                         <h2 className="text-2xl font-bold">{selectedProject.title}</h2>
-                        <span className="px-3 py-1 rounded-lg text-xs font-medium bg-primary/10 text-primary border border-primary/20">
-                          {selectedProject.category}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="px-3 py-1 rounded-lg text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                            {selectedProject.category}
+                          </span>
+                          {selectedProject.subCategory && (
+                            <span className="px-3 py-1 rounded-lg text-xs font-medium bg-primary/5 text-primary/70 border border-primary/10">
+                              {selectedProject.subCategory}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <p className="text-foreground/60 leading-relaxed">
                         {selectedProject.description}
