@@ -209,6 +209,38 @@ export default function ProjectsPage() {
     setFormData((prev) => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
   };
 
+  const handleSeedDemo = async () => {
+    toast("Seeding demo projects...", "info");
+    try {
+      const res = await fetch("/api/admin/seed", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        toast(data.message);
+        await fetchProjects();
+      } else {
+        toast(data.error || "Failed to seed", "error");
+      }
+    } catch {
+      toast("Failed to seed demo data", "error");
+    }
+  };
+
+  const handleDeleteDemo = async () => {
+    toast("Deleting demo projects...", "info");
+    try {
+      const res = await fetch("/api/admin/seed", { method: "DELETE" });
+      const data = await res.json();
+      if (res.ok) {
+        toast(data.message);
+        await fetchProjects();
+      } else {
+        toast(data.error || "Failed to delete", "error");
+      }
+    } catch {
+      toast("Failed to delete demo data", "error");
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -216,10 +248,18 @@ export default function ProjectsPage() {
           <h1 className="text-3xl font-bold gradient-text">Projects</h1>
           <p className="text-foreground/60 mt-1">Manage your portfolio projects</p>
         </div>
-        <Button onClick={() => openModal()} className="flex items-center gap-2">
-          <Plus size={20} />
-          Add Project
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" onClick={handleSeedDemo} className="text-xs">
+            Seed Demo
+          </Button>
+          <Button variant="ghost" onClick={handleDeleteDemo} className="text-xs text-red-400 hover:text-red-300">
+            Delete Demo
+          </Button>
+          <Button onClick={() => openModal()} className="flex items-center gap-2">
+            <Plus size={20} />
+            Add Project
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
