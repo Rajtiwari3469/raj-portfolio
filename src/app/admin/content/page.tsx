@@ -18,6 +18,7 @@ import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import { useToast } from "@/components/ui/Toast";
+import Image from "next/image";
 
 interface AboutContent {
   bio: string[];
@@ -116,6 +117,7 @@ export default function ContentPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchContent();
   }, [fetchContent]);
 
@@ -230,9 +232,12 @@ export default function ContentPage() {
               {profileImage && (
                 <div className="flex justify-center">
                   <div className="relative w-40 h-40 rounded-full overflow-hidden border-2 border-primary/20 shadow-[0_0_30px_rgba(0,212,255,0.1)]">
-                    <img
+                    <Image
                       src={profileImage}
                       alt="Profile"
+                      width={160}
+                      height={160}
+                      unoptimized
                       className="w-full h-full object-cover"
                     />
                   </div>

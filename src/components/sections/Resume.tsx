@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Eye } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
+import Image from "next/image";
 
 interface Resume {
   id: string;
@@ -62,9 +63,12 @@ export default function ResumeSection() {
               <div className="flex flex-col md:flex-row gap-6">
                 {selectedResume.candidatePhoto && (
                   <div className="flex-shrink-0">
-                    <img
+                    <Image
                       src={selectedResume.candidatePhoto}
                       alt={selectedResume.name}
+                      width={128}
+                      height={128}
+                      unoptimized
                       className="w-32 h-32 rounded-2xl object-cover border-2 border-primary/20 shadow-[0_0_20px_rgba(0,212,255,0.1)]"
                     />
                   </div>
@@ -117,9 +121,12 @@ export default function ResumeSection() {
 
                 {selectedResume.candidatePhoto && (
                   <div className="flex justify-center mb-4">
-                    <img
+                    <Image
                       src={selectedResume.candidatePhoto}
                       alt=""
+                      width={80}
+                      height={80}
+                      unoptimized
                       className="w-20 h-20 rounded-full object-cover border-2 border-primary/20 shadow-[0_0_15px_rgba(0,212,255,0.1)]"
                     />
                   </div>

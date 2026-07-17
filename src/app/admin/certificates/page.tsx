@@ -9,6 +9,7 @@ import { Input, Textarea } from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useToast } from "@/components/ui/Toast";
+import Image from "next/image";
 
 interface Certificate {
   id: string;
@@ -56,6 +57,7 @@ export default function CertificatesPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCertificates();
   }, []);
 
@@ -343,9 +345,12 @@ export default function CertificatesPage() {
             </div>
             {imagePreview && (
               <div className="relative inline-block mt-2">
-                <img
+                <Image
                   src={imagePreview}
                   alt="Preview"
+                  width={128}
+                  height={128}
+                  unoptimized
                   className="w-32 h-32 object-cover rounded-lg border border-white/10"
                 />
                 <button

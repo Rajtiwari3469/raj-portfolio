@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import GlassPanel from "@/components/ui/GlassPanel";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ChatWidget from "@/components/ui/ChatWidget";

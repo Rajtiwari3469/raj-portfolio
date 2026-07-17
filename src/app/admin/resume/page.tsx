@@ -9,6 +9,7 @@ import { Input, Textarea } from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useToast } from "@/components/ui/Toast";
+import Image from "next/image";
 
 interface Resume {
   id: string;
@@ -53,6 +54,7 @@ export default function ResumePage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchResumes();
   }, []);
 
@@ -216,7 +218,7 @@ export default function ResumePage() {
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       {resume.candidatePhoto ? (
-                        <img src={resume.candidatePhoto} alt="" className="w-12 h-12 rounded-full object-cover border border-white/10" />
+                        <Image src={resume.candidatePhoto} alt="" width={48} height={48} unoptimized className="w-12 h-12 rounded-full object-cover border border-white/10" />
                       ) : (
                         <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center border border-primary/10">
                           <FileText size={20} className="text-primary" />
@@ -291,7 +293,7 @@ export default function ResumePage() {
             <label className="block text-sm font-medium mb-2">Candidate Photo (for Digital CV)</label>
             {formData.candidatePhoto ? (
               <div className="relative inline-block">
-                <img src={formData.candidatePhoto} alt="" className="w-20 h-20 rounded-full object-cover border border-white/10" />
+                <Image src={formData.candidatePhoto} alt="" width={80} height={80} unoptimized className="w-20 h-20 rounded-full object-cover border border-white/10" />
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, candidatePhoto: "" })}
@@ -414,7 +416,7 @@ export default function ResumePage() {
                 </button>
                 <h2 className="text-xl font-bold mb-4">{previewResume.name}</h2>
                 {previewResume.candidatePhoto && (
-                  <img src={previewResume.candidatePhoto} alt="" className="w-24 h-24 rounded-full object-cover mb-4 border border-white/10" />
+                  <Image src={previewResume.candidatePhoto} alt="" width={96} height={96} unoptimized className="w-24 h-24 rounded-full object-cover mb-4 border border-white/10" />
                 )}
                 {previewResume.pdfUrl ? (
                   <iframe src={previewResume.pdfUrl} className="w-full h-[600px] rounded-xl" />

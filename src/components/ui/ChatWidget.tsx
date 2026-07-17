@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Image as ImageIcon, Smile, Mic, MicOff } from "lucide-react";
+import Image from "next/image";
 
 interface ChatMsg {
   id: string;
@@ -58,6 +59,7 @@ export default function ChatWidget() {
   }, [sessionId, isOpen]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchMessages();
     pollRef.current = setInterval(fetchMessages, 3000);
     return () => {
@@ -131,7 +133,7 @@ export default function ChatWidget() {
 
   const renderMessage = (msg: ChatMsg) => {
     if (msg.messageType === "image") {
-      return <img src={msg.message} alt="Chat image" className="max-w-[200px] rounded-xl" />;
+      return <Image src={msg.message} alt="Chat image" width={200} height={200} unoptimized className="max-w-[200px] rounded-xl" />;
     }
     if (msg.messageType === "voice") {
       return <audio controls src={msg.message} className="max-w-[200px] h-8" />;

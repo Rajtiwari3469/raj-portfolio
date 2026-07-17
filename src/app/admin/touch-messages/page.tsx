@@ -44,6 +44,7 @@ export default function TouchMessagesPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchMessages();
   }, [fetchMessages]);
 

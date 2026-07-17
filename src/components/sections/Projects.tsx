@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ExternalLink, Folder, CheckCircle, Clock, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { GithubIcon } from "@/components/ui/SocialIcons";
 import GlassPanel from "@/components/ui/GlassPanel";
+import Image from "next/image";
 
 interface Project {
   id: string;
@@ -44,6 +45,7 @@ export default function Projects() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProjects();
   }, [fetchProjects]);
 
@@ -156,9 +158,12 @@ export default function Projects() {
                         <Folder size={40} className="text-primary/20" />
                       </div>
                       {project.image && (
-                        <img
+                        <Image
                           src={project.image}
                           alt={project.title}
+                          width={600}
+                          height={300}
+                          unoptimized
                           className="w-full h-full object-cover"
                         />
                       )}
@@ -279,9 +284,12 @@ export default function Projects() {
                       <Folder size={56} className="text-primary/15" />
                     </div>
                     {allImages.length > 0 ? (
-                      <img
+                      <Image
                         src={allImages[modalImageIndex]}
                         alt={selectedProject.title}
+                        width={800}
+                        height={400}
+                        unoptimized
                         className="w-full h-full object-cover"
                       />
                     ) : null}

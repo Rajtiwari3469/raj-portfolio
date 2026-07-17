@@ -7,6 +7,7 @@ import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useToast } from "@/components/ui/Toast";
+import Image from "next/image";
 
 interface ChatMsg {
   id: string;
@@ -66,6 +67,7 @@ export default function AdminChat() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSessions();
     fetchAiStatus();
     const interval = setInterval(() => {
@@ -86,6 +88,7 @@ export default function AdminChat() {
 
   useEffect(() => {
     if (!activeSession) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchMessages(activeSession);
     const interval = setInterval(() => fetchMessages(activeSession), 3000);
     return () => clearInterval(interval);
@@ -198,7 +201,7 @@ export default function AdminChat() {
 
   const renderMessage = (msg: ChatMsg) => {
     if (msg.messageType === "image") {
-      return <img src={msg.message} alt="Chat image" className="max-w-[200px] rounded-lg" />;
+      return <Image src={msg.message} alt="Chat image" width={200} height={200} unoptimized className="max-w-[200px] rounded-lg" />;
     }
     if (msg.messageType === "voice") {
       return <audio controls src={msg.message} className="max-w-[200px] h-8" />;

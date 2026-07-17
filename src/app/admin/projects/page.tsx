@@ -10,6 +10,7 @@ import { Input, Textarea } from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useToast } from "@/components/ui/Toast";
+import Image from "next/image";
 
 interface Project {
   id: string;
@@ -78,6 +79,7 @@ export default function ProjectsPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProjects();
   }, []);
 
@@ -331,7 +333,7 @@ export default function ProjectsPage() {
             </label>
             {formData.image ? (
               <div className="relative">
-                <img src={formData.image} alt="Preview" className="w-full h-40 object-cover rounded-xl" />
+                <Image src={formData.image} alt="Preview" width={800} height={160} unoptimized className="w-full h-40 object-cover rounded-xl" />
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, image: "" })}
@@ -362,7 +364,7 @@ export default function ProjectsPage() {
               <div className="grid grid-cols-3 gap-3 mb-3">
                 {formData.images.map((img, i) => (
                   <div key={i} className="relative group">
-                    <img src={img} alt={`Image ${i + 1}`} className="w-full h-24 object-cover rounded-lg" />
+                    <Image src={img} alt={`Image ${i + 1}`} width={400} height={96} unoptimized className="w-full h-24 object-cover rounded-lg" />
                     <button
                       type="button"
                       onClick={() => removeImage(i)}

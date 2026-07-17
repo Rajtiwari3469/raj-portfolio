@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Award, ExternalLink } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
+import Image from "next/image";
 
 interface Certificate {
   id: string;
@@ -75,9 +76,12 @@ export default function Certificates() {
                 <GlassPanel hover glow="accent" className="h-full flex flex-col">
                   {cert.image && (
                     <div className="h-48 rounded-xl overflow-hidden mb-4 bg-white/[0.02] border border-white/[0.04]">
-                      <img
+                      <Image
                         src={cert.image}
                         alt={cert.name}
+                        width={600}
+                        height={300}
+                        unoptimized
                         className="w-full h-full object-cover"
                       />
                     </div>
