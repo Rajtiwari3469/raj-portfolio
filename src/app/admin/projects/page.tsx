@@ -209,38 +209,6 @@ export default function ProjectsPage() {
     setFormData((prev) => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
   };
 
-  const handleSeedDemo = async () => {
-    toast("Seeding demo projects...", "info");
-    try {
-      const res = await fetch("/api/admin/seed", { method: "POST" });
-      const data = await res.json();
-      if (res.ok) {
-        toast(data.message);
-        await fetchProjects();
-      } else {
-        toast(data.error || "Failed to seed", "error");
-      }
-    } catch {
-      toast("Failed to seed demo data", "error");
-    }
-  };
-
-  const handleDeleteDemo = async () => {
-    toast("Deleting demo projects...", "info");
-    try {
-      const res = await fetch("/api/admin/seed", { method: "DELETE" });
-      const data = await res.json();
-      if (res.ok) {
-        toast(data.message);
-        await fetchProjects();
-      } else {
-        toast(data.error || "Failed to delete", "error");
-      }
-    } catch {
-      toast("Failed to delete demo data", "error");
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -248,18 +216,10 @@ export default function ProjectsPage() {
           <h1 className="text-3xl font-bold gradient-text">Projects</h1>
           <p className="text-foreground/60 mt-1">Manage your portfolio projects</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" onClick={handleSeedDemo} className="text-xs">
-            Seed Demo
-          </Button>
-          <Button variant="ghost" onClick={handleDeleteDemo} className="text-xs text-red-400 hover:text-red-300">
-            Delete Demo
-          </Button>
-          <Button onClick={() => openModal()} className="flex items-center gap-2">
-            <Plus size={20} />
-            Add Project
-          </Button>
-        </div>
+        <Button onClick={() => openModal()} className="flex items-center gap-2">
+          <Plus size={20} />
+          Add Project
+        </Button>
       </div>
 
       {isLoading ? (
@@ -457,34 +417,70 @@ export default function ProjectsPage() {
             <div>
               <label className="block text-sm font-medium mb-2">Category</label>
               <select
-                value={formData.category}
+                value={categoryMap[formData.category] ? formData.category : "__custom__"}
                 onChange={(e) => {
-                  const newCat = e.target.value;
-                  const newSubCats = categoryMap[newCat] || [];
-                  setFormData({
-                    ...formData,
-                    category: newCat,
-                    subCategory: newSubCats[0] || "",
-                  });
+                  if (e.target.value === "__custom__") {
+                    setFormData({ ...formData, category: "", subCategory: "" });
+                  } else {
+                    const newCat = e.target.value;
+                    const newSubCats = categoryMap[newCat] || [];
+                    setFormData({ ...formData, category: newCat, subCategory: newSubCats[0] || "" });
+                  }
                 }}
                 className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
               >
                 {Object.keys(categoryMap).map((cat) => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
+                <option value="__custom__">Custom...</option>
               </select>
+              {!categoryMap[formData.category] && (
+                <input
+                  type="text"
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  placeholder="Type custom category..."
+                  className="w-full mt-2 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
+                />
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Sub Category</label>
-              <select
-                value={formData.subCategory}
-                onChange={(e) => setFormData({ ...formData, subCategory: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
-              >
-                {(categoryMap[formData.category] || []).map((sub) => (
-                  <option key={sub} value={sub}>{sub}</option>
-                ))}
-              </select>
+              {categoryMap[formData.category] ? (
+                <select
+                  value={formData.subCategory}
+                  onChange={(e) => {
+                    if (e.target.value === "__custom__") {
+                      setFormData({ ...formData, subCategory: "" });
+                    } else {
+                      setFormData({ ...formData, subCategory: e.target.value });
+                    }
+                  }}
+                  className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
+                >
+                  {(categoryMap[formData.category] || []).map((sub) => (
+                    <option key={sub} value={sub}>{sub}</option>
+                  ))}
+                  <option value="__custom__">Custom...</option>
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  value={formData.subCategory}
+                  onChange={(e) => setFormData({ ...formData, subCategory: e.target.value })}
+                  placeholder="Type custom sub category..."
+                  className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
+                />
+              )}
+              {categoryMap[formData.category] && formData.subCategory === "" && (
+                <input
+                  type="text"
+                  value={formData.subCategory}
+                  onChange={(e) => setFormData({ ...formData, subCategory: e.target.value })}
+                  placeholder="Type custom sub category..."
+                  className="w-full mt-2 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
+                />
+              )}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
