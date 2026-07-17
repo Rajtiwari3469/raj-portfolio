@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Edit, Trash2, ExternalLink, Image as ImageIcon, Loader2, FolderKanban } from "lucide-react";
+import { Plus, Edit, Trash2, ExternalLink, Upload, Loader2, FolderKanban, X } from "lucide-react";
 import { GithubIcon } from "@/components/ui/SocialIcons";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
@@ -47,6 +47,8 @@ export default function ProjectsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [isUploadingMore, setIsUploadingMore] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -187,21 +189,28 @@ export default function ProjectsPage() {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: "image" | "images") => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const formDataUpload = new FormData();
-    formDataUpload.append("file", file);
-    toast("Uploading image...", "info");
-    const res = await fetch("/api/admin/upload", { method: "POST", body: formDataUpload });
-    if (res.ok) {
-      const data = await res.json();
-      if (target === "image") {
-        setFormData((prev) => ({ ...prev, image: data.url }));
+    if (target === "image") setIsUploadingCover(true);
+    else setIsUploadingMore(true);
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: formDataUpload });
+      if (res.ok) {
+        const data = await res.json();
+        if (target === "image") {
+          setFormData((prev) => ({ ...prev, image: data.url }));
+        } else {
+          setFormData((prev) => ({ ...prev, images: [...prev.images, data.url] }));
+        }
+        toast("Image uploaded");
       } else {
-        setFormData((prev) => ({ ...prev, images: [...prev.images, data.url] }));
+        toast("Upload failed", "error");
       }
-      toast("Image uploaded");
-    } else {
+    } catch {
       toast("Upload failed", "error");
     }
+    if (target === "image") setIsUploadingCover(false);
+    else setIsUploadingMore(false);
   };
 
   const removeImage = (index: number) => {
@@ -331,20 +340,20 @@ export default function ProjectsPage() {
               Cover Image <span className="text-red-400">*</span>
             </label>
             {formData.image ? (
-              <div className="relative">
+              <div className="relative inline-block">
                 <Image src={formData.image} alt="Preview" width={800} height={160} unoptimized className="w-full h-40 object-cover rounded-xl" />
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, image: "" })}
                   className="absolute top-2 right-2 p-1.5 bg-red-500 rounded-lg text-white hover:bg-red-600 transition-colors"
                 >
-                  <Trash2 size={14} />
+                  <X size={14} />
                 </button>
               </div>
             ) : (
               <label className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-primary/30 transition-colors">
-                <ImageIcon size={32} className="text-foreground/30 mb-2" />
-                <span className="text-sm text-foreground/40">Click to upload cover image</span>
+                {isUploadingCover ? <Loader2 size={32} className="text-foreground/30 mb-2 animate-spin" /> : <Upload size={32} className="text-foreground/30 mb-2" />}
+                <span className="text-sm text-foreground/40">{isUploadingCover ? "Uploading..." : "Click to upload cover image"}</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -369,7 +378,7 @@ export default function ProjectsPage() {
                       onClick={() => removeImage(i)}
                       className="absolute top-1 right-1 p-1 bg-red-500 rounded-md text-white hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
                     >
-                      <Trash2 size={12} />
+                      <X size={12} />
                     </button>
                     <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/60 text-[10px] text-white/70">
                       {i + 1}
@@ -380,8 +389,8 @@ export default function ProjectsPage() {
             )}
             {formData.images.length < 3 && (
               <label className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-primary/30 transition-colors">
-                <ImageIcon size={24} className="text-foreground/30 mb-1" />
-                <span className="text-xs text-foreground/40">Add image ({formData.images.length}/3)</span>
+                {isUploadingMore ? <Loader2 size={20} className="text-foreground/30 mb-1 animate-spin" /> : <Upload size={20} className="text-foreground/30 mb-1" />}
+                <span className="text-xs text-foreground/40">{isUploadingMore ? "Uploading..." : `Add image (${formData.images.length}/3)`}</span>
                 <input
                   type="file"
                   accept="image/*"
