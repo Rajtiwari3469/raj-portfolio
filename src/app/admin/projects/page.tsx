@@ -145,7 +145,6 @@ export default function ProjectsPage() {
   const openModal = (project?: Project) => {
     if (project) {
       setEditingProject(project);
-      const subCats = categoryMap[project.category] || [];
       setFormData({
         title: project.title,
         description: project.description,
@@ -155,7 +154,7 @@ export default function ProjectsPage() {
         liveUrl: project.liveUrl || "",
         technology: project.technology.join(", "),
         category: project.category,
-        subCategory: subCats.includes(project.subCategory || "") ? (project.subCategory || "") : (subCats[0] || ""),
+        subCategory: project.subCategory || "",
         status: project.status,
         featured: project.featured,
         order: project.order,
@@ -416,71 +415,35 @@ export default function ProjectsPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2">Category</label>
-              <select
-                value={categoryMap[formData.category] ? formData.category : "__custom__"}
-                onChange={(e) => {
-                  if (e.target.value === "__custom__") {
-                    setFormData({ ...formData, category: "", subCategory: "" });
-                  } else {
-                    const newCat = e.target.value;
-                    const newSubCats = categoryMap[newCat] || [];
-                    setFormData({ ...formData, category: newCat, subCategory: newSubCats[0] || "" });
-                  }
-                }}
+              <input
+                type="text"
+                list="category-options"
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                placeholder="e.g. Full Stack, Mobile, Custom..."
                 className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
-              >
+              />
+              <datalist id="category-options">
                 {Object.keys(categoryMap).map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
+                  <option key={cat} value={cat} />
                 ))}
-                <option value="__custom__">Custom...</option>
-              </select>
-              {!categoryMap[formData.category] && (
-                <input
-                  type="text"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  placeholder="Type custom category..."
-                  className="w-full mt-2 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
-                />
-              )}
+              </datalist>
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Sub Category</label>
-              {categoryMap[formData.category] ? (
-                <select
-                  value={formData.subCategory}
-                  onChange={(e) => {
-                    if (e.target.value === "__custom__") {
-                      setFormData({ ...formData, subCategory: "" });
-                    } else {
-                      setFormData({ ...formData, subCategory: e.target.value });
-                    }
-                  }}
-                  className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
-                >
-                  {(categoryMap[formData.category] || []).map((sub) => (
-                    <option key={sub} value={sub}>{sub}</option>
-                  ))}
-                  <option value="__custom__">Custom...</option>
-                </select>
-              ) : (
-                <input
-                  type="text"
-                  value={formData.subCategory}
-                  onChange={(e) => setFormData({ ...formData, subCategory: e.target.value })}
-                  placeholder="Type custom sub category..."
-                  className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
-                />
-              )}
-              {categoryMap[formData.category] && formData.subCategory === "" && (
-                <input
-                  type="text"
-                  value={formData.subCategory}
-                  onChange={(e) => setFormData({ ...formData, subCategory: e.target.value })}
-                  placeholder="Type custom sub category..."
-                  className="w-full mt-2 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
-                />
-              )}
+              <input
+                type="text"
+                list="subcategory-options"
+                value={formData.subCategory}
+                onChange={(e) => setFormData({ ...formData, subCategory: e.target.value })}
+                placeholder="e.g. Web App, Chatbot, Custom..."
+                className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
+              />
+              <datalist id="subcategory-options">
+                {(categoryMap[formData.category] || []).map((sub) => (
+                  <option key={sub} value={sub} />
+                ))}
+              </datalist>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
