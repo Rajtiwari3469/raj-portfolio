@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Edit, Trash2, Award, Upload, X, Loader2 } from "lucide-react";
+import { Plus, Edit, Trash2, Award, Upload, X, Loader2, FileText } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
@@ -310,41 +310,10 @@ export default function CertificatesPage() {
             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
             required
           />
-          <Input
-            label="Image URL (optional)"
-            value={formData.image}
-            onChange={(e) => {
-              setFormData({ ...formData, image: e.target.value });
-              setImagePreview(e.target.value || null);
-            }}
-            placeholder="https://..."
-          />
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-foreground/80">
-              Or upload image
-            </label>
-            <div className="flex items-center gap-3">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-                id="image-upload"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="flex items-center gap-2"
-              >
-                {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-                {isUploading ? "Uploading..." : "Choose File"}
-              </Button>
-            </div>
-            {imagePreview && (
-              <div className="relative inline-block mt-2">
+          <div>
+            <label className="block text-sm font-medium mb-2">Certificate Image</label>
+            {imagePreview ? (
+              <div className="relative inline-block">
                 <Image
                   src={imagePreview}
                   alt="Preview"
@@ -361,14 +330,62 @@ export default function CertificatesPage() {
                   <X size={14} />
                 </button>
               </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-primary/30 transition-colors">
+                {isUploading ? <Loader2 size={24} className="text-foreground/30 mb-2 animate-spin" /> : <Upload size={24} className="text-foreground/30 mb-2" />}
+                <span className="text-sm text-foreground/40">{isUploading ? "Uploading..." : "Click to upload image"}</span>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </label>
             )}
           </div>
-          <Input
-            label="PDF URL (optional)"
-            value={formData.pdfUrl}
-            onChange={(e) => setFormData({ ...formData, pdfUrl: e.target.value })}
-            placeholder="https://..."
-          />
+          <div>
+            <label className="block text-sm font-medium mb-2">PDF File (optional)</label>
+            {formData.pdfUrl ? (
+              <div className="flex items-center gap-3 p-3 bg-green-500/5 border border-green-500/15 rounded-xl">
+                <FileText size={20} className="text-green-400" />
+                <span className="text-sm text-green-400 flex-1">PDF uploaded</span>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, pdfUrl: "" })}
+                  className="text-red-400 text-sm hover:text-red-300 transition-colors"
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-primary/30 transition-colors">
+                <Upload size={20} className="text-foreground/30 mb-1" />
+                <span className="text-xs text-foreground/40">Click to upload PDF</span>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setIsUploading(true);
+                    const fd = new FormData();
+                    fd.append("file", file);
+                    const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+                    if (res.ok) {
+                      const data = await res.json();
+                      setFormData({ ...formData, pdfUrl: data.url });
+                      toast("PDF uploaded");
+                    } else {
+                      toast("Upload failed", "error");
+                    }
+                    setIsUploading(false);
+                  }}
+                />
+              </label>
+            )}
+          </div>
           <Textarea
             label="Description (optional)"
             value={formData.description}
