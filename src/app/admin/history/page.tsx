@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Mail, MessageCircle, Download } from "lucide-react";
+import { Mail, MessageCircle, Download, Folder, ChevronRight, User } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -44,6 +44,7 @@ export default function HistoryPage() {
   const [allChatMessages, setAllChatMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [expandedSession, setExpandedSession] = useState<string | null>(null);
 
   const sessionUserMap = useMemo(() => {
     const uniqueSessions = [...new Set(allChatMessages.map((m) => m.sessionId))];
@@ -94,6 +95,20 @@ export default function HistoryPage() {
       m.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
       m.sender.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const groupedSessions = useMemo(() => {
+    const groups = new Map<string, ChatMessage[]>();
+    filteredChatMessages.forEach((m) => {
+      const name = getUserName(m.sessionId);
+      if (!groups.has(name)) groups.set(name, []);
+      groups.get(name)!.push(m);
+    });
+    return Array.from(groups.entries()).sort((a, b) => {
+      const aNum = parseInt(a[0].replace("User ", "")) || 0;
+      const bNum = parseInt(b[0].replace("User ", "")) || 0;
+      return aNum - bNum;
+    });
+  }, [filteredChatMessages, getUserName]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString("en-US", {
@@ -200,62 +215,75 @@ export default function HistoryPage() {
       });
     }
 
-    // Chat Record - new page
-    doc.addPage();
-    y = 20;
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("Chat Record", 14, y);
-    y += 3;
+    // Chat Record - grouped by user
+    const sessionGroups = new Map<string, ChatMessage[]>();
+    filteredChatMessages.forEach((m) => {
+      const name = getUserName(m.sessionId);
+      if (!sessionGroups.has(name)) sessionGroups.set(name, []);
+      sessionGroups.get(name)!.push(m);
+    });
 
-    if (filteredChatMessages.length === 0) {
+    const sortedGroups = Array.from(sessionGroups.entries()).sort((a, b) => {
+      const aNum = parseInt(a[0].replace("User ", "")) || 0;
+      const bNum = parseInt(b[0].replace("User ", "")) || 0;
+      return aNum - bNum;
+    });
+
+    if (sortedGroups.length === 0) {
+      doc.addPage();
+      y = 20;
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Chat Record", 14, y);
+      y += 3;
       doc.setFontSize(10);
       doc.setFont("helvetica", "italic");
       doc.text("No chat messages found.", 14, y + 5);
     } else {
-      const chatData = filteredChatMessages.map((m) => [
-        getUserName(m.sessionId),
-        m.sender,
-        m.message.substring(0, 60) + (m.message.length > 60 ? "..." : ""),
-        m.messageType,
-        m.read ? "Read" : "Pending (Chat)",
-        m.rating ? `${m.rating}/5` : "—",
-        formatDate(m.createdAt),
-      ]);
+      sortedGroups.forEach(([userName, msgs], groupIdx) => {
+        doc.addPage();
+        y = 20;
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text(`Chat Record — ${userName}`, 14, y);
+        y += 7;
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.text(`${msgs.length} messages`, 14, y);
+        y += 5;
 
-      autoTable(doc, {
-        startY: y,
-        head: [["Session", "Sender", "Message", "Type", "Status", "Rating", "Date"]],
-        body: chatData,
-        styles: { fontSize: 7, cellPadding: 2 },
-        headStyles: { fillColor: [0, 100, 200], textColor: 255 },
-        columnStyles: {
-          0: { cellWidth: 22 },
-          1: { cellWidth: 18 },
-          2: { cellWidth: 45 },
-          3: { cellWidth: 18 },
-          4: { cellWidth: 28 },
-          5: { cellWidth: 15 },
-          6: { cellWidth: 28 },
-        },
-        didParseCell: (data) => {
-          if (
-            data.section === "body" &&
-            data.column.index === 4 &&
-            data.cell.raw === "Pending (Chat)"
-          ) {
-            data.cell.styles.textColor = [200, 150, 0];
-            data.cell.styles.fontStyle = "bold";
-          }
-          if (
-            data.section === "body" &&
-            data.column.index === 5 &&
-            data.cell.raw !== "—"
-          ) {
-            data.cell.styles.textColor = [245, 158, 11];
-            data.cell.styles.fontStyle = "bold";
-          }
-        },
+        const chatData = msgs.map((m) => [
+          m.sender,
+          m.message.substring(0, 80) + (m.message.length > 80 ? "..." : ""),
+          m.read ? "Read" : "Pending",
+          m.rating ? `${m.rating}/5` : "—",
+          formatDate(m.createdAt),
+        ]);
+
+        autoTable(doc, {
+          startY: y,
+          head: [["Sender", "Message", "Status", "Rating", "Date"]],
+          body: chatData,
+          styles: { fontSize: 7, cellPadding: 2 },
+          headStyles: { fillColor: [0, 100, 200], textColor: 255 },
+          columnStyles: {
+            0: { cellWidth: 20 },
+            1: { cellWidth: 65 },
+            2: { cellWidth: 28 },
+            3: { cellWidth: 15 },
+            4: { cellWidth: 30 },
+          },
+          didParseCell: (data) => {
+            if (data.section === "body" && data.column.index === 2 && data.cell.raw === "Pending") {
+              data.cell.styles.textColor = [200, 150, 0];
+              data.cell.styles.fontStyle = "bold";
+            }
+            if (data.section === "body" && data.column.index === 3 && data.cell.raw !== "—") {
+              data.cell.styles.textColor = [245, 158, 11];
+              data.cell.styles.fontStyle = "bold";
+            }
+          },
+        });
       });
     }
 
@@ -456,108 +484,78 @@ export default function HistoryPage() {
             </table>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-white/[0.08]">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-foreground/40 uppercase tracking-wider">
-                    Session
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-foreground/40 uppercase tracking-wider">
-                    Sender
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-foreground/40 uppercase tracking-wider">
-                    Message
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-foreground/40 uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-foreground/40 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-foreground/40 uppercase tracking-wider">
-                    Rating
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-foreground/40 uppercase tracking-wider">
-                    Date
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/[0.05]">
-                {filteredChatMessages.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={7}
-                      className="px-4 py-12 text-center text-foreground/30"
+          <div className="p-4 space-y-3">
+            {groupedSessions.length === 0 ? (
+              <p className="text-center text-foreground/30 py-12">No chat messages found</p>
+            ) : (
+              groupedSessions.map(([userName, msgs]) => {
+                const isExpanded = expandedSession === userName;
+                const rating = msgs.find((m) => m.rating)?.rating;
+                return (
+                  <div key={userName} className="border border-white/[0.06] rounded-xl overflow-hidden">
+                    <button
+                      onClick={() => setExpandedSession(isExpanded ? null : userName)}
+                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/[0.03] transition-colors"
                     >
-                      No chat messages found
-                    </td>
-                  </tr>
-                ) : (
-                  filteredChatMessages.map((msg) => (
-                    <tr
-                      key={msg.id}
-                      className="hover:bg-white/[0.02] transition-colors"
-                    >
-                      <td className="px-4 py-3 text-xs font-medium text-primary">
-                        {getUserName(msg.sessionId)}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                            msg.sender === "admin"
-                              ? "bg-primary/10 text-primary border border-primary/20"
-                              : msg.sender === "visitor"
-                              ? "bg-secondary/10 text-secondary border border-secondary/20"
-                              : "bg-foreground/10 text-foreground/60 border border-foreground/20"
-                          }`}
-                        >
-                          {msg.sender}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-foreground/60 max-w-[350px] truncate">
-                        {msg.message}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-foreground/40">
-                        {msg.messageType}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                            msg.read
-                              ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                              : "bg-gold/10 text-gold border border-gold/20"
-                          }`}
-                        >
-                          {msg.read ? "Read" : "Pending"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        {msg.rating ? (
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/10">
+                          <Folder size={16} className="text-primary" />
+                        </div>
+                        <div className="text-left">
+                          <p className="text-sm font-semibold">{userName}</p>
+                          <p className="text-xs text-foreground/40">{msgs.length} messages</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {rating && (
                           <div className="flex gap-0.5">
                             {[1, 2, 3, 4, 5].map((s) => (
-                              <span
-                                key={s}
-                                className={`text-xs ${
-                                  s <= msg.rating! ? "text-gold" : "text-foreground/20"
-                                }`}
-                              >
-                                ★
-                              </span>
+                              <span key={s} className={`text-xs ${s <= rating! ? "text-gold" : "text-foreground/20"}`}>★</span>
                             ))}
                           </div>
-                        ) : (
-                          <span className="text-foreground/20 text-xs">—</span>
                         )}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-foreground/40 whitespace-nowrap">
-                        {formatDate(msg.createdAt)}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                        <ChevronRight size={16} className={`text-foreground/30 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
+                      </div>
+                    </button>
+                    {isExpanded && (
+                      <div className="border-t border-white/[0.06] bg-white/[0.01]">
+                        <div className="max-h-[400px] overflow-y-auto">
+                          {msgs.map((msg) => (
+                            <div key={msg.id} className="flex gap-3 px-4 py-3 border-b border-white/[0.04] last:border-0">
+                              <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                                msg.sender === "admin" ? "bg-primary/15" : msg.sender === "ai" ? "bg-purple-500/15" : "bg-secondary/15"
+                              }`}>
+                                <User size={12} className={
+                                  msg.sender === "admin" ? "text-primary" : msg.sender === "ai" ? "text-purple-400" : "text-secondary"
+                                } />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-0.5">
+                                  <span className={`text-xs font-medium ${
+                                    msg.sender === "admin" ? "text-primary" : msg.sender === "ai" ? "text-purple-400" : "text-secondary"
+                                  }`}>
+                                    {msg.sender === "admin" ? "Admin" : msg.sender === "ai" ? "AI" : "Visitor"}
+                                  </span>
+                                  <span className="text-[10px] text-foreground/30">{formatDate(msg.createdAt)}</span>
+                                  {msg.rating && (
+                                    <div className="flex gap-0.5 ml-auto">
+                                      {[1, 2, 3, 4, 5].map((s) => (
+                                        <span key={s} className={`text-[10px] ${s <= msg.rating! ? "text-gold" : "text-foreground/20"}`}>★</span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                                <p className="text-sm text-foreground/70 break-words">{msg.message}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
           </div>
         )}
       </motion.div>
