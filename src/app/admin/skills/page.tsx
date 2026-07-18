@@ -192,6 +192,8 @@ export default function SkillsPage() {
       { name: "Fiber", color: "#00add8" },
       { name: "Python", color: "#3776ab" },
       { name: "Java", color: "#ed8b00" },
+      { name: "C", color: "#555555" },
+      { name: "C++", color: "#00599c" },
       { name: "C#", color: "#68217a" },
       { name: "PHP", color: "#777bb4" },
       { name: "Go", color: "#00add8" },
