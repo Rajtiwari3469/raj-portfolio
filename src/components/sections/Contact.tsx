@@ -33,7 +33,9 @@ export default function Contact() {
     fetch("/api/settings")
       .then((res) => res.json())
       .then((data) => setSettings(data))
-      .catch(() => {});
+      .catch(() => {
+        // Settings unavailable, will use defaults
+      });
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

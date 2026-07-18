@@ -3,24 +3,26 @@ import { createToken, setAuthCookie } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
-const DEFAULT_USERNAME = "Raj@2005#";
-const DEFAULT_PASSWORD_HASH = bcrypt.hashSync("Blackgold7", 12);
+const DEFAULT_USERNAME = process.env.ADMIN_USERNAME || "admin";
+const DEFAULT_PASSWORD_HASH = process.env.ADMIN_PASSWORD
+  ? bcrypt.hashSync(process.env.ADMIN_PASSWORD, 12)
+  : "";
 
 async function getStoredCredentials() {
   try {
     const prisma = getPrisma();
     const usernameSetting = await prisma.setting.findUnique({ where: { key: "adminUsername" } });
     const passwordSetting = await prisma.setting.findUnique({ where: { key: "adminPasswordHash" } });
-    return {
-      username: usernameSetting?.value || DEFAULT_USERNAME,
-      passwordHash: passwordSetting?.value || DEFAULT_PASSWORD_HASH,
-    };
+    if (usernameSetting?.value && passwordSetting?.value) {
+      return { username: usernameSetting.value, passwordHash: passwordSetting.value };
+    }
   } catch {
-    return {
-      username: DEFAULT_USERNAME,
-      passwordHash: DEFAULT_PASSWORD_HASH,
-    };
+    // DB unavailable, fall through to env defaults
   }
+  if (!DEFAULT_PASSWORD_HASH) {
+    throw new Error("No admin credentials configured. Set ADMIN_USERNAME and ADMIN_PASSWORD in environment variables.");
+  }
+  return { username: DEFAULT_USERNAME, passwordHash: DEFAULT_PASSWORD_HASH };
 }
 
 export async function POST(request: NextRequest) {

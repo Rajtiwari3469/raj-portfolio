@@ -2,7 +2,7 @@ import { SignJWT, jwtVerify, JWTPayload } from "jose";
 import { cookies } from "next/headers";
 
 const secret = new TextEncoder().encode(
-  process.env.JWT_SECRET || "raj-portfolio-secret-key-2025"
+  process.env.JWT_SECRET || "raj-portfolio-change-this-in-production"
 );
 
 export interface TokenPayload extends JWTPayload {

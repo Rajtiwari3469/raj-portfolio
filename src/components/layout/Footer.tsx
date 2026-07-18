@@ -12,7 +12,9 @@ export default function Footer() {
     fetch("/api/settings")
       .then((res) => res.json())
       .then((data) => setSocialLinks(data))
-      .catch(() => {});
+      .catch(() => {
+        // Settings unavailable, social links will use defaults
+      });
   }, []);
 
   return (

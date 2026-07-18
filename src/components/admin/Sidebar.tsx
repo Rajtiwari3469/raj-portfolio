@@ -18,6 +18,7 @@ import {
   MessageCircle,
   Mail,
   PenTool,
+  BarChart3,
 } from "lucide-react";
 
 const menuItems = [
@@ -29,6 +30,7 @@ const menuItems = [
   { name: "Content", href: "/admin/content", icon: PenTool },
   { name: "Touch Messages", href: "/admin/touch-messages", icon: Mail },
   { name: "Chat", href: "/admin/chat", icon: MessageCircle },
+  { name: "Public Records", href: "/admin/public-records", icon: BarChart3 },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
@@ -38,7 +40,7 @@ export default function AdminSidebar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const handleLogout = async () => {
-    document.cookie = "auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/login";
   };
 

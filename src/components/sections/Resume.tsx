@@ -31,7 +31,9 @@ export default function ResumeSection() {
           setSelectedResume(data[0]);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        // Resume data unavailable
+      });
   }, []);
 
   if (resumes.length === 0) return null;

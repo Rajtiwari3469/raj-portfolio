@@ -10,7 +10,6 @@ export function parseUserAgent(ua: string | null): DeviceInfo {
     return { browser: "Unknown", os: "Unknown", device: "Unknown", isBot: false };
   }
 
-  const lower = ua.toLowerCase();
   const isBot = /bot|crawl|spider|slurp|mediapartners|facebookexternalhit|preview|headless/i.test(ua);
 
   let browser = "Other";

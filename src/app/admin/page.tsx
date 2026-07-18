@@ -10,6 +10,9 @@ import {
   GraduationCap,
   Briefcase,
   RefreshCw,
+  Eye,
+  Users,
+  BarChart3,
 } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 
@@ -19,26 +22,44 @@ interface Stats {
   certificates: number;
 }
 
+interface VisitorStats {
+  total: number;
+  recent: number;
+  uniqueVisitors: number;
+}
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats>({
     projects: 0,
     skills: 0,
     certificates: 0,
   });
+  const [visitorStats, setVisitorStats] = useState<VisitorStats>({
+    total: 0,
+    recent: 0,
+    uniqueVisitors: 0,
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchStats = async () => {
     try {
-      const [projects, skills, certificates] = await Promise.all([
+      const [projects, skills, certificates, visitorRes] = await Promise.all([
         fetch("/api/admin/projects").then((res) => res.json()),
         fetch("/api/admin/skills").then((res) => res.json()),
         fetch("/api/admin/certificates").then((res) => res.json()),
+        fetch("/api/admin/public-records/stats?period=30").then((res) => res.json()),
       ]);
 
       setStats({
         projects: Array.isArray(projects) ? projects.length : 0,
         skills: Array.isArray(skills) ? skills.length : 0,
         certificates: Array.isArray(certificates) ? certificates.length : 0,
+      });
+
+      setVisitorStats({
+        total: visitorRes.total || 0,
+        recent: visitorRes.recent || 0,
+        uniqueVisitors: visitorRes.recentUniqueVisitors || 0,
       });
     } catch (error) {
       console.error("Failed to fetch stats:", error);
@@ -74,6 +95,27 @@ export default function AdminDashboard() {
       color: "text-gold",
       glowColor: "rgba(234,179,8,0.15)",
     },
+    {
+      title: "Total Views",
+      value: visitorStats.total,
+      icon: <Eye className="w-6 h-6" />,
+      color: "text-green-400",
+      glowColor: "rgba(74,222,128,0.15)",
+    },
+    {
+      title: "30d Visitors",
+      value: visitorStats.uniqueVisitors,
+      icon: <Users className="w-6 h-6" />,
+      color: "text-neon-cyan",
+      glowColor: "rgba(34,211,238,0.15)",
+    },
+    {
+      title: "30d Views",
+      value: visitorStats.recent,
+      icon: <BarChart3 className="w-6 h-6" />,
+      color: "text-secondary",
+      glowColor: "rgba(168,85,247,0.15)",
+    },
   ];
 
   return (
@@ -96,7 +138,7 @@ export default function AdminDashboard() {
         </button>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {statCards.map((card, index) => (
           <motion.div
             key={card.title}
@@ -142,7 +184,7 @@ export default function AdminDashboard() {
       >
         <GlassPanel className="h-full">
           <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               { href: "/admin/projects", icon: FolderKanban, label: "Projects", color: "text-primary", hover: "hover:bg-primary/10 hover:border-primary/20" },
               { href: "/admin/skills", icon: Code2, label: "Skills", color: "text-accent", hover: "hover:bg-accent/10 hover:border-accent/20" },
@@ -150,6 +192,7 @@ export default function AdminDashboard() {
               { href: "/admin/content", icon: FileText, label: "Edit Content", color: "text-secondary", hover: "hover:bg-secondary/10 hover:border-secondary/20" },
               { href: "/admin/content", icon: GraduationCap, label: "Education", color: "text-green-400", hover: "hover:bg-green-500/10 hover:border-green-500/20" },
               { href: "/admin/content", icon: Briefcase, label: "Experience", color: "text-orange-400", hover: "hover:bg-orange-500/10 hover:border-orange-500/20" },
+              { href: "/admin/public-records", icon: BarChart3, label: "Public Records", color: "text-neon-cyan", hover: "hover:bg-cyan-500/10 hover:border-cyan-500/20" },
             ].map((item) => (
               <a
                 key={item.label}

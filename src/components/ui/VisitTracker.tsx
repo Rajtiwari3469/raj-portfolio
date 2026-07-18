@@ -15,7 +15,11 @@ function generateSessionId(): string {
 export default function VisitTracker() {
   const pathname = usePathname();
   const lastPageRef = useRef<string>("");
-  const startTimeRef = useRef<number>(Date.now());
+  const startTimeRef = useRef<number>(0);
+
+  useEffect(() => {
+    startTimeRef.current = Date.now();
+  }, []);
 
   useEffect(() => {
     if (pathname === lastPageRef.current) return;
@@ -35,7 +39,9 @@ export default function VisitTracker() {
             sessionId: generateSessionId(),
           }),
         });
-      } catch {}
+      } catch {
+        // Tracking failure is non-critical
+      }
     };
 
     sendVisit();
@@ -43,10 +49,11 @@ export default function VisitTracker() {
     const handleUnload = () => {
       const duration = Math.round((Date.now() - startTimeRef.current) / 1000);
       if (navigator.sendBeacon) {
-        navigator.sendBeacon(
-          "/api/public-records/duration",
-          JSON.stringify({ sessionId: generateSessionId(), duration })
+        const blob = new Blob(
+          [JSON.stringify({ sessionId: generateSessionId(), duration })],
+          { type: "application/json" }
         );
+        navigator.sendBeacon("/api/public-records/duration", blob);
       }
     };
 

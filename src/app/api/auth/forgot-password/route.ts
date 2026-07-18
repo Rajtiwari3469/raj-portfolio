@@ -56,7 +56,10 @@ export async function POST(request: NextRequest) {
     const prisma = getPrisma();
 
     const emailSetting = await prisma.setting.findUnique({ where: { key: "adminEmail" } });
-    const adminEmail = emailSetting?.value || "tiwariraj3469@gmail.com";
+    const adminEmail = emailSetting?.value || process.env.ADMIN_EMAIL;
+    if (!adminEmail) {
+      return NextResponse.json({ error: "Admin email not configured. Set ADMIN_EMAIL in environment variables." }, { status: 500 });
+    }
 
     if (email.toLowerCase() !== adminEmail.toLowerCase()) {
       return NextResponse.json({ error: "This email is not registered as admin" }, { status: 401 });
