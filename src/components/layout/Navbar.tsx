@@ -55,7 +55,7 @@ export default function Navbar() {
             Raj Tiwari
           </Link>
 
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-2">
             {navItems.map((item) => (
               <Link
                 key={item.name}
