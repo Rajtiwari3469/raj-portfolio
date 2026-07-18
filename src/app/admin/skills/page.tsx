@@ -138,54 +138,62 @@ export default function SkillsPage() {
 
   const categories = [...new Set(skills.map((s) => s.category))];
 
-  const skillNames = [
-    { name: "JavaScript", color: "#f7df1e" },
-    { name: "TypeScript", color: "#3178c6" },
-    { name: "Python", color: "#3776ab" },
-    { name: "Java", color: "#ed8b00" },
-    { name: "C++", color: "#00599c" },
-    { name: "C#", color: "#68217a" },
-    { name: "Go", color: "#00add8" },
-    { name: "Rust", color: "#dea584" },
-    { name: "PHP", color: "#777bb4" },
-    { name: "Ruby", color: "#cc342d" },
-    { name: "Swift", color: "#f05138" },
-    { name: "Kotlin", color: "#7f52ff" },
-    { name: "Dart", color: "#0175c2" },
-    { name: "Scala", color: "#dc322f" },
-    { name: "R", color: "#276dc3" },
-    { name: "MATLAB", color: "#e16737" },
-    { name: "Shell/Bash", color: "#4eaa25" },
-    { name: "SQL", color: "#e38c00" },
-    { name: "HTML", color: "#e34f26" },
-    { name: "CSS", color: "#1572b6" },
-    { name: "Sass", color: "#cc6699" },
-    { name: "React", color: "#61dafb" },
-    { name: "Next.js", color: "#ffffff" },
-    { name: "Node.js", color: "#339933" },
-    { name: "Vue.js", color: "#42b883" },
-    { name: "Angular", color: "#dd0031" },
-    { name: "Svelte", color: "#ff3e00" },
-    { name: "Django", color: "#092e20" },
-    { name: "Flask", color: "#ffffff" },
-    { name: "Spring Boot", color: "#6db33f" },
-    { name: "Express.js", color: "#ffffff" },
-    { name: "Tailwind CSS", color: "#06b6d4" },
-    { name: "Bootstrap", color: "#7952b3" },
-    { name: "MongoDB", color: "#47a248" },
-    { name: "PostgreSQL", color: "#4169e1" },
-    { name: "MySQL", color: "#4479a1" },
-    { name: "Redis", color: "#dc382d" },
-    { name: "Firebase", color: "#ffca28" },
-    { name: "Docker", color: "#2496ed" },
-    { name: "Kubernetes", color: "#326ce5" },
-    { name: "AWS", color: "#ff9900" },
-    { name: "Git", color: "#f05032" },
-    { name: "Figma", color: "#f24e1e" },
-    { name: "Photoshop", color: "#31a8ff" },
-    { name: "Illustrator", color: "#ff9a00" },
-    { name: "Other", color: "#888888" },
-  ];
+  const skillNamesByCategory: Record<string, { name: string; color: string }[]> = {
+    Frontend: [
+      { name: "HTML", color: "#e34f26" },
+      { name: "CSS", color: "#1572b6" },
+      { name: "Sass", color: "#cc6699" },
+      { name: "React", color: "#61dafb" },
+      { name: "Next.js", color: "#ffffff" },
+      { name: "Vue.js", color: "#42b883" },
+      { name: "Angular", color: "#dd0031" },
+      { name: "Svelte", color: "#ff3e00" },
+      { name: "Tailwind CSS", color: "#06b6d4" },
+      { name: "Bootstrap", color: "#7952b3" },
+    ],
+    Backend: [
+      { name: "JavaScript", color: "#f7df1e" },
+      { name: "TypeScript", color: "#3178c6" },
+      { name: "Python", color: "#3776ab" },
+      { name: "Java", color: "#ed8b00" },
+      { name: "C++", color: "#00599c" },
+      { name: "C#", color: "#68217a" },
+      { name: "Go", color: "#00add8" },
+      { name: "Rust", color: "#dea584" },
+      { name: "PHP", color: "#777bb4" },
+      { name: "Ruby", color: "#cc342d" },
+      { name: "Swift", color: "#f05138" },
+      { name: "Kotlin", color: "#7f52ff" },
+      { name: "Dart", color: "#0175c2" },
+      { name: "Scala", color: "#dc322f" },
+      { name: "R", color: "#276dc3" },
+      { name: "MATLAB", color: "#e16737" },
+      { name: "Shell/Bash", color: "#4eaa25" },
+      { name: "Node.js", color: "#339933" },
+      { name: "Django", color: "#092e20" },
+      { name: "Flask", color: "#ffffff" },
+      { name: "Spring Boot", color: "#6db33f" },
+      { name: "Express.js", color: "#ffffff" },
+    ],
+    Database: [
+      { name: "SQL", color: "#e38c00" },
+      { name: "MongoDB", color: "#47a248" },
+      { name: "PostgreSQL", color: "#4169e1" },
+      { name: "MySQL", color: "#4479a1" },
+      { name: "Redis", color: "#dc382d" },
+      { name: "Firebase", color: "#ffca28" },
+    ],
+    Tools: [
+      { name: "Docker", color: "#2496ed" },
+      { name: "Kubernetes", color: "#326ce5" },
+      { name: "AWS", color: "#ff9900" },
+      { name: "Git", color: "#f05032" },
+      { name: "Figma", color: "#f24e1e" },
+      { name: "Photoshop", color: "#31a8ff" },
+      { name: "Illustrator", color: "#ff9a00" },
+      { name: "Other", color: "#888888" },
+    ],
+  };
 
   const categoryOptions = [
     { name: "Frontend", color: "#61dafb" },
@@ -194,8 +202,10 @@ export default function SkillsPage() {
     { name: "Tools", color: "#ff9900" },
   ];
 
-  const getSkillColor = (name: string) => skillNames.find((s) => s.name === name)?.color || "#888888";
+  const allSkillNames = Object.values(skillNamesByCategory).flat();
+  const getSkillColor = (name: string) => allSkillNames.find((s) => s.name === name)?.color || "#888888";
   const getCategoryColor = (name: string) => categoryOptions.find((c) => c.name === name)?.color || "#888888";
+  const getSkillsForCategory = (cat: string) => skillNamesByCategory[cat] || [];
 
   return (
     <div className="space-y-6">
@@ -290,7 +300,7 @@ export default function SkillsPage() {
                 required
               >
                 <option value="" disabled style={{ background: "#0a0a1f", color: "#555" }}>Select a skill</option>
-                {skillNames.map((skill) => (
+                {getSkillsForCategory(formData.category).map((skill) => (
                   <option key={skill.name} value={skill.name} style={{ color: skill.color, background: "#0a0a1f" }}>
                     {skill.name}
                   </option>
@@ -306,7 +316,7 @@ export default function SkillsPage() {
             <div className="relative">
               <select
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value, name: "" })}
                 className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors appearance-none"
                 style={{ color: getCategoryColor(formData.category) }}
               >
