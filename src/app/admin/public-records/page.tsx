@@ -48,6 +48,7 @@ interface StatsData {
   recentBots: number;
   humanVisits: number;
   recentUserVisits: number;
+  recentHumanVisits: number;
   byPage: { name: string; count: number }[];
   byDevice: { name: string; count: number }[];
   byBrowser: { name: string; count: number }[];
@@ -83,6 +84,7 @@ interface RecordsResponse {
   total: number;
   page: number;
   totalPages: number;
+  error?: string;
 }
 
 export default function PublicRecordsPage() {
@@ -113,9 +115,15 @@ export default function PublicRecordsPage() {
     try {
       const res = await fetch(`/api/admin/public-records/stats?period=${period}`);
       const data = await res.json();
-      setStats(data);
+      if (data.error) {
+        console.error("Stats API error:", data.error);
+        setStats(null);
+      } else {
+        setStats(data);
+      }
     } catch (error) {
       console.error("Failed to fetch stats:", error);
+      setStats(null);
     } finally {
       setIsStatsLoading(false);
     }
@@ -136,11 +144,19 @@ export default function PublicRecordsPage() {
 
       const res = await fetch(`/api/admin/public-records?${params}`);
       const data: RecordsResponse = await res.json();
-      setRecords(data.records);
-      setTotalPages(data.totalPages);
-      setTotalRecords(data.total);
+      if (data.error) {
+        console.error("Records API error:", data.error);
+        setRecords([]);
+        setTotalPages(0);
+        setTotalRecords(0);
+      } else {
+        setRecords(data.records || []);
+        setTotalPages(data.totalPages || 0);
+        setTotalRecords(data.total || 0);
+      }
     } catch (error) {
       console.error("Failed to fetch records:", error);
+      setRecords([]);
     } finally {
       setIsLoading(false);
     }
@@ -346,11 +362,13 @@ export default function PublicRecordsPage() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {isStatsLoading
                 ? Array.from({ length: 6 }).map((_, i) => (
-                    <GlassPanel key={i}>
-                      <div className="animate-pulse space-y-3">
+                    <GlassPanel key={i} className="min-h-[120px]">
+                      <div className="animate-pulse space-y-3 h-full flex flex-col justify-between">
                         <div className="w-8 h-8 rounded-lg bg-white/5" />
-                        <div className="w-16 h-6 bg-white/5 rounded" />
-                        <div className="w-20 h-3 bg-white/5 rounded" />
+                        <div className="space-y-2">
+                          <div className="w-16 h-6 bg-white/5 rounded" />
+                          <div className="w-20 h-3 bg-white/5 rounded" />
+                        </div>
                       </div>
                     </GlassPanel>
                   ))
@@ -360,16 +378,19 @@ export default function PublicRecordsPage() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.05 }}
+                      className="h-full"
                     >
-                      <GlassPanel className="relative overflow-hidden group">
+                      <GlassPanel className="relative overflow-hidden group h-full min-h-[120px] flex flex-col justify-between">
                         <div
                           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                           style={{ background: `radial-gradient(circle at 50% 50%, ${stat.glow}, transparent 70%)` }}
                         />
-                        <div className="relative">
-                          <stat.icon size={20} className={`${stat.color} mb-2`} />
-                          <p className="text-2xl font-bold">{stat.value}</p>
-                          <p className="text-xs text-foreground/50 mt-1">{stat.label}</p>
+                        <div className="relative flex flex-col justify-between h-full">
+                          <stat.icon size={20} className={`${stat.color}`} />
+                          <div>
+                            <p className="text-2xl font-bold">{stat.value}</p>
+                            <p className="text-xs text-foreground/50 mt-1">{stat.label}</p>
+                          </div>
                         </div>
                       </GlassPanel>
                     </motion.div>
@@ -458,7 +479,7 @@ export default function PublicRecordsPage() {
               </div>
             ) : stats && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <GlassPanel>
+                <GlassPanel className="h-full">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <Layers size={18} className="text-primary" />
                     Page Views Breakdown
@@ -492,7 +513,7 @@ export default function PublicRecordsPage() {
                   </div>
                 </GlassPanel>
 
-                <GlassPanel>
+                <GlassPanel className="h-full">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <Globe size={18} className="text-secondary" />
                     Top Referrers
@@ -545,7 +566,7 @@ export default function PublicRecordsPage() {
                 ].map((section) => {
                   const maxCount = Math.max(...section.data.map((d) => d.count), 1);
                   return (
-                    <GlassPanel key={section.title}>
+                    <GlassPanel key={section.title} className="h-full">
                       <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                         <section.icon size={18} className="text-primary" />
                         {section.title}
@@ -608,7 +629,7 @@ export default function PublicRecordsPage() {
             ) : stats && (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <GlassPanel>
+                  <GlassPanel className="h-full">
                     <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                       <User size={18} className="text-green-400" />
                       User vs Bot Traffic
@@ -655,7 +676,7 @@ export default function PublicRecordsPage() {
                     </div>
                   </GlassPanel>
 
-                  <GlassPanel>
+                  <GlassPanel className="h-full">
                     <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                       <TrendingUp size={18} className="text-neon-cyan" />
                       Traffic Summary

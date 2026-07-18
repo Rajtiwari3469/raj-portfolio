@@ -44,10 +44,10 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     try {
       const [projects, skills, certificates, visitorRes] = await Promise.all([
-        fetch("/api/admin/projects").then((res) => res.json()),
-        fetch("/api/admin/skills").then((res) => res.json()),
-        fetch("/api/admin/certificates").then((res) => res.json()),
-        fetch("/api/admin/public-records/stats?period=30").then((res) => res.json()),
+        fetch("/api/admin/projects").then((r) => r.json()),
+        fetch("/api/admin/skills").then((r) => r.json()),
+        fetch("/api/admin/certificates").then((r) => r.json()),
+        fetch("/api/admin/public-records/stats?period=30").then((r) => r.json()),
       ]);
 
       setStats({
@@ -57,9 +57,9 @@ export default function AdminDashboard() {
       });
 
       setVisitorStats({
-        total: visitorRes.total || 0,
-        recent: visitorRes.recent || 0,
-        uniqueVisitors: visitorRes.recentUniqueVisitors || 0,
+        total: visitorRes.error ? 0 : (visitorRes.total || 0),
+        recent: visitorRes.error ? 0 : (visitorRes.recent || 0),
+        uniqueVisitors: visitorRes.error ? 0 : (visitorRes.recentUniqueVisitors || 0),
       });
     } catch (error) {
       console.error("Failed to fetch stats:", error);
@@ -77,45 +77,56 @@ export default function AdminDashboard() {
     {
       title: "Projects",
       value: stats.projects,
-      icon: <FolderKanban className="w-6 h-6" />,
+      icon: FolderKanban,
       color: "text-primary",
       glowColor: "rgba(0,212,255,0.15)",
     },
     {
       title: "Skills",
       value: stats.skills,
-      icon: <Code2 className="w-6 h-6" />,
+      icon: Code2,
       color: "text-accent",
       glowColor: "rgba(139,92,246,0.15)",
     },
     {
       title: "Certificates",
       value: stats.certificates,
-      icon: <Award className="w-6 h-6" />,
+      icon: Award,
       color: "text-gold",
       glowColor: "rgba(234,179,8,0.15)",
     },
     {
       title: "Total Views",
       value: visitorStats.total,
-      icon: <Eye className="w-6 h-6" />,
+      icon: Eye,
       color: "text-green-400",
       glowColor: "rgba(74,222,128,0.15)",
     },
     {
       title: "30d Visitors",
       value: visitorStats.uniqueVisitors,
-      icon: <Users className="w-6 h-6" />,
+      icon: Users,
       color: "text-neon-cyan",
       glowColor: "rgba(34,211,238,0.15)",
     },
     {
       title: "30d Views",
       value: visitorStats.recent,
-      icon: <BarChart3 className="w-6 h-6" />,
+      icon: BarChart3,
       color: "text-secondary",
       glowColor: "rgba(168,85,247,0.15)",
     },
+  ];
+
+  const quickActions = [
+    { href: "/admin/projects", icon: FolderKanban, label: "Projects", color: "text-primary", hover: "hover:bg-primary/10 hover:border-primary/20" },
+    { href: "/admin/skills", icon: Code2, label: "Skills", color: "text-accent", hover: "hover:bg-accent/10 hover:border-accent/20" },
+    { href: "/admin/certificates", icon: Award, label: "Certificates", color: "text-gold", hover: "hover:bg-yellow-500/10 hover:border-yellow-500/20" },
+    { href: "/admin/content", icon: FileText, label: "Edit Content", color: "text-secondary", hover: "hover:bg-secondary/10 hover:border-secondary/20" },
+    { href: "/admin/content", icon: GraduationCap, label: "Education", color: "text-green-400", hover: "hover:bg-green-500/10 hover:border-green-500/20" },
+    { href: "/admin/content", icon: Briefcase, label: "Experience", color: "text-orange-400", hover: "hover:bg-orange-500/10 hover:border-orange-500/20" },
+    { href: "/admin/public-records", icon: BarChart3, label: "Public Records", color: "text-neon-cyan", hover: "hover:bg-cyan-500/10 hover:border-cyan-500/20" },
+    { href: "/admin/touch-messages", icon: FileText, label: "Messages", color: "text-pink-400", hover: "hover:bg-pink-500/10 hover:border-pink-500/20" },
   ];
 
   return (
@@ -144,17 +155,18 @@ export default function AdminDashboard() {
             key={card.title}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
+            transition={{ delay: index * 0.05 }}
+            className="h-full"
           >
-            <GlassPanel className="relative overflow-hidden group">
+            <GlassPanel className="relative overflow-hidden group h-full flex flex-col justify-between min-h-[120px]">
               <div
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                 style={{ background: `radial-gradient(circle at 50% 50%, ${card.glowColor}, transparent 70%)` }}
               />
-              <div className="relative flex items-center justify-between">
-                <div>
-                  <p className="text-foreground/60 text-sm">{card.title}</p>
-                  <p className="text-3xl font-bold mt-1">
+              <div className="relative flex items-center justify-between h-full">
+                <div className="flex flex-col justify-between h-full py-1">
+                  <p className="text-foreground/60 text-xs font-medium uppercase tracking-wider">{card.title}</p>
+                  <p className="text-3xl font-bold mt-2">
                     {isLoading ? (
                       <span className="inline-block w-12 h-8 bg-white/5 rounded-lg animate-pulse" />
                     ) : (
@@ -168,8 +180,8 @@ export default function AdminDashboard() {
                     )}
                   </p>
                 </div>
-                <div className={`p-3 rounded-xl bg-white/5 ${card.color} border border-white/5`}>
-                  {card.icon}
+                <div className={`p-3 rounded-xl bg-white/5 ${card.color} border border-white/5 shrink-0`}>
+                  <card.icon className="w-6 h-6" />
                 </div>
               </div>
             </GlassPanel>
@@ -182,25 +194,17 @@ export default function AdminDashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
-        <GlassPanel className="h-full">
+        <GlassPanel>
           <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              { href: "/admin/projects", icon: FolderKanban, label: "Projects", color: "text-primary", hover: "hover:bg-primary/10 hover:border-primary/20" },
-              { href: "/admin/skills", icon: Code2, label: "Skills", color: "text-accent", hover: "hover:bg-accent/10 hover:border-accent/20" },
-              { href: "/admin/certificates", icon: Award, label: "Certificates", color: "text-gold", hover: "hover:bg-yellow-500/10 hover:border-yellow-500/20" },
-              { href: "/admin/content", icon: FileText, label: "Edit Content", color: "text-secondary", hover: "hover:bg-secondary/10 hover:border-secondary/20" },
-              { href: "/admin/content", icon: GraduationCap, label: "Education", color: "text-green-400", hover: "hover:bg-green-500/10 hover:border-green-500/20" },
-              { href: "/admin/content", icon: Briefcase, label: "Experience", color: "text-orange-400", hover: "hover:bg-orange-500/10 hover:border-orange-500/20" },
-              { href: "/admin/public-records", icon: BarChart3, label: "Public Records", color: "text-neon-cyan", hover: "hover:bg-cyan-500/10 hover:border-cyan-500/20" },
-            ].map((item) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {quickActions.map((item) => (
               <a
                 key={item.label}
                 href={item.href}
-                className={`flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/5 ${item.hover} transition-all duration-200 group`}
+                className={`flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/5 ${item.hover} transition-all duration-200 group h-[60px]`}
               >
-                <item.icon size={20} className={`${item.color} group-hover:scale-110 transition-transform`} />
-                <span className="text-sm">{item.label}</span>
+                <item.icon size={20} className={`${item.color} group-hover:scale-110 transition-transform shrink-0`} />
+                <span className="text-sm truncate">{item.label}</span>
               </a>
             ))}
           </div>
