@@ -76,22 +76,6 @@ export default function Certificates() {
                 className="relative group cursor-pointer"
                 onClick={() => setSelectedCert(cert)}
               >
-                <div className="absolute -top-2 -left-2 z-10">
-                  <div className="relative">
-                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" className="drop-shadow-lg">
-                      <polygon points="24,2 30,18 48,18 34,28 38,46 24,36 10,46 14,28 0,18 18,18" fill={`url(#gold-${index})`} stroke="#b8860b" strokeWidth="1"/>
-                      <defs>
-                        <linearGradient id={`gold-${index}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#ffd700"/>
-                          <stop offset="50%" stopColor="#ffec80"/>
-                          <stop offset="100%" stopColor="#daa520"/>
-                        </linearGradient>
-                      </defs>
-                      <text x="24" y="28" textAnchor="middle" fill="#8B6914" fontSize="14" fontWeight="bold">★</text>
-                    </svg>
-                  </div>
-                </div>
-
                 <div className="absolute -top-1 -right-1 z-10">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-600 flex items-center justify-center shadow-lg border-2 border-yellow-300/50">
                     <Award size={18} className="text-yellow-900" />
@@ -207,22 +191,6 @@ export default function Certificates() {
               className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
-                <div className="relative">
-                  <svg width="64" height="64" viewBox="0 0 64 64" fill="none" className="drop-shadow-2xl">
-                    <polygon points="32,2 40,24 64,24 44,38 52,62 32,48 12,62 20,38 0,24 24,24" fill="url(#modal-gold)" stroke="#b8860b" strokeWidth="1.5"/>
-                    <defs>
-                      <linearGradient id="modal-gold" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#ffd700"/>
-                        <stop offset="50%" stopColor="#ffec80"/>
-                        <stop offset="100%" stopColor="#daa520"/>
-                      </linearGradient>
-                    </defs>
-                    <text x="32" y="36" textAnchor="middle" fill="#8B6914" fontSize="18" fontWeight="bold">★</text>
-                  </svg>
-                </div>
-              </div>
-
               <div className="absolute -top-3 -right-3 z-20">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-600 flex items-center justify-center shadow-xl border-2 border-yellow-300/50">
                   <Award size={22} className="text-yellow-900" />
