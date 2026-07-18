@@ -82,12 +82,6 @@ export default function Certificates() {
                   </div>
                 </div>
 
-                <div className="absolute -bottom-2 -right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400/80 to-amber-600/80 flex items-center justify-center backdrop-blur-sm">
-                    <span className="text-xs font-bold text-yellow-900">✓</span>
-                  </div>
-                </div>
-
                 <GlassPanel hover glow="gold" className="h-full flex flex-col relative overflow-visible">
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
                     <div className="h-6 w-1 bg-gradient-to-b from-yellow-400/80 to-transparent rounded-full" />
