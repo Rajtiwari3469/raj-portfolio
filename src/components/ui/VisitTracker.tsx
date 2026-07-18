@@ -27,7 +27,7 @@ export default function VisitTracker() {
 
     const sendVisit = async () => {
       try {
-        await fetch("/api/public-records", {
+        const res = await fetch("/api/public-records", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -39,8 +39,11 @@ export default function VisitTracker() {
             sessionId: generateSessionId(),
           }),
         });
-      } catch {
-        // Tracking failure is non-critical
+        if (!res.ok) {
+          console.error("Visit tracking failed:", res.status, await res.text());
+        }
+      } catch (err) {
+        console.error("Visit tracking error:", err);
       }
     };
 

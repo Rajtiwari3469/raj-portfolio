@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { parseUserAgent, getClientIp } from "@/lib/tracking";
 
 export async function POST(request: NextRequest) {
@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
     const ip = getClientIp(request.headers);
     const { browser, os, device, isBot } = parseUserAgent(ua);
 
+    const prisma = getPrisma();
     const record = await prisma.publicRecord.create({
       data: {
         page,

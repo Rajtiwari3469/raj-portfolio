@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,6 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "sessionId and duration required" }, { status: 400 });
     }
 
+    const prisma = getPrisma();
     await prisma.publicRecord.updateMany({
       where: {
         sessionId,

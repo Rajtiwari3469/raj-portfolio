@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,6 +8,8 @@ export async function GET(request: NextRequest) {
 
     const daysAgo = new Date();
     daysAgo.setDate(daysAgo.getDate() - parseInt(period));
+
+    const prisma = getPrisma();
 
     const [
       totalRecords,
@@ -26,8 +28,8 @@ export async function GET(request: NextRequest) {
     ] = await Promise.all([
       prisma.publicRecord.count(),
       prisma.publicRecord.count({ where: { createdAt: { gte: daysAgo } } }),
-      prisma.publicRecord.findMany({ select: { ip: true }, distinct: ["ip"] }).then((r) => r.length),
-      prisma.publicRecord.findMany({ where: { createdAt: { gte: daysAgo } }, select: { ip: true }, distinct: ["ip"] }).then((r) => r.length),
+      prisma.publicRecord.findMany({ select: { ip: true }, distinct: ["ip"] }).then((r: { ip: string | null }[]) => r.length),
+      prisma.publicRecord.findMany({ where: { createdAt: { gte: daysAgo } }, select: { ip: true }, distinct: ["ip"] }).then((r: { ip: string | null }[]) => r.length),
       prisma.publicRecord.groupBy({ by: ["page"], _count: true, orderBy: { _count: { page: "desc" } } }),
       prisma.publicRecord.groupBy({ by: ["device"], _count: true, orderBy: { _count: { device: "desc" } } }),
       prisma.publicRecord.groupBy({ by: ["browser"], _count: true, orderBy: { _count: { browser: "desc" } } }),
@@ -51,13 +53,13 @@ export async function GET(request: NextRequest) {
       recentBots: recentBotCount,
       humanVisits: totalRecords - botCount,
       recentHumanVisits: recentRecords - recentBotCount,
-      byPage: byPage.map((r) => ({ name: r.page, count: r._count })),
-      byDevice: byDevice.map((r) => ({ name: r.device || "Unknown", count: r._count })),
-      byBrowser: byBrowser.map((r) => ({ name: r.browser || "Unknown", count: r._count })),
-      byOs: byOs.map((r) => ({ name: r.os || "Unknown", count: r._count })),
+      byPage: byPage.map((r: { page: string; _count: number }) => ({ name: r.page, count: r._count })),
+      byDevice: byDevice.map((r: { device: string | null; _count: number }) => ({ name: r.device || "Unknown", count: r._count })),
+      byBrowser: byBrowser.map((r: { browser: string | null; _count: number }) => ({ name: r.browser || "Unknown", count: r._count })),
+      byOs: byOs.map((r: { os: string | null; _count: number }) => ({ name: r.os || "Unknown", count: r._count })),
       byDay: byDay,
       byHour: byHour,
-      topReferrers: topReferrers.map((r) => ({ name: r.referrer || "Direct", count: r._count })),
+      topReferrers: topReferrers.map((r: { referrer: string | null; _count: number }) => ({ name: r.referrer || "Direct", count: r._count })),
       period: parseInt(period),
     });
   } catch (error) {

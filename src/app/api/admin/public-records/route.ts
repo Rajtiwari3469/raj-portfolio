@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
       if (dateTo) (where.createdAt as Record<string, unknown>).lte = new Date(dateTo + "T23:59:59.999Z");
     }
 
+    const prisma = getPrisma();
     const skip = (page - 1) * limit;
     const [records, total] = await Promise.all([
       prisma.publicRecord.findMany({
@@ -51,6 +52,8 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const ids = searchParams.get("ids");
+
+    const prisma = getPrisma();
 
     if (ids) {
       const idArray = ids.split(",");

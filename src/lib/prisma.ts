@@ -46,9 +46,9 @@ export function getPrisma(): PrismaClient {
 }
 
 export const prisma = new Proxy({} as PrismaClient, {
-  get(_target, prop, receiver) {
+  get(_target, prop) {
     const client = getPrisma();
-    const value = Reflect.get(client, prop, receiver);
+    const value = Reflect.get(client, prop as string);
     if (typeof value === "function") {
       return value.bind(client);
     }
@@ -56,7 +56,7 @@ export const prisma = new Proxy({} as PrismaClient, {
   },
   has(_target, prop) {
     const client = getPrisma();
-    return Reflect.has(client, prop);
+    return Reflect.has(client, prop as string);
   },
   ownKeys() {
     const client = getPrisma();
@@ -64,6 +64,6 @@ export const prisma = new Proxy({} as PrismaClient, {
   },
   getOwnPropertyDescriptor(_target, prop) {
     const client = getPrisma();
-    return Reflect.getOwnPropertyDescriptor(client, prop);
+    return Reflect.getOwnPropertyDescriptor(client, prop as string);
   },
 });
