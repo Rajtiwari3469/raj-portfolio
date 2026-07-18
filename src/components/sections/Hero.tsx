@@ -20,7 +20,7 @@ interface HeroProps {
 export default function Hero({ profileImage, heroTitle, heroSubtitle }: HeroProps) {
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-24 pb-16">
       <SpaceBackground />
 
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#050510]/80 pointer-events-none" />
