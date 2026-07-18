@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Mail, MessageCircle, Download } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface Message {
   id: string;
@@ -86,24 +88,147 @@ export default function HistoryPage() {
     });
   };
 
-  const exportToCSV = (data: Record<string, unknown>[], filename: string) => {
-    if (data.length === 0) return;
-    const headers = Object.keys(data[0]);
-    const csvContent = [
-      headers.join(","),
-      ...data.map((row) =>
-        headers
-          .map((h) => `"${String(row[h] ?? "").replace(/"/g, '""')}"`)
-          .join(",")
-      ),
-    ].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
+  const exportToPDF = () => {
+    const doc = new jsPDF("p", "mm", "a4");
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Title
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.text("History Report", pageWidth / 2, 20, { align: "center" });
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(
+      `Generated on ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`,
+      pageWidth / 2,
+      27,
+      { align: "center" }
+    );
+
+    // Summary
+    let y = 35;
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Summary", 14, y);
+    y += 7;
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Total Touch Messages: ${messages.length}`, 14, y);
+    y += 5;
+    doc.text(
+      `Pending (Touch Message): ${messages.filter((m) => !m.read).length}`,
+      14,
+      y
+    );
+    y += 5;
+    doc.text(`Total Chat Messages: ${allChatMessages.length}`, 14, y);
+    y += 5;
+    doc.text(
+      `Pending (Chat): ${allChatMessages.filter((m) => !m.read && m.sender === "visitor").length}`,
+      14,
+      y
+    );
+    y += 5;
+    doc.text(`Total Chat Sessions: ${chatSessions.length}`, 14, y);
+    y += 10;
+
+    // Touch Message Record
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Touch Message Record", 14, y);
+    y += 3;
+
+    if (filteredMessages.length === 0) {
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "italic");
+      doc.text("No touch messages found.", 14, y + 5);
+    } else {
+      const msgData = filteredMessages.map((m) => [
+        m.name,
+        m.email,
+        m.subject || "—",
+        m.message.substring(0, 60) + (m.message.length > 60 ? "..." : ""),
+        m.read ? "Read" : "Pending (Touch Message)",
+        formatDate(m.createdAt),
+      ]);
+
+      autoTable(doc, {
+        startY: y,
+        head: [["Name", "Email", "Subject", "Message", "Status", "Date"]],
+        body: msgData,
+        styles: { fontSize: 7, cellPadding: 2 },
+        headStyles: { fillColor: [0, 100, 200], textColor: 255 },
+        columnStyles: {
+          0: { cellWidth: 25 },
+          1: { cellWidth: 30 },
+          2: { cellWidth: 25 },
+          3: { cellWidth: 45 },
+          4: { cellWidth: 30 },
+          5: { cellWidth: 30 },
+        },
+        didParseCell: (data) => {
+          if (
+            data.section === "body" &&
+            data.column.index === 4 &&
+            data.cell.raw === "Pending (Touch Message)"
+          ) {
+            data.cell.styles.textColor = [200, 150, 0];
+            data.cell.styles.fontStyle = "bold";
+          }
+        },
+      });
+    }
+
+    // Chat Record - new page
+    doc.addPage();
+    y = 20;
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Chat Record", 14, y);
+    y += 3;
+
+    if (filteredChatMessages.length === 0) {
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "italic");
+      doc.text("No chat messages found.", 14, y + 5);
+    } else {
+      const chatData = filteredChatMessages.map((m) => [
+        m.sessionId.substring(0, 12) + "...",
+        m.sender,
+        m.message.substring(0, 60) + (m.message.length > 60 ? "..." : ""),
+        m.messageType,
+        m.read ? "Read" : "Pending (Chat)",
+        formatDate(m.createdAt),
+      ]);
+
+      autoTable(doc, {
+        startY: y,
+        head: [["Session", "Sender", "Message", "Type", "Status", "Date"]],
+        body: chatData,
+        styles: { fontSize: 7, cellPadding: 2 },
+        headStyles: { fillColor: [0, 100, 200], textColor: 255 },
+        columnStyles: {
+          0: { cellWidth: 25 },
+          1: { cellWidth: 20 },
+          2: { cellWidth: 50 },
+          3: { cellWidth: 20 },
+          4: { cellWidth: 30 },
+          5: { cellWidth: 30 },
+        },
+        didParseCell: (data) => {
+          if (
+            data.section === "body" &&
+            data.column.index === 4 &&
+            data.cell.raw === "Pending (Chat)"
+          ) {
+            data.cell.styles.textColor = [200, 150, 0];
+            data.cell.styles.fontStyle = "bold";
+          }
+        },
+      });
+    }
+
+    doc.save("history-report.pdf");
   };
 
   const stats = {
@@ -134,34 +259,11 @@ export default function HistoryPage() {
           </p>
         </div>
         <button
-          onClick={() =>
-            exportToCSV(
-              activeTab === "messages"
-                ? filteredMessages.map((m) => ({
-                    Name: m.name,
-                    Email: m.email,
-                    Subject: m.subject,
-                    Message: m.message,
-                    Read: m.read ? "Yes" : "No",
-                    Date: formatDate(m.createdAt),
-                  }))
-                : filteredChatMessages.map((m) => ({
-                    Session: m.sessionId,
-                    Sender: m.sender,
-                    Message: m.message,
-                    Type: m.messageType,
-                    Read: m.read ? "Yes" : "No",
-                    Date: formatDate(m.createdAt),
-                  })),
-              activeTab === "messages"
-                ? "touch-messages.csv"
-                : "chat-messages.csv"
-            )
-          }
+          onClick={exportToPDF}
           className="flex items-center gap-2 px-4 py-2 rounded-xl border border-primary/20 bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm font-medium"
         >
           <Download size={16} />
-          Export CSV
+          Export PDF
         </button>
       </div>
 
@@ -171,7 +273,7 @@ export default function HistoryPage() {
           <p className="text-xl font-bold text-primary">{stats.totalMessages}</p>
         </div>
         <div className="glass rounded-xl p-3 border border-white/[0.08]">
-          <p className="text-foreground/40 text-xs mb-1">Unread Messages</p>
+          <p className="text-foreground/40 text-xs mb-1">Pending Messages</p>
           <p className="text-xl font-bold text-gold">{stats.unreadMessages}</p>
         </div>
         <div className="glass rounded-xl p-3 border border-white/[0.08]">
@@ -187,7 +289,7 @@ export default function HistoryPage() {
           </p>
         </div>
         <div className="glass rounded-xl p-3 border border-white/[0.08]">
-          <p className="text-foreground/40 text-xs mb-1">Unread Chats</p>
+          <p className="text-foreground/40 text-xs mb-1">Pending Chats</p>
           <p className="text-xl font-bold text-gold">
             {stats.unreadChatMessages}
           </p>
@@ -296,7 +398,7 @@ export default function HistoryPage() {
                               : "bg-gold/10 text-gold border border-gold/20"
                           }`}
                         >
-                          {msg.read ? "Read" : "Unread"}
+                          {msg.read ? "Read" : "Pending"}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-xs text-foreground/40 whitespace-nowrap">
@@ -326,7 +428,7 @@ export default function HistoryPage() {
                     Type
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-foreground/40 uppercase tracking-wider">
-                    Read
+                    Status
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-foreground/40 uppercase tracking-wider">
                     Date
@@ -379,7 +481,7 @@ export default function HistoryPage() {
                               : "bg-gold/10 text-gold border border-gold/20"
                           }`}
                         >
-                          {msg.read ? "Yes" : "No"}
+                          {msg.read ? "Read" : "Pending"}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-xs text-foreground/40 whitespace-nowrap">

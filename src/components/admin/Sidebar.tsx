@@ -31,8 +31,8 @@ const menuItems = [
   { name: "Content", href: "/admin/content", icon: PenTool },
   { name: "Touch Messages", href: "/admin/touch-messages", icon: Mail },
   { name: "Chat", href: "/admin/chat", icon: MessageCircle },
-  { name: "History", href: "/admin/history", icon: History },
   { name: "Public Records", href: "/admin/public-records", icon: BarChart3 },
+  { name: "History", href: "/admin/history", icon: History },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
