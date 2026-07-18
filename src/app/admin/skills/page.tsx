@@ -124,7 +124,7 @@ export default function SkillsPage() {
       setEditingSkill(null);
       setFormData({
         name: "",
-        category: "Programming",
+        category: "Frontend",
         level: 80,
       });
     }
@@ -190,7 +190,6 @@ export default function SkillsPage() {
   const categoryOptions = [
     { name: "Frontend", color: "#61dafb" },
     { name: "Backend", color: "#339933" },
-    { name: "Database", color: "#4169e1" },
     { name: "Tools", color: "#ff9900" },
   ];
 
