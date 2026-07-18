@@ -20,7 +20,7 @@ interface HeroProps {
 export default function Hero({ profileImage, heroTitle, heroSubtitle }: HeroProps) {
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-28 pb-20">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-32 pb-28">
       <SpaceBackground />
 
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#050510]/80 pointer-events-none" />
@@ -37,7 +37,7 @@ export default function Hero({ profileImage, heroTitle, heroSubtitle }: HeroProp
               initial={{ opacity: 0, scale: 0.7 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2, duration: 0.8, type: "spring" }}
-              className="mb-14 flex justify-center"
+              className="mb-20 flex justify-center"
             >
               <div className="relative w-40 h-40 md:w-52 md:h-52">
                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary via-accent to-secondary animate-rotate-slow opacity-50 blur-md" />
@@ -92,7 +92,7 @@ export default function Hero({ profileImage, heroTitle, heroSubtitle }: HeroProp
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9, duration: 0.8 }}
-            className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+            className="flex flex-col sm:flex-row gap-8 justify-center items-center"
           >
             <Button variant="primary" size="lg" glow>
               <a href="#projects" className="flex items-center gap-2">
@@ -113,7 +113,7 @@ export default function Hero({ profileImage, heroTitle, heroSubtitle }: HeroProp
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2 }}
-        className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
+        className="absolute bottom-14 left-1/2 transform -translate-x-1/2"
       >
         <motion.div
           animate={{ y: [0, 12, 0] }}
