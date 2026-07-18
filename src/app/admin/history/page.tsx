@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Mail, MessageCircle, Download } from "lucide-react";
 import jsPDF from "jspdf";
@@ -45,6 +45,20 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const sessionUserMap = useMemo(() => {
+    const uniqueSessions = [...new Set(allChatMessages.map((m) => m.sessionId))];
+    const sorted = uniqueSessions.sort((a, b) => {
+      const aFirst = allChatMessages.find((m) => m.sessionId === a);
+      const bFirst = allChatMessages.find((m) => m.sessionId === b);
+      return (aFirst?.createdAt || "").localeCompare(bFirst?.createdAt || "");
+    });
+    const map = new Map<string, string>();
+    sorted.forEach((id, i) => map.set(id, `User ${i + 1}`));
+    return map;
+  }, [allChatMessages]);
+
+  const getUserName = (sessionId: string) => sessionUserMap.get(sessionId) || sessionId;
+
   const fetchData = async () => {
     try {
       const res = await fetch("/api/admin/history");
@@ -75,6 +89,7 @@ export default function HistoryPage() {
 
   const filteredChatMessages = allChatMessages.filter(
     (m) =>
+      getUserName(m.sessionId).toLowerCase().includes(searchTerm.toLowerCase()) ||
       m.sessionId.toLowerCase().includes(searchTerm.toLowerCase()) ||
       m.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
       m.sender.toLowerCase().includes(searchTerm.toLowerCase())
@@ -199,7 +214,7 @@ export default function HistoryPage() {
       doc.text("No chat messages found.", 14, y + 5);
     } else {
       const chatData = filteredChatMessages.map((m) => [
-        m.sessionId.substring(0, 12) + "...",
+        getUserName(m.sessionId),
         m.sender,
         m.message.substring(0, 60) + (m.message.length > 60 ? "..." : ""),
         m.messageType,
@@ -484,8 +499,8 @@ export default function HistoryPage() {
                       key={msg.id}
                       className="hover:bg-white/[0.02] transition-colors"
                     >
-                      <td className="px-4 py-3 text-xs text-foreground/40 font-mono">
-                        {msg.sessionId.substring(0, 12)}...
+                      <td className="px-4 py-3 text-xs font-medium text-primary">
+                        {getUserName(msg.sessionId)}
                       </td>
                       <td className="px-4 py-3">
                         <span
