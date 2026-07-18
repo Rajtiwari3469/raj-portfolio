@@ -22,19 +22,22 @@ function generateSessionId(): string {
 
 function shouldShowRating(messages: ChatMsg[]): boolean {
   if (messages.length < 2) return false;
-  const lastAiMsg = [...messages].reverse().find((m) => m.sender === "ai" || m.sender === "system");
-  if (!lastAiMsg) return false;
-  const lower = lastAiMsg.message.toLowerCase();
-  return (
-    lower.includes("rate") ||
-    lower.includes("rating") ||
-    lower.includes("1-5 stars") ||
-    lower.includes("1 to 5") ||
-    lower.includes("star") ||
-    lower.includes("before you go") ||
-    lower.includes("quick rating") ||
-    lower.includes("feedback")
-  );
+  const lastRatingIdx = [...messages].reverse().findIndex((m) => m.rating !== null && m.rating !== undefined);
+  const afterLastRating = lastRatingIdx >= 0 ? messages.slice(messages.length - 1 - lastRatingIdx + 1) : messages;
+  const aiMsgs = afterLastRating.filter((m) => m.sender === "ai" || m.sender === "system");
+  return aiMsgs.some((m) => {
+    const lower = m.message.toLowerCase();
+    return (
+      lower.includes("rate") ||
+      lower.includes("rating") ||
+      lower.includes("1-5 stars") ||
+      lower.includes("1 to 5") ||
+      lower.includes("star") ||
+      lower.includes("before you go") ||
+      lower.includes("quick rating") ||
+      lower.includes("feedback")
+    );
+  });
 }
 
 function hasRated(messages: ChatMsg[]): boolean {

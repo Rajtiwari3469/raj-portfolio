@@ -15,12 +15,33 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    const chatSessions = await prisma.chatMessage.groupBy({
+    const chatSessionsRaw = await prisma.chatMessage.groupBy({
       by: ["sessionId"],
       _count: { id: true },
       _max: { createdAt: true },
       orderBy: { _max: { createdAt: "desc" } },
     });
+
+    const chatSessions = await Promise.all(
+      chatSessionsRaw.map(async (session) => {
+        const lastMessages = await prisma.chatMessage.findMany({
+          where: { sessionId: session.sessionId },
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        });
+        const ratingMsg = await prisma.chatMessage.findFirst({
+          where: { sessionId: session.sessionId, rating: { not: null } },
+          orderBy: { createdAt: "desc" },
+          select: { rating: true },
+        });
+        return {
+          sessionId: session.sessionId,
+          messageCount: session._count.id,
+          lastMessage: lastMessages[0] || null,
+          rating: ratingMsg?.rating || null,
+        };
+      })
+    );
 
     const allChatMessages = await prisma.chatMessage.findMany({
       orderBy: { createdAt: "desc" },
