@@ -338,7 +338,7 @@ function isEndingMessage(message: string): boolean {
 async function hasRatingAlready(sessionId: string): Promise<boolean> {
   try {
     const rating = await prisma.chatMessage.findFirst({
-      where: { sessionId, rating: { not: null } },
+      where: { sessionId, rating: { not: null }, deleted: false },
     });
     return rating !== null;
   } catch {
@@ -387,7 +387,7 @@ export async function POST(request: NextRequest) {
           });
         } else {
           const history = await prisma.chatMessage.findMany({
-            where: { sessionId },
+            where: { sessionId, deleted: false },
             orderBy: { createdAt: "asc" },
             select: { sender: true, message: true },
           });
@@ -427,7 +427,7 @@ export async function GET(request: NextRequest) {
     if (!sessionId) return NextResponse.json({ error: "sessionId is required" }, { status: 400 });
 
     const messages = await prisma.chatMessage.findMany({
-      where: { sessionId },
+      where: { sessionId, deleted: false },
       orderBy: { createdAt: "asc" },
     });
     return NextResponse.json(messages);
@@ -446,7 +446,7 @@ export async function DELETE(request: NextRequest) {
     const sessionId = searchParams.get("sessionId");
     if (!sessionId) return NextResponse.json({ error: "sessionId is required" }, { status: 400 });
 
-    await prisma.chatMessage.deleteMany({ where: { sessionId } });
+    await prisma.chatMessage.updateMany({ where: { sessionId }, data: { deleted: true } });
     return NextResponse.json({ message: "Chat deleted" });
   } catch (error) {
     console.error("Delete chat error:", error);

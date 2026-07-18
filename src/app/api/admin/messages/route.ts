@@ -10,6 +10,7 @@ export async function GET() {
     }
 
     const messages = await prisma.message.findMany({
+      where: { deleted: false },
       orderBy: { createdAt: "desc" },
     });
 
@@ -72,8 +73,9 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await prisma.message.delete({
+    await prisma.message.update({
       where: { id },
+      data: { deleted: true },
     });
 
     return NextResponse.json({ message: "Message deleted successfully" });

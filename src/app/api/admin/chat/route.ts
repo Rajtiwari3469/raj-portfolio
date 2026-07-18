@@ -13,6 +13,7 @@ export async function GET() {
 
     const sessions = await prisma.chatMessage.groupBy({
       by: ["sessionId"],
+      where: { deleted: false },
       _count: { id: true },
       _max: { createdAt: true },
       orderBy: { _max: { createdAt: "desc" } },
@@ -21,12 +22,12 @@ export async function GET() {
     const sessionDetails = await Promise.all(
       sessions.map(async (session) => {
         const lastMessages = await prisma.chatMessage.findMany({
-          where: { sessionId: session.sessionId },
+          where: { sessionId: session.sessionId, deleted: false },
           orderBy: { createdAt: "desc" },
           take: 1,
         });
         const unreadCount = await prisma.chatMessage.count({
-          where: { sessionId: session.sessionId, read: false, sender: "visitor" },
+          where: { sessionId: session.sessionId, read: false, sender: "visitor", deleted: false },
         });
         const ratingMsg = await prisma.chatMessage.findFirst({
           where: { sessionId: session.sessionId, rating: { not: null } },

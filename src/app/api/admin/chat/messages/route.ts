@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     }
 
     const messages = await prisma.chatMessage.findMany({
-      where: { sessionId },
+      where: { sessionId, deleted: false },
       orderBy: { createdAt: "asc" },
     });
 
@@ -132,7 +132,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "sessionId is required" }, { status: 400 });
     }
 
-    await prisma.chatMessage.deleteMany({ where: { sessionId } });
+    await prisma.chatMessage.updateMany({ where: { sessionId }, data: { deleted: true } });
 
     return NextResponse.json({ message: "Chat session deleted" });
   } catch (error) {

@@ -84,6 +84,7 @@ model Message {
   subject   String?
   message   String
   read      Boolean  @default(false)
+  deleted   Boolean  @default(false)
   createdAt DateTime @default(now())
 }
 
@@ -130,6 +131,7 @@ model ChatMessage {
   messageType String   @default("text")
   read        Boolean  @default(false)
   rating      Int?
+  deleted     Boolean  @default(false)
   createdAt   DateTime @default(now())
 }
 
