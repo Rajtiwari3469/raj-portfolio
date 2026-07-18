@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Award, ExternalLink } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Award, ExternalLink, X, Calendar, Building2, FileText } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Image from "next/image";
 
@@ -19,6 +19,7 @@ interface Certificate {
 export default function Certificates() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedCert, setSelectedCert] = useState<Certificate | null>(null);
 
   const fetchCertificates = async () => {
     try {
@@ -72,8 +73,42 @@ export default function Certificates() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: false, amount: 0.2 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="relative group cursor-pointer"
+                onClick={() => setSelectedCert(cert)}
               >
-                <GlassPanel hover glow="accent" className="h-full flex flex-col">
+                <div className="absolute -top-2 -left-2 z-10">
+                  <div className="relative">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" className="drop-shadow-lg">
+                      <polygon points="24,2 30,18 48,18 34,28 38,46 24,36 10,46 14,28 0,18 18,18" fill={`url(#gold-${index})`} stroke="#b8860b" strokeWidth="1"/>
+                      <defs>
+                        <linearGradient id={`gold-${index}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#ffd700"/>
+                          <stop offset="50%" stopColor="#ffec80"/>
+                          <stop offset="100%" stopColor="#daa520"/>
+                        </linearGradient>
+                      </defs>
+                      <text x="24" y="28" textAnchor="middle" fill="#8B6914" fontSize="14" fontWeight="bold">★</text>
+                    </svg>
+                  </div>
+                </div>
+
+                <div className="absolute -top-1 -right-1 z-10">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-600 flex items-center justify-center shadow-lg border-2 border-yellow-300/50">
+                    <Award size={18} className="text-yellow-900" />
+                  </div>
+                </div>
+
+                <div className="absolute -bottom-2 -right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400/80 to-amber-600/80 flex items-center justify-center backdrop-blur-sm">
+                    <span className="text-xs font-bold text-yellow-900">✓</span>
+                  </div>
+                </div>
+
+                <GlassPanel hover glow="gold" className="h-full flex flex-col relative overflow-visible">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                    <div className="h-6 w-1 bg-gradient-to-b from-yellow-400/80 to-transparent rounded-full" />
+                  </div>
+
                   {cert.image && (
                     <div className="h-48 rounded-xl overflow-hidden mb-4 bg-white/[0.02] border border-white/[0.04]">
                       <Image
@@ -89,7 +124,7 @@ export default function Certificates() {
 
                   {!cert.image && (
                     <div className="h-48 rounded-xl mb-4 bg-white/[0.02] border border-white/[0.04] flex items-center justify-center">
-                      <Award size={40} className="text-gold/30" />
+                      <Award size={40} className="text-yellow-500/30" />
                     </div>
                   )}
 
@@ -117,6 +152,7 @@ export default function Certificates() {
                         href={cert.pdfUrl}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
                         className="flex items-center gap-1.5 text-sm text-primary/70 hover:text-primary transition-colors"
                       >
                         <ExternalLink size={14} />
@@ -152,6 +188,128 @@ export default function Certificates() {
           </motion.div>
         )}
       </div>
+
+      <AnimatePresence>
+        {selectedCert && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md"
+            onClick={() => setSelectedCert(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ duration: 0.4, type: "spring", damping: 25 }}
+              className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
+                <div className="relative">
+                  <svg width="64" height="64" viewBox="0 0 64 64" fill="none" className="drop-shadow-2xl">
+                    <polygon points="32,2 40,24 64,24 44,38 52,62 32,48 12,62 20,38 0,24 24,24" fill="url(#modal-gold)" stroke="#b8860b" strokeWidth="1.5"/>
+                    <defs>
+                      <linearGradient id="modal-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#ffd700"/>
+                        <stop offset="50%" stopColor="#ffec80"/>
+                        <stop offset="100%" stopColor="#daa520"/>
+                      </linearGradient>
+                    </defs>
+                    <text x="32" y="36" textAnchor="middle" fill="#8B6914" fontSize="18" fontWeight="bold">★</text>
+                  </svg>
+                </div>
+              </div>
+
+              <div className="absolute -top-3 -right-3 z-20">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-600 flex items-center justify-center shadow-xl border-2 border-yellow-300/50">
+                  <Award size={22} className="text-yellow-900" />
+                </div>
+              </div>
+
+              <button
+                onClick={() => setSelectedCert(null)}
+                className="absolute -top-2 -right-2 z-30 w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-foreground/60 hover:text-foreground hover:bg-white/20 transition-all"
+              >
+                <X size={16} />
+              </button>
+
+              <div className="glass rounded-2xl p-0 overflow-hidden border border-yellow-500/20">
+                {selectedCert.image && (
+                  <div className="relative h-64 overflow-hidden bg-white/[0.02]">
+                    <Image
+                      src={selectedCert.image}
+                      alt={selectedCert.name}
+                      width={800}
+                      height={400}
+                      unoptimized
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    <div className="absolute bottom-4 left-6 right-6">
+                      <h3 className="text-2xl font-bold text-white drop-shadow-lg">{selectedCert.name}</h3>
+                    </div>
+                  </div>
+                )}
+
+                {!selectedCert.image && (
+                  <div className="relative h-32 bg-gradient-to-br from-yellow-500/10 via-amber-500/10 to-yellow-600/10 flex items-center justify-center">
+                    <Award size={48} className="text-yellow-500/40" />
+                  </div>
+                )}
+
+                <div className="p-6 space-y-4">
+                  {!selectedCert.image && (
+                    <h3 className="text-2xl font-bold gradient-text">{selectedCert.name}</h3>
+                  )}
+
+                  <div className="flex items-center gap-2 text-foreground/50">
+                    <Building2 size={16} className="text-yellow-500/60" />
+                    <span>{selectedCert.organization}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-foreground/40">
+                    <Calendar size={16} className="text-yellow-500/60" />
+                    <span>
+                      {new Date(selectedCert.date).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </span>
+                  </div>
+
+                  {selectedCert.description && (
+                    <div className="pt-4 border-t border-white/[0.05]">
+                      <div className="flex items-center gap-2 mb-2">
+                        <FileText size={14} className="text-yellow-500/60" />
+                        <span className="text-sm font-medium text-foreground/60">Description</span>
+                      </div>
+                      <p className="text-foreground/60 leading-relaxed">{selectedCert.description}</p>
+                    </div>
+                  )}
+
+                  {selectedCert.pdfUrl && (
+                    <div className="pt-4 border-t border-white/[0.05]">
+                      <a
+                        href={selectedCert.pdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-yellow-500/10 to-amber-500/10 border border-yellow-500/20 text-yellow-500/80 hover:text-yellow-400 hover:border-yellow-500/30 hover:from-yellow-500/15 hover:to-amber-500/15 transition-all"
+                      >
+                        <ExternalLink size={16} />
+                        <span className="font-medium">View Full Certificate</span>
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
