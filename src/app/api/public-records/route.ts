@@ -4,6 +4,11 @@ import { parseUserAgent, getClientIp } from "@/lib/tracking";
 
 export async function POST(request: NextRequest) {
   try {
+    const authCookie = request.cookies.get("auth-token");
+    if (authCookie?.value) {
+      return NextResponse.json({ skipped: true }, { status: 200 });
+    }
+
     const body = await request.json();
     const { page, referrer, screenWidth, screenHeight, language, sessionId } = body;
 
