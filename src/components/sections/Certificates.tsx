@@ -206,32 +206,20 @@ export default function Certificates() {
 
               <div className="glass rounded-2xl p-0 overflow-hidden border border-yellow-500/20">
                 {selectedCert.image && (
-                  <div className="relative h-64 overflow-hidden bg-white/[0.02]">
+                  <div className="relative bg-black/30">
                     <Image
                       src={selectedCert.image}
                       alt={selectedCert.name}
-                      width={800}
-                      height={400}
+                      width={1200}
+                      height={800}
                       unoptimized
-                      className="w-full h-full object-cover"
+                      className="w-full h-auto"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                    <div className="absolute bottom-4 left-6 right-6">
-                      <h3 className="text-2xl font-bold text-white drop-shadow-lg">{selectedCert.name}</h3>
-                    </div>
-                  </div>
-                )}
-
-                {!selectedCert.image && (
-                  <div className="relative h-32 bg-gradient-to-br from-yellow-500/10 via-amber-500/10 to-yellow-600/10 flex items-center justify-center">
-                    <Award size={48} className="text-yellow-500/40" />
                   </div>
                 )}
 
                 <div className="p-6 space-y-4">
-                  {!selectedCert.image && (
-                    <h3 className="text-2xl font-bold gradient-text">{selectedCert.name}</h3>
-                  )}
+                  <h3 className="text-2xl font-bold gradient-text">{selectedCert.name}</h3>
 
                   <div className="flex items-center gap-2 text-foreground/50">
                     <Building2 size={16} className="text-yellow-500/60" />
