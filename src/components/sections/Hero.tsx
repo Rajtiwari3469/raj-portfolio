@@ -38,13 +38,22 @@ export default function Hero({ profileImage, heroTitle, heroSubtitle }: HeroProp
                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary via-accent to-secondary animate-rotate-slow opacity-50 blur-md" />
                 <div className="absolute inset-1 rounded-full bg-[#050510]" />
                 <div className="absolute inset-2 rounded-full overflow-hidden border-2 border-primary/30 shadow-[0_0_40px_rgba(0,212,255,0.2)]">
-                  <Image
-                    src={profileImage}
-                    alt="Raj Tiwari"
-                    fill
-                    className="object-cover"
-                    priority
-                  />
+                  {profileImage.startsWith("data:") ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={profileImage}
+                      alt="Raj Tiwari"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Image
+                      src={profileImage}
+                      alt="Raj Tiwari"
+                      fill
+                      className="object-cover"
+                      priority
+                    />
+                  )}
                 </div>
                 <div className="absolute -inset-3 rounded-full border border-primary/10 animate-pulse-neon" />
               </div>
