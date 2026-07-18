@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Plus, Trash2, Edit3, Save, X, IndianRupee, ArrowUpDown } from "lucide-react";
+import { Plus, Trash2, Edit3, Save, X, IndianRupee } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import ConfirmModal from "@/components/ui/ConfirmModal";
@@ -35,10 +35,6 @@ export default function PricingPage() {
     description: "",
   });
 
-  useEffect(() => {
-    fetchPricing();
-  }, []);
-
   const fetchPricing = async () => {
     try {
       const res = await fetch("/api/admin/pricing");
@@ -49,6 +45,10 @@ export default function PricingPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchPricing();
+  }, []);
 
   const handleSubmit = async () => {
     if (!form.projectName || !form.totalPrice || !form.advancePrice) {
