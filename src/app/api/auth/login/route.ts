@@ -25,6 +25,11 @@ async function getStoredCredentials() {
   return { username: DEFAULT_USERNAME, passwordHash: DEFAULT_PASSWORD_HASH };
 }
 
+async function getEnvCredentials() {
+  if (!DEFAULT_PASSWORD_HASH) return null;
+  return { username: DEFAULT_USERNAME, passwordHash: DEFAULT_PASSWORD_HASH };
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -38,8 +43,10 @@ export async function POST(request: NextRequest) {
     }
 
     const stored = await getStoredCredentials();
+    const envCreds = await getEnvCredentials();
 
-    if (username !== stored.username) {
+    const usernameMatch = username === stored.username || (envCreds && username === envCreds.username);
+    if (!usernameMatch) {
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 }
@@ -47,7 +54,8 @@ export async function POST(request: NextRequest) {
     }
 
     const isValidPassword = await bcrypt.compare(password, stored.passwordHash);
-    if (!isValidPassword) {
+    const isValidEnvPassword = envCreds ? await bcrypt.compare(password, envCreds.passwordHash) : false;
+    if (!isValidPassword && !isValidEnvPassword) {
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 }
