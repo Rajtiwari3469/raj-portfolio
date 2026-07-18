@@ -2,6 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
+async function ensurePricingTable(prisma: ReturnType<typeof getPrisma>) {
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "Pricing" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "projectName" TEXT NOT NULL,
+      "totalPrice" INTEGER NOT NULL,
+      "advancePrice" INTEGER NOT NULL,
+      "description" TEXT,
+      "active" BOOLEAN NOT NULL DEFAULT true,
+      "order" INTEGER NOT NULL DEFAULT 0,
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" TIMESTAMP(3) NOT NULL
+    );
+  `);
+}
+
 export async function GET() {
   try {
     const prisma = getPrisma();
@@ -32,6 +48,8 @@ export async function POST(request: NextRequest) {
     }
 
     const prisma = getPrisma();
+    await ensurePricingTable(prisma);
+
     const maxOrder = await prisma.pricing.findMany({ select: { order: true }, orderBy: { order: "desc" }, take: 1 });
     const nextOrder = maxOrder.length > 0 ? maxOrder[0].order + 1 : 0;
 
