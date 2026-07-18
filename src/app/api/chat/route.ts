@@ -28,9 +28,9 @@ async function getPricingContext(): Promise<string> {
       return `- ${p.projectName}${desc}: ₹${p.totalPrice.toLocaleString("en-IN")} total | ₹${p.advancePrice.toLocaleString("en-IN")} advance | ₹${pending.toLocaleString("en-IN")} pending`;
     });
 
-    return `PRICING (Raj's actual rates — use these exactly):
+    return `ACTUAL PRICING (use these EXACT prices — never make up numbers):
 ${lines.join("\n")}
-Always mention advance + pending split when discussing any project.`;
+Always mention advance + pending split when discussing any project. If project type is not in the list, say you'll connect them with Sir for a custom quote.`;
   } catch {
     return `PRICING (Default):
 - Web Development: ₹15,000+ | Mobile Apps: ₹25,000+ | Full-Stack: ₹25,000+
@@ -40,144 +40,220 @@ Always mention advance + pending split when discussing any project.`;
 }
 
 function buildSystemPrompt(pricingContext: string): string {
-  return `You are Raj Tiwari's personal AI assistant — you work directly for Raj on his portfolio website. You are NOT a generic chatbot. You are a real, warm, smart human-like assistant who genuinely cares about helping visitors.
+  return `You are a smart, friendly, and professional AI assistant working on Raj Tiwari's portfolio website. You are a REAL person-like assistant — NOT a robot, NOT a generic chatbot. You think before replying, understand context, and respond naturally.
 
-## YOUR PERSONALITY
-- You are witty, friendly, and professional — like a smart friend who works in tech
-- You use casual but respectful language — mix of formal and friendly
-- You use emojis naturally (but not too much) — like 💡🚀✨👋👍
-- You have a sense of humor — crack light jokes when appropriate
-- You are enthusiastic about Raj's work — you genuinely believe in his skills
-- You never sound robotic or templated — every response feels unique and personal
-- You use contractions (I'm, we've, that's, don't, won't) to sound natural
-- You vary your sentence structure — sometimes short, sometimes detailed
-- You ask follow-up questions to keep the conversation going
+## YOUR CORE BEHAVIOR
 
-## SMART CONVERSATION RULES
+### 1. GREETINGS — Match their energy
+When someone says hi/hello/hey:
+- If they say "hi" → reply with "Hey! 👋" or "Hi there!" (short, matching energy)
+- If they say "hello" → reply with "Hello! 😊" 
+- If they say "hey" → reply with "Hey! What's up?"
+- If they say "good morning" → reply with "Good morning! ☀️"
+- ALWAYS follow up with a question like "How can I help you?" or "What brings you here?"
+- NEVER say "Welcome to Raj Tiwari's portfolio" on every greeting — vary it
 
-### GREETINGS
-Don't always say "Hello! Welcome to Raj Tiwari's portfolio." Mix it up:
-- "Hey there! 👋 What brings you here today?"
-- "Hi! Great to see you! What can I help you with?"
-- "Hey! Welcome! I'm Raj's assistant — what's on your mind?"
-- "Hello! 😊 Looking for something specific or just browsing?"
+### 2. REPLY TO RANDOM/ANY MESSAGE — Read and understand
+- Read the visitor's message carefully BEFORE replying
+- Understand the INTENT behind their message, not just keywords
+- If they say something random/funny → be playful, then redirect to how you can help
+- If they say something confusing → ask for clarification politely
+- If they send just emojis → respond with emojis and ask what they need
+- If they ask a general question → answer it briefly, then ask about their project needs
+- If they seem frustrated → be empathetic and helpful
+- NEVER give robotic/template responses — every reply must feel unique
+- If they ask "who are you" → "I'm Raj's personal assistant! I help with project inquiries, pricing, and everything related to Raj's work. What can I do for you? 😊"
 
-### WHEN ASKED ABOUT RAJ
-- "Raj is a BCA CS & IT student, but trust me, his skills go way beyond academics! He's a software developer and AI tech enthusiast who builds amazing web apps, mobile apps, and AI solutions. 🚀"
-- "Oh, Raj? He's brilliant! BCA student by day, full-stack developer and AI enthusiast by night. He's built some incredible projects — want to see some?"
-- "Raj Tiwari — BCA CS & IT student, software developer, and AI technology enthusiast. He's passionate about building innovative solutions. What would you like to know about him?"
+### 3. ABOUT RAJ — Don't reveal details, redirect to Sir
+When someone asks about Raj (who is Raj, tell me about Raj, Raj kaun hai, Raj details, etc.):
+- NEVER give Raj's bio, education details, skills, or personal info
+- ALWAYS say something like:
+  - "Sir will connect with you soon! 😊 In the meantime, is there anything I can help you with regarding projects or services?"
+  - "Sir will be in touch with you shortly! Is there something specific I can help you with right now?"
+  - "Sir personally handles all client relationships and will connect with you soon! Meanwhile, feel free to ask me about our services and pricing. 🚀"
+- Keep it brief and professional
 
-### WHEN DISCUSSING PROJECTS & PRICING
-- Always show EXACT prices from the pricing list
-- Break it down naturally: "So for a web app, we're looking at ₹25,000 total — you'd pay ₹15,000 upfront and the remaining ₹10,000 after we deliver. Pretty fair, right? 😊"
-- If project not in list: "Hmm, that's a custom one! Let me connect you with Raj directly for a personalized quote. Just drop him a Touch Message with your requirements and he'll get back to you super fast! 📩"
+### 4. PROJECT DEVELOPMENT & PRICING — Use EXACT admin prices
+When someone asks about development, projects, services, or pricing:
+- ALWAYS use the EXACT prices from the pricing list below
+- Present prices naturally in conversation:
+  - "For a web app, we're looking at ₹X total — ₹Y upfront and ₹Z on delivery."
+  - "Our rates start from ₹X for [project type]. Want me to break it down?"
+- If their project type matches a pricing item → show the EXACT price
+- If their project type is NOT in the list → say: "That's a custom project! Sir will connect with you soon for a personalized quote. You can also send a Touch Message with your requirements! 📩"
+- ALWAYS mention the advance + pending split
+- Be confident about pricing — never say "I think" or "maybe around"
 
-### WHEN VISITOR WANTS TO PROCEED
-- "Awesome! 🎉 To get started, just use the Touch Message feature on the website — share your project details and Raj will personally reach out to you within a few hours!"
-- "Love the enthusiasm! 🚀 The best next step is to send a Touch Message with your requirements. Raj reviews every message personally!"
+### 5. WHEN VISITOR WANTS TO PROCEED / CONTACT
+- "Great! 🎉 You can send a Touch Message on the website — share your project details and Sir will personally reach out to you within a few hours!"
+- "Awesome! The best next step is to send a Touch Message with your requirements. Sir reviews every message personally! 📩"
 
-### WHEN VISITOR IS CONFUSED OR UNCLEAR
-- "Hmm, I want to make sure I understand you right — could you tell me a bit more about what you're looking for? 😊"
-- "I'd love to help! Can you give me a few more details about your project?"
+### 6. CONVERSATION ENDING — Ask for rating
+When visitor says bye/thanks/done/goodbye/see you/nothing else:
+- FIRST say goodbye warmly
+- THEN ask for rating: "Before you go, could you rate our chat from 1-5 stars? ⭐"
+- Example: "It was great chatting with you! 😊 Before you go, could you rate our chat from 1-5 stars? It really helps us improve!"
+- If they already rated → just say goodbye warmly, do NOT ask again
 
-### WHEN VISITOR SAYS THANK YOU / BYE / DONE
-- "It was great chatting with you! If you have a sec, could you rate your experience from 1-5 stars? ⭐ It really helps us improve! Have an amazing day! 🌟"
-- "Glad I could help! Before you go, would you mind rating our chat? Just pick 1-5 stars! 🙏 Have a wonderful day!"
+### 7. RATING RECEIVED — Thank and close
+When they give a rating (1-5):
+- "Thank you so much! 🙏 That means a lot! Have an amazing day! ✨"
+- "Wow, thanks for the feedback! 🌟 That really helps us improve! Take care!"
+- Do NOT ask for rating again after this
 
-### WHEN VISITOR GIVES RATING
-- "Wow, thank you so much! 🙏 That means a lot to us! Have an awesome day ahead! ✨"
-- "You're awesome! Thanks for the feedback — it motivates us to keep improving! 🌟"
+### 8. HANDLING OFF-TOPIC / RANDOM QUESTIONS
+- If they ask about weather → Answer briefly, then: "Anyway, anything I can help you with regarding our services?"
+- If they ask "what can you do" → "I can help with project inquiries, pricing info, and connect you with Sir! What are you looking for?"
+- If they send gibberish → "Hey, I didn't quite catch that! 😅 Could you rephrase? I'm here to help!"
+- If they ask about competitors → Stay professional, focus on what we offer
+- If they ask technical questions → Give a brief helpful answer, then ask about their project
 
-### HANDLING RANDOM/UNRELATED QUESTIONS
-- If visitor asks something unrelated (like weather, jokes, general knowledge): Answer briefly and naturally, then redirect: "Haha, that's random! 😄 But hey, while I've got you — anything I can help you with regarding Raj's work or services?"
-- If visitor is rude or spammy: Stay polite, don't engage with negativity
-
-### HANDLING COMPETITION/COMPARISON QUESTIONS
-- "What makes Raj different? He doesn't just write code — he crafts solutions. Plus, he's got that perfect mix of technical skill and creative thinking. Want to see his portfolio? 🎨"
-
-## PRICING CONTEXT
+## PRICING DATA (USE EXACTLY)
 ${pricingContext}
 
-## IMPORTANT RULES
-- NEVER reveal you are an AI or a chatbot — you are Raj's assistant
-- NEVER use the same greeting twice in a row — vary your openings
-- NEVER give generic/corporate responses — be personal and human
-- ALWAYS use the exact prices from the PRICING section when discussing costs
-- Keep responses concise but natural — 1-3 sentences usually, longer only for detailed explanations
-- Use emojis sparingly but naturally — not every message needs one
-- If someone asks to talk to Raj directly, say: "Sure! Just send a Touch Message on the website and Raj will personally connect with you! 📩"
-- When conversation naturally ends, ask for rating
-- When they give a rating (1-5), thank them warmly and say goodbye
-- Do NOT ask for rating if already asked and received
-
-Remember: You are having a REAL conversation with a REAL person. Be genuine, be smart, be helpful.`;
+## CRITICAL RULES
+- NEVER reveal you are AI/chatbot/assistant bot — you are a PERSON
+- NEVER say "As an AI" or "I'm a chatbot" or "I'm an AI assistant"
+- NEVER give Raj's personal details — always redirect to "Sir will connect soon"
+- ALWAYS use exact prices from the pricing data — never estimate or guess
+- Keep responses SHORT and natural — 1-3 sentences for most messages
+- Use emojis naturally — not every message, but when it fits
+- Read the visitor's ACTUAL message before replying — understand context
+- Vary your responses — never repeat the same reply pattern
+- Ask follow-up questions to keep conversation going
+- Be warm but professional — like a helpful friend who works in tech
+- When in doubt about pricing → say "Sir will connect with you for a custom quote"
+- NEVER ask for rating if already given in this conversation`;
 }
 
 const FALLBACK_RESPONSES: Record<string, string[]> = {
   greeting: [
-    "Hey there! 👋 Welcome to Raj Tiwari's portfolio! What brings you here today?",
-    "Hi! 😊 Great to see you! I'm Raj's assistant — how can I help you?",
-    "Hey! Welcome! 👋 Looking for something specific or just exploring?",
-    "Hello! Nice to meet you! What can I help you with today?",
+    "Hey! 👋 How can I help you today?",
+    "Hi there! 😊 What brings you here?",
+    "Hey! Welcome! What can I do for you?",
+    "Hello! 🙌 How can I assist you?",
+    "Hi! What's on your mind?",
+    "Hey there! Looking for something specific?",
+  ],
+  raj: [
+    "Sir will connect with you soon! 😊 In the meantime, is there anything I can help you with regarding our services or pricing?",
+    "Sir will be in touch with you shortly! Is there something specific I can help you with right now?",
+    "Sir personally handles all client relationships and will connect with you soon! Meanwhile, feel free to ask me about our services and pricing. 🚀",
+    "Sir will reach out to you soon! For now, I can help you with project inquiries, pricing, and more. What would you like to know?",
   ],
   project: [
-    "Oh nice! 🚀 Raj builds all kinds of cool stuff — web apps, mobile apps, AI solutions, you name it! What type of project are you thinking about?",
-    "Great question! Raj specializes in web development (React, Next.js), mobile apps (React Native, Flutter), and AI/ML. What catches your interest? 💡",
-    "Raj has worked on some amazing projects! From e-commerce platforms to AI-powered apps. Tell me more about what you need! 🎯",
+    "We build all kinds of projects — web apps, mobile apps, AI solutions, and more! What type of project are you thinking about? 🚀",
+    "Great! We specialize in web development, mobile apps, and AI/ML solutions. Tell me more about what you need! 💡",
+    "Awesome! From e-commerce platforms to AI-powered apps — we've got you covered. What's your project about? 🎯",
+    "We work on full-stack web apps, mobile apps, and custom software. What kind of project do you have in mind?",
   ],
   pricing: [
-    "I'd love to share our pricing! We have competitive rates for web dev, mobile apps, and full-stack projects. What type of project are you interested in? 💰",
-    "Pricing depends on the project type — we've got options starting from ₹8,000 for portfolios up to ₹30,000+ for AI/ML solutions. What are you looking for?",
-    "Great question! Our pricing is super transparent. Just let me know what kind of project you have in mind and I'll break down the costs for you! ✨",
+    "I'd love to share our pricing! What type of project are you interested in? I'll break down the exact costs for you 💰",
+    "Great question! Our pricing is transparent. Just tell me what kind of project you need and I'll give you the exact numbers! ✨",
+    "Pricing depends on the project type. What are you looking to build? I'll share the exact rates! 💵",
   ],
   availability: [
-    "Raj is currently available for freelance work! 🎉 He typically responds within a few hours. Want to discuss your project?",
-    "Good news — Raj has openings right now! He's always excited to take on new challenges. What's your project about? 🚀",
-    "Raj is available and ready to roll! 💪 He loves working on interesting projects. Tell me more about what you need!",
+    "Sir is available for freelance work! 🎉 He typically responds within a few hours. Want to discuss your project?",
+    "Good news — Sir has openings right now! He's always excited to take on new challenges. What's your project about? 🚀",
+    "Sir is available and ready to work! 💪 What kind of project are you looking to build?",
   ],
-  touch: [
-    "To get started, just use the Touch Message feature on the website! Share your project details and Raj will personally reach out to you. 📩",
-    "The best way to connect is through Touch Message — Raj reviews every message personally and gets back to you fast! 📩",
-    "Send a Touch Message with your requirements — Raj will give you a detailed response within hours! 📩",
+  contact: [
+    "You can send a Touch Message on the website! Share your project details and Sir will personally reach out to you. 📩",
+    "The best way to connect is through Touch Message — Sir reviews every message personally and gets back to you fast! 📩",
+    "Send a Touch Message with your requirements — Sir will give you a detailed response within hours! 📩",
   ],
   ending: [
-    "It was awesome chatting with you! 🌟 If you could take a second to rate our chat (1-5 stars), that would mean a lot! Have a great day! ✨",
-    "Glad I could help! Before you go — would you mind rating our conversation? Just pick 1-5 stars! ⭐ Thanks and have an amazing day!",
-    "Great chatting with you! 🎉 A quick 1-5 star rating would really help us out! Have a wonderful day ahead! 💫",
+    "It was great chatting with you! 😊 Before you go, could you rate our chat from 1-5 stars? It really helps us improve!",
+    "Glad I could help! Before you go — would you mind rating our conversation? Just pick 1-5 stars! ⭐ Have a wonderful day!",
+    "Thanks for chatting! 🌟 A quick 1-5 star rating would really help us out! Have an amazing day ahead!",
+    "Awesome chatting with you! 🎉 Before you go, could you rate our chat 1-5 stars? Take care! ✨",
   ],
   rating: [
-    "You're the best! 🙏 Thank you so much for the feedback! Have an incredible day! ✨",
-    "Aww, thanks! 🌟 That really means a lot to us! Take care and good luck with everything! 💫",
-    "Thank you! 🎉 Your feedback motivates us to keep doing great work! Have an awesome day! 🚀",
+    "Thank you so much! 🙏 That means a lot! Have an amazing day! ✨",
+    "Wow, thanks! 🌟 That really helps us improve! Take care and good luck!",
+    "You're awesome! 🎉 Thanks for the feedback — it motivates us to keep doing great work! Have a wonderful day! 🚀",
+    "Thanks a ton! 🙌 Your feedback means the world to us! Have an incredible day ahead! 💫",
+  ],
+  thanks: [
+    "You're welcome! 😊 Is there anything else I can help you with?",
+    "Happy to help! 🙌 Anything else on your mind?",
+    "Anytime! Let me know if you need anything else! 👍",
+  ],
+  confusion: [
+    "Hmm, I want to make sure I understand you right — could you tell me a bit more? 😊",
+    "I'd love to help! Can you give me a few more details about what you're looking for?",
+    "Could you elaborate a little? The more details, the better I can assist! 💡",
+  ],
+  random: [
+    "Haha, that's interesting! 😄 While I've got you — anything I can help you with regarding our services?",
+    "Oh cool! 😊 By the way, are you looking for any development services? I can help with that!",
+    "Interesting! 🤔 Is there anything specific I can help you with today?",
+    "That's random! 😄 But hey, while I'm here — do you have any project needs I can help with?",
   ],
   default: [
     "That's interesting! Tell me more about what you're looking for — I'd love to help! 😊",
-    "Hmm, I want to make sure I understand you right. Could you give me a bit more context? 💡",
-    "Great question! Let me think... While I figure that out, can you tell me more about your project? 🤔",
-    "I'd love to help with that! Could you elaborate a little? The more details, the better I can assist! ✨",
+    "Hmm, I want to make sure I understand. Could you give me a bit more context? 💡",
+    "Great question! Can you tell me more about your project needs? The more details, the better! 🎯",
+    "I'd love to help with that! Could you elaborate a little? ✨",
   ],
 };
 
 function getFallbackResponse(message: string): string {
-  const lower = message.toLowerCase();
-  let category = "default";
+  const lower = message.toLowerCase().trim();
 
-  if (lower.match(/\b(hi|hello|hey|good morning|good evening|greetings|sup|yo|hola)\b/)) {
-    category = "greeting";
-  } else if (lower.match(/\b(project|website|app|development|build|create|develop|mobile|web)\b/)) {
-    category = "project";
-  } else if (lower.match(/\b(price|pricing|cost|charge|fees|how much|rate|budget|advance|pending|expensive|cheap|affordable)\b/)) {
-    category = "pricing";
-  } else if (lower.match(/\b(available|free|time|when|schedule|consultation|meeting|busy|start)\b/)) {
-    category = "availability";
-  } else if (lower.match(/\b(proceed|continue|contact|touch|connect|details|consult|talk|raj|speak)\b/)) {
-    category = "touch";
-  } else if (lower.match(/\b(bye|thank|done|goodbye|see you|end|that's all|nothing else)\b/)) {
-    category = "ending";
+  if (lower.match(/^(hi|hello|hey|yo|sup|hiya|howdy|hola|namaste|good\s*(morning|afternoon|evening)|greetings)$/)) {
+    return FALLBACK_RESPONSES.greeting[Math.floor(Math.random() * FALLBACK_RESPONSES.greeting.length)];
   }
 
-  const options = FALLBACK_RESPONSES[category];
-  return options[Math.floor(Math.random() * options.length)];
+  if (lower.match(/\b(who.*(ra[jz]|sir)|tell.*about.*ra[jz]|ra[jz].*kaun|ra[jz].*info|ra[jz].*detail|ra[jz].*bio|ra[jz].*background|about.*ra[jz]|ra[jz].*about|know.*ra[jz]|ra[jz].*know)\b/)) {
+    return FALLBACK_RESPONSES.raj[Math.floor(Math.random() * FALLBACK_RESPONSES.raj.length)];
+  }
+
+  if (lower.match(/\b(price|pricing|cost|charge|fees|how\s*much|rate|budget|advance|pending|expensive|cheap|affordable|tariff|quotation|quote)\b/)) {
+    return FALLBACK_RESPONSES.pricing[Math.floor(Math.random() * FALLBACK_RESPONSES.pricing.length)];
+  }
+
+  if (lower.match(/\b(project|website|app|development|build|create|develop|mobile|web|software|saas|ecommerce|e-commerce|dashboard|blog|portfolio|ai|ml|chatbot|api|frontend|backend|full\s*stack)\b/)) {
+    return FALLBACK_RESPONSES.project[Math.floor(Math.random() * FALLBACK_RESPONSES.project.length)];
+  }
+
+  if (lower.match(/\b(available|free|time|when|schedule|consultation|meeting|busy|start|start\s*working|hiring|hire|freelance)\b/)) {
+    return FALLBACK_RESPONSES.availability[Math.floor(Math.random() * FALLBACK_RESPONSES.availability.length)];
+  }
+
+  if (lower.match(/\b(proceed|continue|contact|touch|connect|details|consult|talk|speak|reach|message|call|email)\b/)) {
+    return FALLBACK_RESPONSES.contact[Math.floor(Math.random() * FALLBACK_RESPONSES.contact.length)];
+  }
+
+  if (lower.match(/\b(thank|thanks|thx|ty|appreciate)\b/)) {
+    return FALLBACK_RESPONSES.thanks[Math.floor(Math.random() * FALLBACK_RESPONSES.thanks.length)];
+  }
+
+  if (lower.match(/\b(bye|goodbye|see\s*you|done|that'?s\s*all|nothing\s*else|end|quit|exit|later|gotta\s*go|have\s*to\s*go|talk\s*later)\b/)) {
+    return FALLBACK_RESPONSES.ending[Math.floor(Math.random() * FALLBACK_RESPONSES.ending.length)];
+  }
+
+  if (lower.match(/\b(what\s*can\s*you\s*do|what\s*do\s*you\s*do|help|services|what\s*services|capabilities)\b/)) {
+    return "I can help you with project inquiries, pricing info, and connect you with Sir! I can tell you about web development, mobile apps, AI solutions, and more. What are you looking for? 😊";
+  }
+
+  if (lower.match(/\b(who\s*are\s*you|what\s*are\s*you|your\s*name|introduce\s*yourself)\b/)) {
+    return "I'm Raj's personal assistant! I help with project inquiries, pricing, and everything related to our services. What can I do for you? 😊";
+  }
+
+  if (lower.match(/\b(weather|joke|funny|laugh|entertain|music|movie|game|sport|cricket|football|score)\b/)) {
+    return FALLBACK_RESPONSES.random[Math.floor(Math.random() * FALLBACK_RESPONSES.random.length)];
+  }
+
+  if (lower.match(/\b(good|great|nice|awesome|amazing|cool|wow|ok|okay|fine|alright|hmm|oh|ah|um)\b/) && lower.length < 15) {
+    return "😊 That's great! Is there anything I can help you with regarding our services or projects?";
+  }
+
+  if (lower.match(/\?$/)) {
+    return FALLBACK_RESPONSES.confusion[Math.floor(Math.random() * FALLBACK_RESPONSES.confusion.length)];
+  }
+
+  return FALLBACK_RESPONSES.default[Math.floor(Math.random() * FALLBACK_RESPONSES.default.length)];
 }
 
 const MODELS = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
@@ -227,14 +303,14 @@ async function generateAIReply(
 
     const historyText = conversationHistory
       .slice(-10)
-      .map((m) => `${m.sender === "visitor" ? "Visitor" : "Raj's Assistant"}: ${m.message}`)
+      .map((m) => `${m.sender === "visitor" ? "Visitor" : "Assistant"}: ${m.message}`)
       .join("\n");
 
-    const fullPrompt = `${systemPrompt}\n\nCONVERSATION HISTORY (last 10 messages for context):\n${historyText}\n\nVisitor just said: "${visitorMessage}"\n\nRespond naturally as Raj's Assistant. Be unique, be human, be smart:`;
+    const fullPrompt = `${systemPrompt}\n\nCONVERSATION HISTORY (for context — understand what has been discussed):\n${historyText}\n\nVisitor just said: "${visitorMessage}"\n\nRead the visitor's message carefully. Understand their intent. Reply naturally and smartly as a real human assistant would:`;
 
     const aiReply = await callGemini(fullPrompt, apiKey);
     if (aiReply) {
-      const cleaned = aiReply.replace(/^(Raj's Assistant|Assistant):\s*/i, "").trim();
+      const cleaned = aiReply.replace(/^(Assistant|Raj's Assistant|AI Assistant):\s*/i, "").trim();
       return cleaned;
     }
     return getFallbackResponse(visitorMessage);
@@ -254,6 +330,22 @@ function detectRating(message: string): number | null {
   return null;
 }
 
+function isEndingMessage(message: string): boolean {
+  const lower = message.toLowerCase().trim();
+  return /\b(bye|goodbye|see\s*you|done|that'?s\s*all|nothing\s*else|end|quit|exit|later|gotta\s*go|have\s*to\s*go|talk\s*later|good\s*night|gn|cya|ttyl|brb)\b/.test(lower);
+}
+
+async function hasRatingAlready(sessionId: string): Promise<boolean> {
+  try {
+    const rating = await prisma.chatMessage.findFirst({
+      where: { sessionId, rating: { not: null } },
+    });
+    return rating !== null;
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -269,8 +361,7 @@ export async function POST(request: NextRequest) {
         data: { sessionId, sender: "visitor", message, messageType: "text", rating: ratingValue },
       });
       if (ratingValue) {
-        const options = FALLBACK_RESPONSES.rating;
-        const thankYou = options[Math.floor(Math.random() * options.length)];
+        const thankYou = FALLBACK_RESPONSES.rating[Math.floor(Math.random() * FALLBACK_RESPONSES.rating.length)];
         await prisma.chatMessage.create({
           data: { sessionId, sender: "ai", message: thankYou, messageType: "text" },
         });
@@ -290,8 +381,7 @@ export async function POST(request: NextRequest) {
         const rating = detectRating(message);
         if (rating) {
           await prisma.chatMessage.update({ where: { id: chatMessage.id }, data: { rating } });
-          const options = FALLBACK_RESPONSES.rating;
-          const thankYou = options[Math.floor(Math.random() * options.length)];
+          const thankYou = FALLBACK_RESPONSES.rating[Math.floor(Math.random() * FALLBACK_RESPONSES.rating.length)];
           await prisma.chatMessage.create({
             data: { sessionId, sender: "ai", message: thankYou, messageType: "text" },
           });
@@ -303,10 +393,21 @@ export async function POST(request: NextRequest) {
           });
           const conversationHistory = history.map((m) => ({ sender: m.sender, message: m.message }));
           const aiReply = await generateAIReply(message, conversationHistory);
+
           if (aiReply) {
             await prisma.chatMessage.create({
               data: { sessionId, sender: "ai", message: aiReply, messageType: "text" },
             });
+
+            if (isEndingMessage(message)) {
+              const alreadyRated = await hasRatingAlready(sessionId);
+              if (!alreadyRated) {
+                const ratingPrompt = FALLBACK_RESPONSES.ending[Math.floor(Math.random() * FALLBACK_RESPONSES.ending.length)];
+                await prisma.chatMessage.create({
+                  data: { sessionId, sender: "ai", message: ratingPrompt, messageType: "text" },
+                });
+              }
+            }
           }
         }
       }

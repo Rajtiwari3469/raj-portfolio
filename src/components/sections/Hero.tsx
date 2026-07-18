@@ -3,13 +3,8 @@
 import { motion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
 import Button from "@/components/ui/Button";
-import dynamic from "next/dynamic";
+import SpaceBackground from "@/components/three/SpaceBackground";
 import Image from "next/image";
-
-const SpaceBackground = dynamic(() => import("@/components/three/SpaceBackground"), {
-  ssr: false,
-  loading: () => <div className="fixed inset-0 -z-10 bg-[#050510]" />,
-});
 
 interface HeroProps {
   profileImage: string | null;

@@ -21,15 +21,19 @@ function generateSessionId(): string {
 }
 
 function shouldShowRating(messages: ChatMsg[]): boolean {
-  if (messages.length < 4) return false;
-  const lastAiMsg = [...messages].reverse().find((m) => m.sender === "ai");
+  if (messages.length < 2) return false;
+  const lastAiMsg = [...messages].reverse().find((m) => m.sender === "ai" || m.sender === "system");
   if (!lastAiMsg) return false;
   const lower = lastAiMsg.message.toLowerCase();
   return (
     lower.includes("rate") ||
     lower.includes("rating") ||
     lower.includes("1-5 stars") ||
-    lower.includes("1 to 5")
+    lower.includes("1 to 5") ||
+    lower.includes("star") ||
+    lower.includes("before you go") ||
+    lower.includes("quick rating") ||
+    lower.includes("feedback")
   );
 }
 
