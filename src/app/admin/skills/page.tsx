@@ -2,14 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Edit, Trash2, Loader2, Code2, Upload, X } from "lucide-react";
+import { Plus, Edit, Trash2, Loader2, Code2 } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useToast } from "@/components/ui/Toast";
-import Image from "next/image";
 
 interface Skill {
   id: string;
@@ -31,12 +30,9 @@ export default function SkillsPage() {
     name: "",
     category: "Programming",
     level: 50,
-    icon: "",
-    order: 0,
   });
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isUploadingIcon, setIsUploadingIcon] = useState(false);
 
   const fetchSkills = async () => {
     try {
@@ -57,34 +53,14 @@ export default function SkillsPage() {
     fetchSkills();
   }, []);
 
-  const handleIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setIsUploadingIcon(true);
-    try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-      if (res.ok) {
-        const data = await res.json();
-        setFormData({ ...formData, icon: data.url });
-        toast("Icon uploaded");
-      } else {
-        toast("Upload failed", "error");
-      }
-    } catch {
-      toast("Upload failed", "error");
-    }
-    setIsUploadingIcon(false);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
     try {
       const payload = {
-        ...formData,
-        icon: formData.icon || null,
+        name: formData.name,
+        category: formData.category,
+        level: formData.level,
       };
 
       let res;
@@ -144,8 +120,6 @@ export default function SkillsPage() {
         name: skill.name,
         category: skill.category,
         level: skill.level,
-        icon: skill.icon || "",
-        order: skill.order,
       });
     } else {
       setEditingSkill(null);
@@ -153,8 +127,6 @@ export default function SkillsPage() {
         name: "",
         category: "Programming",
         level: 80,
-        icon: "",
-        order: 0,
       });
     }
     setIsModalOpen(true);
@@ -345,45 +317,6 @@ export default function SkillsPage() {
               className="w-full accent-primary"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Icon</label>
-            {formData.icon ? (
-              <div className="relative inline-block">
-                <Image
-                  src={formData.icon}
-                  alt="Icon"
-                  width={64}
-                  height={64}
-                  unoptimized
-                  className="w-16 h-16 object-cover rounded-lg border border-white/10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, icon: "" })}
-                  className="absolute -top-2 -right-2 p-1 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            ) : (
-              <label className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-primary/30 transition-colors">
-                {isUploadingIcon ? <Loader2 size={20} className="text-foreground/30 mb-1 animate-spin" /> : <Upload size={20} className="text-foreground/30 mb-1" />}
-                <span className="text-xs text-foreground/40">{isUploadingIcon ? "Uploading..." : "Click to upload icon"}</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleIconUpload}
-                  className="hidden"
-                />
-              </label>
-            )}
-          </div>
-          <Input
-            label="Order"
-            type="number"
-            value={formData.order}
-            onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
-          />
           <div className="flex gap-4 pt-4">
             <Button type="button" variant="ghost" onClick={closeModal}>
               Cancel
