@@ -23,6 +23,7 @@ interface ChatMessage {
   message: string;
   messageType: string;
   read: boolean;
+  rating?: number | null;
   createdAt: string;
 }
 
@@ -31,6 +32,7 @@ interface ChatSession {
   messageCount: number;
   lastMessage: ChatMessage | null;
   unreadCount: number;
+  rating?: number | null;
 }
 
 type Tab = "messages" | "chat";
@@ -130,6 +132,10 @@ export default function HistoryPage() {
     );
     y += 5;
     doc.text(`Total Chat Sessions: ${chatSessions.length}`, 14, y);
+    y += 5;
+    doc.text(`Rated Sessions: ${chatSessions.filter((s) => s.rating).length}`, 14, y);
+    y += 5;
+    doc.text(`Average Rating: ${stats.averageRating}/5`, 14, y);
     y += 10;
 
     // Touch Message Record
@@ -198,22 +204,24 @@ export default function HistoryPage() {
         m.message.substring(0, 60) + (m.message.length > 60 ? "..." : ""),
         m.messageType,
         m.read ? "Read" : "Pending (Chat)",
+        m.rating ? `${m.rating}/5` : "—",
         formatDate(m.createdAt),
       ]);
 
       autoTable(doc, {
         startY: y,
-        head: [["Session", "Sender", "Message", "Type", "Status", "Date"]],
+        head: [["Session", "Sender", "Message", "Type", "Status", "Rating", "Date"]],
         body: chatData,
         styles: { fontSize: 7, cellPadding: 2 },
         headStyles: { fillColor: [0, 100, 200], textColor: 255 },
         columnStyles: {
-          0: { cellWidth: 25 },
-          1: { cellWidth: 20 },
-          2: { cellWidth: 50 },
-          3: { cellWidth: 20 },
-          4: { cellWidth: 30 },
-          5: { cellWidth: 30 },
+          0: { cellWidth: 22 },
+          1: { cellWidth: 18 },
+          2: { cellWidth: 45 },
+          3: { cellWidth: 18 },
+          4: { cellWidth: 28 },
+          5: { cellWidth: 15 },
+          6: { cellWidth: 28 },
         },
         didParseCell: (data) => {
           if (
@@ -222,6 +230,14 @@ export default function HistoryPage() {
             data.cell.raw === "Pending (Chat)"
           ) {
             data.cell.styles.textColor = [200, 150, 0];
+            data.cell.styles.fontStyle = "bold";
+          }
+          if (
+            data.section === "body" &&
+            data.column.index === 5 &&
+            data.cell.raw !== "—"
+          ) {
+            data.cell.styles.textColor = [245, 158, 11];
             data.cell.styles.fontStyle = "bold";
           }
         },
@@ -239,6 +255,14 @@ export default function HistoryPage() {
     unreadChatMessages: allChatMessages.filter(
       (m) => !m.read && m.sender === "visitor"
     ).length,
+    ratedSessions: chatSessions.filter((s) => s.rating).length,
+    averageRating:
+      chatSessions.filter((s) => s.rating).length > 0
+        ? (
+            chatSessions.reduce((sum, s) => sum + (s.rating || 0), 0) /
+            chatSessions.filter((s) => s.rating).length
+          ).toFixed(1)
+        : "0",
   };
 
   if (loading) {
@@ -267,7 +291,7 @@ export default function HistoryPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
         <div className="glass rounded-xl p-3 border border-white/[0.08]">
           <p className="text-foreground/40 text-xs mb-1">Total Messages</p>
           <p className="text-xl font-bold text-primary">{stats.totalMessages}</p>
@@ -289,9 +313,15 @@ export default function HistoryPage() {
           </p>
         </div>
         <div className="glass rounded-xl p-3 border border-white/[0.08]">
-          <p className="text-foreground/40 text-xs mb-1">Pending Chats</p>
+          <p className="text-foreground/40 text-xs mb-1">Rated Sessions</p>
           <p className="text-xl font-bold text-gold">
-            {stats.unreadChatMessages}
+            {stats.ratedSessions}
+          </p>
+        </div>
+        <div className="glass rounded-xl p-3 border border-white/[0.08]">
+          <p className="text-foreground/40 text-xs mb-1">Avg Rating</p>
+          <p className="text-xl font-bold text-gold">
+            {stats.averageRating}★
           </p>
         </div>
       </div>
@@ -431,6 +461,9 @@ export default function HistoryPage() {
                     Status
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-foreground/40 uppercase tracking-wider">
+                    Rating
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-foreground/40 uppercase tracking-wider">
                     Date
                   </th>
                 </tr>
@@ -439,7 +472,7 @@ export default function HistoryPage() {
                 {filteredChatMessages.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="px-4 py-12 text-center text-foreground/30"
                     >
                       No chat messages found
@@ -483,6 +516,24 @@ export default function HistoryPage() {
                         >
                           {msg.read ? "Read" : "Pending"}
                         </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {msg.rating ? (
+                          <div className="flex gap-0.5">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <span
+                                key={s}
+                                className={`text-xs ${
+                                  s <= msg.rating! ? "text-gold" : "text-foreground/20"
+                                }`}
+                              >
+                                ★
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-foreground/20 text-xs">—</span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-xs text-foreground/40 whitespace-nowrap">
                         {formatDate(msg.createdAt)}

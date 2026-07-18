@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Image as ImageIcon, Smile, Mic, MicOff } from "lucide-react";
+import { MessageCircle, X, Send, Image as ImageIcon, Smile, Mic, MicOff, Star } from "lucide-react";
 import Image from "next/image";
 
 interface ChatMsg {
@@ -10,6 +10,7 @@ interface ChatMsg {
   sender: string;
   message: string;
   messageType: string;
+  rating?: number | null;
   createdAt: string;
 }
 
@@ -17,6 +18,23 @@ const EMOJI_LIST = ["\u{1F60A}", "\u{1F602}", "\u2764\uFE0F", "\u{1F44D}", "\u{1
 
 function generateSessionId(): string {
   return "visitor-" + Date.now() + "-" + Math.random().toString(36).substring(2, 8);
+}
+
+function shouldShowRating(messages: ChatMsg[]): boolean {
+  if (messages.length < 4) return false;
+  const lastAiMsg = [...messages].reverse().find((m) => m.sender === "ai");
+  if (!lastAiMsg) return false;
+  const lower = lastAiMsg.message.toLowerCase();
+  return (
+    lower.includes("rate") ||
+    lower.includes("rating") ||
+    lower.includes("1-5 stars") ||
+    lower.includes("1 to 5")
+  );
+}
+
+function hasRated(messages: ChatMsg[]): boolean {
+  return messages.some((m) => m.rating !== null && m.rating !== undefined);
 }
 
 export default function ChatWidget() {
@@ -28,6 +46,8 @@ export default function ChatWidget() {
   const [showEmoji, setShowEmoji] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [hoveredStar, setHoveredStar] = useState(0);
+  const [selectedRating, setSelectedRating] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -49,8 +69,9 @@ export default function ChatWidget() {
           setUnread(0);
         } else {
           const adminMsgs = data.filter(
-            (m) => (m.sender === "admin" || m.sender === "ai" || m.sender === "system") &&
-            new Date(m.createdAt) > new Date(Date.now() - 30000)
+            (m) =>
+              (m.sender === "admin" || m.sender === "ai" || m.sender === "system") &&
+              new Date(m.createdAt) > new Date(Date.now() - 30000)
           );
           setUnread(adminMsgs.length);
         }
@@ -59,7 +80,6 @@ export default function ChatWidget() {
   }, [sessionId, isOpen]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchMessages();
     pollRef.current = setInterval(fetchMessages, 3000);
     return () => {
@@ -77,10 +97,35 @@ export default function ChatWidget() {
       await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, sender: "visitor", message: msg, messageType: type }),
+        body: JSON.stringify({
+          sessionId,
+          sender: "visitor",
+          message: msg,
+          messageType: type,
+        }),
       });
       setInput("");
       setShowEmoji(false);
+      fetchMessages();
+    } catch {}
+  };
+
+  const submitRating = async (rating: number) => {
+    if (!sessionId) return;
+    try {
+      await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          sender: "visitor",
+          message: `${rating}`,
+          messageType: "rating",
+          rating,
+        }),
+      });
+      setSelectedRating(0);
+      setHoveredStar(0);
       fetchMessages();
     } catch {}
   };
@@ -133,13 +178,24 @@ export default function ChatWidget() {
 
   const renderMessage = (msg: ChatMsg) => {
     if (msg.messageType === "image") {
-      return <Image src={msg.message} alt="Chat image" width={200} height={200} unoptimized className="max-w-[200px] rounded-xl" />;
+      return (
+        <Image
+          src={msg.message}
+          alt="Chat image"
+          width={200}
+          height={200}
+          unoptimized
+          className="max-w-[200px] rounded-xl"
+        />
+      );
     }
     if (msg.messageType === "voice") {
       return <audio controls src={msg.message} className="max-w-[200px] h-8" />;
     }
     return msg.message;
   };
+
+  const showRatingUI = shouldShowRating(messages) && !hasRated(messages);
 
   return (
     <>
@@ -190,7 +246,13 @@ export default function ChatWidget() {
               {messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`flex ${msg.sender === "visitor" ? "justify-end" : msg.sender === "system" ? "justify-center" : "justify-start"}`}
+                  className={`flex ${
+                    msg.sender === "visitor"
+                      ? "justify-end"
+                      : msg.sender === "system"
+                      ? "justify-center"
+                      : "justify-start"
+                  }`}
                 >
                   {msg.sender === "system" ? (
                     <div className="bg-yellow-500/10 text-yellow-300/80 text-xs px-3 py-1.5 rounded-full text-center max-w-[90%] border border-yellow-500/10">
@@ -207,6 +269,17 @@ export default function ChatWidget() {
                       {renderMessage(msg)}
                       {msg.sender === "ai" && (
                         <p className="text-[10px] text-foreground/30 mt-1">AI Assistant</p>
+                      )}
+                      {msg.rating && (
+                        <div className="flex gap-0.5 mt-1">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star
+                              key={s}
+                              size={12}
+                              className={s <= msg.rating! ? "fill-gold text-gold" : "text-foreground/20"}
+                            />
+                          ))}
+                        </div>
                       )}
                     </div>
                   )}
@@ -239,55 +312,86 @@ export default function ChatWidget() {
             </AnimatePresence>
 
             <div className="p-3 border-t border-white/[0.06]">
-              <div className="flex gap-2 items-center">
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleImageUpload}
-                  accept="image/*"
-                  className="hidden"
-                />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  className="w-9 h-9 rounded-lg flex items-center justify-center text-foreground/30 hover:text-primary hover:bg-primary/5 transition-colors"
-                  title="Upload image"
-                >
-                  <ImageIcon size={18} />
-                </button>
-                <button
-                  onClick={() => setShowEmoji(!showEmoji)}
-                  className="w-9 h-9 rounded-lg flex items-center justify-center text-foreground/30 hover:text-primary hover:bg-primary/5 transition-colors"
-                  title="Emoji"
-                >
-                  <Smile size={18} />
-                </button>
-                <button
-                  onClick={isRecording ? stopRecording : startRecording}
-                  className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${
-                    isRecording ? "text-red-400 bg-red-500/10 animate-pulse" : "text-foreground/30 hover:text-primary hover:bg-primary/5"
-                  }`}
-                  title={isRecording ? "Stop recording" : "Voice message"}
-                >
-                  {isRecording ? <MicOff size={18} /> : <Mic size={18} />}
-                </button>
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
-                  placeholder={uploading ? "Uploading..." : "Type a message..."}
-                  disabled={uploading}
-                  className="flex-1 bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary/30 focus:shadow-[0_0_15px_rgba(0,212,255,0.05)] transition-all"
-                />
-                <button
-                  onClick={() => sendMessage(input)}
-                  disabled={!input.trim() || uploading}
-                  className="w-10 h-10 rounded-xl bg-gradient-to-r from-primary to-accent text-[#050510] flex items-center justify-center disabled:opacity-30 hover:shadow-[0_0_20px_rgba(0,212,255,0.3)] hover:scale-105 transition-all duration-300"
-                >
-                  <Send size={16} />
-                </button>
-              </div>
+              {showRatingUI ? (
+                <div className="text-center py-2">
+                  <p className="text-xs text-foreground/50 mb-2">Rate your experience</p>
+                  <div className="flex justify-center gap-1 mb-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onMouseEnter={() => setHoveredStar(star)}
+                        onMouseLeave={() => setHoveredStar(0)}
+                        onClick={() => submitRating(star)}
+                        className="p-1 transition-transform hover:scale-125"
+                      >
+                        <Star
+                          size={28}
+                          className={`transition-colors ${
+                            star <= (hoveredStar || selectedRating)
+                              ? "fill-gold text-gold drop-shadow-[0_0_6px_rgba(245,158,11,0.5)]"
+                              : "text-foreground/20"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-[10px] text-foreground/30">
+                    {hoveredStar ? `${hoveredStar} star${hoveredStar > 1 ? "s" : ""}` : "Tap a star to rate"}
+                  </p>
+                </div>
+              ) : (
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center text-foreground/30 hover:text-primary hover:bg-primary/5 transition-colors"
+                    title="Upload image"
+                  >
+                    <ImageIcon size={18} />
+                  </button>
+                  <button
+                    onClick={() => setShowEmoji(!showEmoji)}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center text-foreground/30 hover:text-primary hover:bg-primary/5 transition-colors"
+                    title="Emoji"
+                  >
+                    <Smile size={18} />
+                  </button>
+                  <button
+                    onClick={isRecording ? stopRecording : startRecording}
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${
+                      isRecording
+                        ? "text-red-400 bg-red-500/10 animate-pulse"
+                        : "text-foreground/30 hover:text-primary hover:bg-primary/5"
+                    }`}
+                    title={isRecording ? "Stop recording" : "Voice message"}
+                  >
+                    {isRecording ? <MicOff size={18} /> : <Mic size={18} />}
+                  </button>
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
+                    placeholder={uploading ? "Uploading..." : "Type a message..."}
+                    disabled={uploading}
+                    className="flex-1 bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary/30 focus:shadow-[0_0_15px_rgba(0,212,255,0.05)] transition-all"
+                  />
+                  <button
+                    onClick={() => sendMessage(input)}
+                    disabled={!input.trim() || uploading}
+                    className="w-10 h-10 rounded-xl bg-gradient-to-r from-primary to-accent text-[#050510] flex items-center justify-center disabled:opacity-30 hover:shadow-[0_0_20px_rgba(0,212,255,0.3)] hover:scale-105 transition-all duration-300"
+                  >
+                    <Send size={16} />
+                  </button>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

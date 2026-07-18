@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
 export async function GET() {
@@ -8,6 +8,8 @@ export async function GET() {
     if (!auth) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const prisma = getPrisma();
 
     const sessions = await prisma.chatMessage.groupBy({
       by: ["sessionId"],
@@ -26,11 +28,17 @@ export async function GET() {
         const unreadCount = await prisma.chatMessage.count({
           where: { sessionId: session.sessionId, read: false, sender: "visitor" },
         });
+        const ratingMsg = await prisma.chatMessage.findFirst({
+          where: { sessionId: session.sessionId, rating: { not: null } },
+          orderBy: { createdAt: "desc" },
+          select: { rating: true },
+        });
         return {
           sessionId: session.sessionId,
           messageCount: session._count.id,
           lastMessage: lastMessages[0] || null,
           unreadCount,
+          rating: ratingMsg?.rating || null,
         };
       })
     );

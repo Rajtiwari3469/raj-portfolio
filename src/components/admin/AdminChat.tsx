@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Send, MessageCircle, ArrowLeft, Image as ImageIcon, Smile, Mic, MicOff, Bot, Trash2 } from "lucide-react";
+import { Send, MessageCircle, ArrowLeft, Image as ImageIcon, Smile, Mic, MicOff, Bot, Trash2, Star } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
 import ConfirmModal from "@/components/ui/ConfirmModal";
@@ -16,6 +16,7 @@ interface ChatMsg {
   message: string;
   messageType: string;
   read: boolean;
+  rating?: number | null;
   createdAt: string;
 }
 
@@ -24,6 +25,7 @@ interface Session {
   messageCount: number;
   lastMessage: ChatMsg | null;
   unreadCount: number;
+  rating?: number | null;
 }
 
 const EMOJI_LIST = ["😊", "😂", "❤️", "👍", "🎉", "🔥", "💯", "✨", "🙏", "😎", "🤔", "💪", "🚀", "⭐", "😍", "🙌", "👏", "💻", "🎯", "🌟"];
@@ -209,6 +211,18 @@ export default function AdminChat() {
     return msg.message;
   };
 
+  const renderStars = (rating: number, size: number = 14) => (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((s) => (
+        <Star
+          key={s}
+          size={size}
+          className={s <= rating ? "fill-gold text-gold" : "text-foreground/20"}
+        />
+      ))}
+    </div>
+  );
+
   if (activeSession) {
     return (
       <div className="space-y-4">
@@ -266,6 +280,11 @@ export default function AdminChat() {
                       }`}
                     >
                       {renderMessage(msg)}
+                      {msg.rating && (
+                        <div className="mt-1.5">
+                          {renderStars(msg.rating)}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -405,6 +424,7 @@ export default function AdminChat() {
                   </div>
                 </div>
                 <div className="text-right">
+                  {session.rating && renderStars(session.rating)}
                   {session.unreadCount > 0 && (
                     <span className="inline-block w-6 h-6 rounded-full bg-red-500 text-white text-xs flex items-center justify-center mb-1">
                       {session.unreadCount}

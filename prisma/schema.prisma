@@ -129,6 +129,7 @@ model ChatMessage {
   message     String
   messageType String   @default("text")
   read        Boolean  @default(false)
+  rating      Int?
   createdAt   DateTime @default(now())
 }
 
