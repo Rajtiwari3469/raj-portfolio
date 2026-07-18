@@ -167,6 +167,58 @@ export default function SkillsPage() {
 
   const categories = [...new Set(skills.map((s) => s.category))];
 
+  const programmingCategories = [
+    { name: "JavaScript", color: "#f7df1e" },
+    { name: "TypeScript", color: "#3178c6" },
+    { name: "Python", color: "#3776ab" },
+    { name: "Java", color: "#ed8b00" },
+    { name: "C++", color: "#00599c" },
+    { name: "C#", color: "#68217a" },
+    { name: "Go", color: "#00add8" },
+    { name: "Rust", color: "#dea584" },
+    { name: "PHP", color: "#777bb4" },
+    { name: "Ruby", color: "#cc342d" },
+    { name: "Swift", color: "#f05138" },
+    { name: "Kotlin", color: "#7f52ff" },
+    { name: "Dart", color: "#0175c2" },
+    { name: "Scala", color: "#dc322f" },
+    { name: "R", color: "#276dc3" },
+    { name: "MATLAB", color: "#e16737" },
+    { name: "Shell/Bash", color: "#4eaa25" },
+    { name: "SQL", color: "#e38c00" },
+    { name: "HTML", color: "#e34f26" },
+    { name: "CSS", color: "#1572b6" },
+    { name: "Sass", color: "#cc6699" },
+    { name: "React", color: "#61dafb" },
+    { name: "Next.js", color: "#ffffff" },
+    { name: "Node.js", color: "#339933" },
+    { name: "Vue.js", color: "#42b883" },
+    { name: "Angular", color: "#dd0031" },
+    { name: "Svelte", color: "#ff3e00" },
+    { name: "Django", color: "#092e20" },
+    { name: "Flask", color: "#ffffff" },
+    { name: "Spring Boot", color: "#6db33f" },
+    { name: "Express.js", color: "#ffffff" },
+    { name: "Tailwind CSS", color: "#06b6d4" },
+    { name: "Bootstrap", color: "#7952b3" },
+    { name: "MongoDB", color: "#47a248" },
+    { name: "PostgreSQL", color: "#4169e1" },
+    { name: "MySQL", color: "#4479a1" },
+    { name: "Redis", color: "#dc382d" },
+    { name: "Firebase", color: "#ffca28" },
+    { name: "Docker", color: "#2496ed" },
+    { name: "Kubernetes", color: "#326ce5" },
+    { name: "AWS", color: "#ff9900" },
+    { name: "Git", color: "#f05032" },
+    { name: "Figma", color: "#f24e1e" },
+    { name: "Photoshop", color: "#31a8ff" },
+    { name: "Illustrator", color: "#ff9a00" },
+    { name: "Other", color: "#888888" },
+  ];
+
+  const allCategories = [...new Set([...categories, ...programmingCategories.map((c) => c.name)])];
+  const getCategoryColor = (name: string) => programmingCategories.find((c) => c.name === name)?.color || "#888888";
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -193,7 +245,7 @@ export default function SkillsPage() {
         <div className="space-y-8">
           {categories.map((category) => (
             <div key={category}>
-              <h2 className="text-xl font-semibold mb-4 gradient-text">{category}</h2>
+              <h2 className="text-xl font-semibold mb-4" style={{ color: getCategoryColor(category) }}>{category}</h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <AnimatePresence>
                   {skills
@@ -257,17 +309,28 @@ export default function SkillsPage() {
           />
           <div>
             <label className="block text-sm font-medium mb-2">Category</label>
-            <select
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
-            >
-              <option value="Programming">Programming</option>
-              <option value="Framework">Framework</option>
-              <option value="Database">Database</option>
-              <option value="Tool">Tool</option>
-              <option value="Other">Other</option>
-            </select>
+            <div className="relative">
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors appearance-none"
+                style={{ color: getCategoryColor(formData.category) }}
+              >
+                {programmingCategories.map((cat) => (
+                  <option key={cat.name} value={cat.name} style={{ color: cat.color, background: "#0a0a1f" }}>
+                    {cat.name}
+                  </option>
+                ))}
+                {categories.filter((c) => !programmingCategories.some((p) => p.name === c)).map((cat) => (
+                  <option key={cat} value={cat} style={{ background: "#0a0a1f" }}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <div className="w-2.5 h-2.5 border-r-2 border-b-2 border-foreground/30 rotate-45" />
+              </div>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">
@@ -283,7 +346,7 @@ export default function SkillsPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Icon (optional)</label>
+            <label className="block text-sm font-medium mb-2">Icon</label>
             {formData.icon ? (
               <div className="relative inline-block">
                 <Image
