@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Edit, Trash2, Loader2, Code2 } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useToast } from "@/components/ui/Toast";
@@ -139,7 +138,7 @@ export default function SkillsPage() {
 
   const categories = [...new Set(skills.map((s) => s.category))];
 
-  const programmingCategories = [
+  const skillNames = [
     { name: "JavaScript", color: "#f7df1e" },
     { name: "TypeScript", color: "#3178c6" },
     { name: "Python", color: "#3776ab" },
@@ -188,8 +187,15 @@ export default function SkillsPage() {
     { name: "Other", color: "#888888" },
   ];
 
-  const allCategories = [...new Set([...categories, ...programmingCategories.map((c) => c.name)])];
-  const getCategoryColor = (name: string) => programmingCategories.find((c) => c.name === name)?.color || "#888888";
+  const categoryOptions = [
+    { name: "Frontend", color: "#61dafb" },
+    { name: "Backend", color: "#339933" },
+    { name: "Database", color: "#4169e1" },
+    { name: "Tools", color: "#ff9900" },
+  ];
+
+  const getSkillColor = (name: string) => skillNames.find((s) => s.name === name)?.color || "#888888";
+  const getCategoryColor = (name: string) => categoryOptions.find((c) => c.name === name)?.color || "#888888";
 
   return (
     <div className="space-y-6">
@@ -273,12 +279,28 @@ export default function SkillsPage() {
         title={editingSkill ? "Edit Skill" : "Add Skill"}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="Skill Name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required
-          />
+          <div>
+            <label className="block text-sm font-medium mb-2">Skill Name</label>
+            <div className="relative">
+              <select
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors appearance-none"
+                style={{ color: getSkillColor(formData.name) }}
+                required
+              >
+                <option value="" disabled style={{ background: "#0a0a1f", color: "#555" }}>Select a skill</option>
+                {skillNames.map((skill) => (
+                  <option key={skill.name} value={skill.name} style={{ color: skill.color, background: "#0a0a1f" }}>
+                    {skill.name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <div className="w-2.5 h-2.5 border-r-2 border-b-2 border-foreground/30 rotate-45" />
+              </div>
+            </div>
+          </div>
           <div>
             <label className="block text-sm font-medium mb-2">Category</label>
             <div className="relative">
@@ -288,14 +310,9 @@ export default function SkillsPage() {
                 className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors appearance-none"
                 style={{ color: getCategoryColor(formData.category) }}
               >
-                {programmingCategories.map((cat) => (
+                {categoryOptions.map((cat) => (
                   <option key={cat.name} value={cat.name} style={{ color: cat.color, background: "#0a0a1f" }}>
                     {cat.name}
-                  </option>
-                ))}
-                {categories.filter((c) => !programmingCategories.some((p) => p.name === c)).map((cat) => (
-                  <option key={cat} value={cat} style={{ background: "#0a0a1f" }}>
-                    {cat}
                   </option>
                 ))}
               </select>
