@@ -16,15 +16,15 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className="glass mt-auto py-8 border-t border-white/[0.05]">
+    <footer className="glass mt-auto py-10 border-t border-white/[0.05]">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="text-center md:text-left">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="space-y-3">
             <h3 className="text-lg font-bold gradient-text">Raj Tiwari</h3>
-            <p className="text-foreground/40 text-xs mt-1">
-              BCA CS & IT Student | Software & AI
+            <p className="text-foreground/40 text-xs leading-relaxed">
+              BCA CS & IT Student passionate about software development and AI technology.
             </p>
-            <div className="flex gap-2 mt-2 justify-center md:justify-start">
+            <div className="flex gap-2">
               {socialLinks.github && (
                 <a href={socialLinks.github} target="_blank" rel="noopener noreferrer" className="text-foreground/30 hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-primary/5">
                   <GithubIcon size={16} />
@@ -53,31 +53,69 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-6 text-sm">
-            <Link href="/" className="text-foreground/40 hover:text-primary transition-colors">Home</Link>
-            <Link href="/about" className="text-foreground/40 hover:text-primary transition-colors">About</Link>
-            <Link href="/projects" className="text-foreground/40 hover:text-primary transition-colors">Projects</Link>
-            <Link href="/#certificates" className="text-foreground/40 hover:text-primary transition-colors">Certificates</Link>
-            <Link href="/terms" className="text-foreground/40 hover:text-foreground/60 transition-colors">Terms</Link>
-            <Link href="/privacy" className="text-foreground/40 hover:text-foreground/60 transition-colors">Privacy</Link>
+          <div className="space-y-3">
+            <h4 className="font-semibold tracking-wide text-xs">Quick Links</h4>
+            <ul className="space-y-1.5">
+              <li>
+                <Link href="/" className="text-foreground/40 hover:text-primary transition-colors text-xs">
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link href="/about" className="text-foreground/40 hover:text-primary transition-colors text-xs">
+                  About
+                </Link>
+              </li>
+              <li>
+                <Link href="/projects" className="text-foreground/40 hover:text-primary transition-colors text-xs">
+                  Projects
+                </Link>
+              </li>
+              <li>
+                <Link href="/#certificates" className="text-foreground/40 hover:text-primary transition-colors text-xs">
+                  Certificates
+                </Link>
+              </li>
+            </ul>
           </div>
 
-          <div className="text-center md:text-right">
-            <div className="flex items-center gap-2 text-foreground/40 text-xs justify-center md:justify-end">
-              <Mail size={12} />
-              <span>{socialLinks.email || "raj@example.com"}</span>
-            </div>
-            <div className="flex items-center gap-2 text-foreground/40 text-xs mt-1 justify-center md:justify-end">
-              <MapPin size={12} />
-              <span>{socialLinks.location || "India"}</span>
-            </div>
+          <div className="space-y-3">
+            <h4 className="font-semibold tracking-wide text-xs">Services</h4>
+            <ul className="space-y-1.5">
+              <li className="text-foreground/40 text-xs">Web Development</li>
+              <li className="text-foreground/40 text-xs">Application Development</li>
+              <li className="text-foreground/40 text-xs">Software Development</li>
+              <li className="text-foreground/40 text-xs">AI Solutions</li>
+            </ul>
+          </div>
+
+          <div className="space-y-3">
+            <h4 className="font-semibold tracking-wide text-xs">Contact</h4>
+            <ul className="space-y-1.5">
+              <li className="flex items-center gap-2 text-foreground/40 text-xs">
+                <Mail size={12} />
+                <span>{socialLinks.email || "raj@example.com"}</span>
+              </li>
+              <li className="flex items-center gap-2 text-foreground/40 text-xs">
+                <MapPin size={12} />
+                <span>{socialLinks.location || "India"}</span>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <div className="mt-6 pt-4 border-t border-white/[0.05] text-center">
+        <div className="mt-8 pt-5 border-t border-white/[0.05] flex flex-col items-center gap-2">
           <p className="text-foreground/30 text-xs">
             &copy; {new Date().getFullYear()} Raj Tiwari. All rights reserved.
           </p>
+          <div className="flex gap-5">
+            <Link href="/terms" className="text-foreground/30 hover:text-foreground/60 text-xs transition-colors">
+              Terms & Conditions
+            </Link>
+            <Link href="/privacy" className="text-foreground/30 hover:text-foreground/60 text-xs transition-colors">
+              Privacy Policy
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
