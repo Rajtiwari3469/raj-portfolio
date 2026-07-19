@@ -107,7 +107,7 @@ export default function Projects() {
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all duration-300 text-sm ${
                 activeFilter === filter.id
                   ? "bg-primary/10 text-primary border border-primary/30 shadow-[0_0_15px_rgba(0,212,255,0.1)]"
-                  : "text-foreground/40 hover:bg-white/[0.03] hover:text-foreground/60 border border-transparent hover:border-white/[0.05]"
+                  : "text-foreground/70 hover:bg-white/[0.03] hover:text-foreground border border-white/[0.08] hover:border-white/[0.15]"
               }`}
             >
               {filter.icon}
@@ -152,9 +152,11 @@ export default function Projects() {
                     onClick={() => openModal(project)}
                   >
                     <div className="relative h-48 rounded-xl overflow-hidden mb-4 bg-white/[0.02] border border-white/[0.04]">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Folder size={40} className="text-primary/20" />
-                      </div>
+                      {!project.image && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Folder size={40} className="text-primary/20" />
+                        </div>
+                      )}
                       {project.image && (
                         <Image
                           src={project.image}
@@ -278,9 +280,11 @@ export default function Projects() {
                   </button>
 
                   <div className="relative h-64 rounded-xl overflow-hidden mb-6 bg-white/[0.02] border border-white/[0.04]">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Folder size={56} className="text-primary/15" />
-                    </div>
+                    {allImages.length === 0 && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Folder size={56} className="text-primary/15" />
+                      </div>
+                    )}
                     {allImages.length > 0 ? (
                       <Image
                         src={allImages[modalImageIndex]}
