@@ -877,6 +877,150 @@ export default function PublicRecordsPage() {
                       </button>
                     )}
                   </GlassPanel>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {isLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 size={32} className="animate-spin text-primary" />
+              </div>
+            ) : filteredRecords.length === 0 ? (
+              <GlassPanel className="text-center py-16">
+                <Eye size={48} className="mx-auto mb-4 text-foreground/20" />
+                <p className="text-foreground/60">No records found</p>
+              </GlassPanel>
+            ) : (
+              <>
+                <GlassPanel className="overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-white/5">
+                          <th className="text-left px-3 py-3">
+                            <input
+                              type="checkbox"
+                              checked={deleteIds.length === filteredRecords.length && filteredRecords.length > 0}
+                              onChange={selectAllRecords}
+                              className="rounded border-white/20 bg-white/5 accent-primary"
+                            />
+                          </th>
+                          <th className="text-left px-3 py-3 text-sm font-semibold text-foreground/60">Page</th>
+                          <th className="text-left px-3 py-3 text-sm font-semibold text-foreground/60">IP</th>
+                          <th className="text-left px-3 py-3 text-sm font-semibold text-foreground/60">Browser</th>
+                          <th className="text-left px-3 py-3 text-sm font-semibold text-foreground/60">OS</th>
+                          <th className="text-left px-3 py-3 text-sm font-semibold text-foreground/60">Device</th>
+                          <th className="text-left px-3 py-3 text-sm font-semibold text-foreground/60">Duration</th>
+                          <th className="text-left px-3 py-3 text-sm font-semibold text-foreground/60">Type</th>
+                          <th className="text-left px-3 py-3 text-sm font-semibold text-foreground/60">Date</th>
+                          <th className="text-left px-3 py-3 text-sm font-semibold text-foreground/60">Time</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredRecords.map((record, index) => (
+                          <motion.tr
+                            key={record.id}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: index * 0.02 }}
+                            className={`border-b border-white/5 hover:bg-white/[0.02] transition-colors cursor-pointer ${
+                              deleteIds.includes(record.id) ? "bg-primary/[0.05]" : ""
+                            }`}
+                            onClick={() => setSelectedRecord(record)}
+                          >
+                            <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
+                              <input
+                                type="checkbox"
+                                checked={deleteIds.includes(record.id)}
+                                onChange={() => toggleRecordSelection(record.id)}
+                                className="rounded border-white/20 bg-white/5 accent-primary"
+                              />
+                            </td>
+                            <td className="px-3 py-3 text-sm font-mono text-foreground/80 max-w-[150px] truncate">
+                              {record.page}
+                            </td>
+                            <td className="px-3 py-3 text-sm text-foreground/50 font-mono max-w-[120px] truncate">
+                              {record.ip || "—"}
+                            </td>
+                            <td className="px-3 py-3 text-sm text-foreground/70">{record.browser || "—"}</td>
+                            <td className="px-3 py-3 text-sm text-foreground/70">{record.os || "—"}</td>
+                            <td className="px-3 py-3 text-sm">
+                              <span className="flex items-center gap-1.5 text-foreground/70">
+                                {getDeviceIcon(record.device)}
+                                {record.device || "—"}
+                              </span>
+                            </td>
+                            <td className="px-3 py-3 text-sm text-foreground/60">
+                              {formatDuration(record.visitDuration)}
+                            </td>
+                            <td className="px-3 py-3">
+                              {record.isBot ? (
+                                <span className="px-2 py-0.5 rounded-full text-xs bg-gold/10 text-gold border border-gold/20">Bot</span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-full text-xs bg-green-500/10 text-green-400 border border-green-500/20">User</span>
+                              )}
+                            </td>
+                            <td className="px-3 py-3 text-sm text-foreground/60 whitespace-nowrap">
+                              <span className="flex items-center gap-1.5">
+                                <Calendar size={12} />
+                                {formatDate(record.createdAt)}
+                              </span>
+                            </td>
+                            <td className="px-3 py-3 text-sm text-foreground/60 whitespace-nowrap">
+                              <span className="flex items-center gap-1.5">
+                                <Clock size={12} />
+                                {formatTime(record.createdAt)}
+                              </span>
+                            </td>
+                          </motion.tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </GlassPanel>
+
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-foreground/50">
+                      Page {page} of {totalPages} ({formatNumber(totalRecords)} records)
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setPage(Math.max(1, page - 1))}
+                        disabled={page === 1}
+                        className="p-2 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:bg-primary/10 hover:border-primary/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                      >
+                        <ChevronLeft size={18} />
+                      </button>
+                      {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
+                        const pageNum = Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
+                        if (pageNum > totalPages) return null;
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => setPage(pageNum)}
+                            className={`w-9 h-9 rounded-xl text-sm font-medium transition-all ${
+                              pageNum === page
+                                ? "bg-primary/15 text-primary border border-primary/20"
+                                : "text-foreground/50 hover:bg-white/[0.03] border border-transparent"
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                      <button
+                        onClick={() => setPage(Math.min(totalPages, page + 1))}
+                        disabled={page === totalPages}
+                        className="p-2 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:bg-primary/10 hover:border-primary/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                      >
+                        <ChevronRight size={18} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </motion.div>
         )}
 
@@ -1035,150 +1179,6 @@ export default function PublicRecordsPage() {
                 </div>
               )}
             </GlassPanel>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-            {isLoading ? (
-              <div className="flex items-center justify-center py-20">
-                <Loader2 size={32} className="animate-spin text-primary" />
-              </div>
-            ) : filteredRecords.length === 0 ? (
-              <GlassPanel className="text-center py-16">
-                <Eye size={48} className="mx-auto mb-4 text-foreground/20" />
-                <p className="text-foreground/60">No records found</p>
-              </GlassPanel>
-            ) : (
-              <>
-                <GlassPanel className="overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b border-white/5">
-                          <th className="text-left px-3 py-3">
-                            <input
-                              type="checkbox"
-                              checked={deleteIds.length === filteredRecords.length && filteredRecords.length > 0}
-                              onChange={selectAllRecords}
-                              className="rounded border-white/20 bg-white/5 accent-primary"
-                            />
-                          </th>
-                          <th className="text-left px-3 py-3 text-sm font-semibold text-foreground/60">Page</th>
-                          <th className="text-left px-3 py-3 text-sm font-semibold text-foreground/60">IP</th>
-                          <th className="text-left px-3 py-3 text-sm font-semibold text-foreground/60">Browser</th>
-                          <th className="text-left px-3 py-3 text-sm font-semibold text-foreground/60">OS</th>
-                          <th className="text-left px-3 py-3 text-sm font-semibold text-foreground/60">Device</th>
-                          <th className="text-left px-3 py-3 text-sm font-semibold text-foreground/60">Duration</th>
-                          <th className="text-left px-3 py-3 text-sm font-semibold text-foreground/60">Type</th>
-                          <th className="text-left px-3 py-3 text-sm font-semibold text-foreground/60">Date</th>
-                          <th className="text-left px-3 py-3 text-sm font-semibold text-foreground/60">Time</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredRecords.map((record, index) => (
-                          <motion.tr
-                            key={record.id}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: index * 0.02 }}
-                            className={`border-b border-white/5 hover:bg-white/[0.02] transition-colors cursor-pointer ${
-                              deleteIds.includes(record.id) ? "bg-primary/[0.05]" : ""
-                            }`}
-                            onClick={() => setSelectedRecord(record)}
-                          >
-                            <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
-                              <input
-                                type="checkbox"
-                                checked={deleteIds.includes(record.id)}
-                                onChange={() => toggleRecordSelection(record.id)}
-                                className="rounded border-white/20 bg-white/5 accent-primary"
-                              />
-                            </td>
-                            <td className="px-3 py-3 text-sm font-mono text-foreground/80 max-w-[150px] truncate">
-                              {record.page}
-                            </td>
-                            <td className="px-3 py-3 text-sm text-foreground/50 font-mono max-w-[120px] truncate">
-                              {record.ip || "—"}
-                            </td>
-                            <td className="px-3 py-3 text-sm text-foreground/70">{record.browser || "—"}</td>
-                            <td className="px-3 py-3 text-sm text-foreground/70">{record.os || "—"}</td>
-                            <td className="px-3 py-3 text-sm">
-                              <span className="flex items-center gap-1.5 text-foreground/70">
-                                {getDeviceIcon(record.device)}
-                                {record.device || "—"}
-                              </span>
-                            </td>
-                            <td className="px-3 py-3 text-sm text-foreground/60">
-                              {formatDuration(record.visitDuration)}
-                            </td>
-                            <td className="px-3 py-3">
-                              {record.isBot ? (
-                                <span className="px-2 py-0.5 rounded-full text-xs bg-gold/10 text-gold border border-gold/20">Bot</span>
-                              ) : (
-                                <span className="px-2 py-0.5 rounded-full text-xs bg-green-500/10 text-green-400 border border-green-500/20">User</span>
-                              )}
-                            </td>
-                            <td className="px-3 py-3 text-sm text-foreground/60 whitespace-nowrap">
-                              <span className="flex items-center gap-1.5">
-                                <Calendar size={12} />
-                                {formatDate(record.createdAt)}
-                              </span>
-                            </td>
-                            <td className="px-3 py-3 text-sm text-foreground/60 whitespace-nowrap">
-                              <span className="flex items-center gap-1.5">
-                                <Clock size={12} />
-                                {formatTime(record.createdAt)}
-                              </span>
-                            </td>
-                          </motion.tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </GlassPanel>
-
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-foreground/50">
-                      Page {page} of {totalPages} ({formatNumber(totalRecords)} records)
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setPage(Math.max(1, page - 1))}
-                        disabled={page === 1}
-                        className="p-2 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:bg-primary/10 hover:border-primary/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                      >
-                        <ChevronLeft size={18} />
-                      </button>
-                      {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
-                        const pageNum = Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
-                        if (pageNum > totalPages) return null;
-                        return (
-                          <button
-                            key={pageNum}
-                            onClick={() => setPage(pageNum)}
-                            className={`w-9 h-9 rounded-xl text-sm font-medium transition-all ${
-                              pageNum === page
-                                ? "bg-primary/15 text-primary border border-primary/20"
-                                : "text-foreground/50 hover:bg-white/[0.03] border border-transparent"
-                            }`}
-                          >
-                            {pageNum}
-                          </button>
-                        );
-                      })}
-                      <button
-                        onClick={() => setPage(Math.min(totalPages, page + 1))}
-                        disabled={page === totalPages}
-                        className="p-2 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:bg-primary/10 hover:border-primary/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                      >
-                        <ChevronRight size={18} />
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
           </motion.div>
         )}
       </AnimatePresence>
