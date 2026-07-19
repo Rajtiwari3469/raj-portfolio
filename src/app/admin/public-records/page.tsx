@@ -31,6 +31,10 @@ import {
   AppWindow,
   Apple,
   LayoutDashboard,
+  Download,
+  Folder,
+  FolderOpen,
+  FileText,
 } from "lucide-react";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
@@ -108,7 +112,12 @@ export default function PublicRecordsPage() {
   const [deleteAll, setDeleteAll] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<PublicRecord | null>(null);
-  const [activeTab, setActiveTab] = useState<"overview" | "pages" | "devices" | "traffic" | "records">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "pages" | "devices" | "traffic" | "records" | "downloads">("overview");
+  const [visitors, setVisitors] = useState<{ visitorId: string; label: string; records: PublicRecord[]; lastVisit: string; isBot: boolean }[]>([]);
+  const [isVisitorsLoading, setIsVisitorsLoading] = useState(false);
+  const [visitorSummary, setVisitorSummary] = useState({ total: 0, users: 0, bots: 0 });
+  const [expandedVisitor, setExpandedVisitor] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const fetchStats = useCallback(async () => {
     setIsStatsLoading(true);
@@ -171,6 +180,53 @@ export default function PublicRecordsPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchRecords();
   }, [fetchRecords]);
+
+  const fetchVisitors = useCallback(async () => {
+    setIsVisitorsLoading(true);
+    try {
+      const res = await fetch("/api/admin/public-records/visitors");
+      const data = await res.json();
+      if (data.visitors) {
+        setVisitors(data.visitors);
+        setVisitorSummary(data.summary);
+      }
+    } catch (error) {
+      console.error("Failed to fetch visitors:", error);
+    } finally {
+      setIsVisitorsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "downloads") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchVisitors();
+    }
+  }, [activeTab, fetchVisitors]);
+
+  const handleDownload = async (visitorId?: string) => {
+    setIsDownloading(true);
+    try {
+      const url = visitorId
+        ? `/api/admin/public-records/download?visitorId=${encodeURIComponent(visitorId)}`
+        : "/api/admin/public-records/download";
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = visitorId ? `visitor-${visitorId}-records.csv` : "all-records.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(downloadUrl);
+      toast("Download started");
+    } catch {
+      toast("Download failed", "error");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   const handleDeleteSelected = async () => {
     if (deleteIds.length === 0) return;
@@ -295,6 +351,7 @@ export default function PublicRecordsPage() {
     { id: "devices" as const, label: "Devices", icon: Monitor },
     { id: "traffic" as const, label: "Traffic", icon: BarChart3 },
     { id: "records" as const, label: "Records", icon: Eye },
+    { id: "downloads" as const, label: "Downloads", icon: Download },
   ];
 
   return (
@@ -820,9 +877,167 @@ export default function PublicRecordsPage() {
                       </button>
                     )}
                   </GlassPanel>
-                </motion.div>
+          </motion.div>
+        )}
+
+        {activeTab === "downloads" && (
+          <motion.div
+            key="downloads"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-6"
+          >
+            <GlassPanel>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <Download size={18} className="text-primary" />
+                    Download Visitor Records
+                  </h3>
+                  <p className="text-foreground/50 text-sm mt-1">
+                    Browse visitors as folders and download their records as CSV
+                  </p>
+                </div>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => handleDownload()}
+                  disabled={isDownloading}
+                  className="flex items-center gap-2"
+                >
+                  {isDownloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                  Download All
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-center">
+                  <p className="text-2xl font-bold text-primary">{visitorSummary.total}</p>
+                  <p className="text-xs text-foreground/50 mt-1">Total Visitors</p>
+                </div>
+                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-center">
+                  <p className="text-2xl font-bold text-green-400">{visitorSummary.users}</p>
+                  <p className="text-xs text-foreground/50 mt-1">Users</p>
+                </div>
+                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-center">
+                  <p className="text-2xl font-bold text-gold">{visitorSummary.bots}</p>
+                  <p className="text-xs text-foreground/50 mt-1">Bots</p>
+                </div>
+              </div>
+
+              {isVisitorsLoading ? (
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 size={32} className="animate-spin text-primary" />
+                </div>
+              ) : visitors.length === 0 ? (
+                <div className="text-center py-16">
+                  <Folder size={48} className="mx-auto mb-4 text-foreground/20" />
+                  <p className="text-foreground/60">No visitors found</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {visitors.map((visitor) => (
+                    <motion.div
+                      key={visitor.visitorId}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                    >
+                      <div
+                        className={`rounded-xl border transition-all duration-200 ${
+                          expandedVisitor === visitor.visitorId
+                            ? "bg-primary/[0.03] border-primary/20"
+                            : "bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10"
+                        }`}
+                      >
+                        <div
+                          className="flex items-center justify-between p-4 cursor-pointer"
+                          onClick={() => setExpandedVisitor(expandedVisitor === visitor.visitorId ? null : visitor.visitorId)}
+                        >
+                          <div className="flex items-center gap-3">
+                            {expandedVisitor === visitor.visitorId ? (
+                              <FolderOpen size={20} className={visitor.isBot ? "text-gold" : "text-primary"} />
+                            ) : (
+                              <Folder size={20} className={visitor.isBot ? "text-gold" : "text-primary"} />
+                            )}
+                            <div>
+                              <p className="font-medium text-sm">{visitor.label}</p>
+                              <p className="text-xs text-foreground/40 font-mono">{visitor.visitorId}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <span className={`px-2 py-0.5 rounded-full text-xs ${
+                              visitor.isBot
+                                ? "bg-gold/10 text-gold border border-gold/20"
+                                : "bg-green-500/10 text-green-400 border border-green-500/20"
+                            }`}>
+                              {visitor.isBot ? "Bot" : "User"}
+                            </span>
+                            <span className="text-sm text-foreground/50">
+                              {visitor.records.length} visit{visitor.records.length !== 1 ? "s" : ""}
+                            </span>
+                            <span className="text-xs text-foreground/40">
+                              {formatDate(visitor.lastVisit)}
+                            </span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDownload(visitor.visitorId);
+                              }}
+                              disabled={isDownloading}
+                              className="p-2 rounded-lg hover:bg-primary/10 text-foreground/40 hover:text-primary transition-colors"
+                              title="Download records"
+                            >
+                              <Download size={16} />
+                            </button>
+                          </div>
+                        </div>
+
+                        <AnimatePresence>
+                          {expandedVisitor === visitor.visitorId && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="px-4 pb-4 border-t border-white/5 pt-3">
+                                <div className="space-y-2 max-h-64 overflow-y-auto">
+                                  {visitor.records.slice(0, 20).map((record) => (
+                                    <div
+                                      key={record.id}
+                                      className="flex items-center justify-between p-2.5 rounded-lg bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors text-sm"
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        <FileText size={14} className="text-foreground/30" />
+                                        <span className="text-foreground/70 font-mono">{record.page}</span>
+                                      </div>
+                                      <div className="flex items-center gap-4 text-xs text-foreground/40">
+                                        <span>{record.browser || "—"}</span>
+                                        <span>{record.os || "—"}</span>
+                                        <span>{formatDate(record.createdAt)} {formatTime(record.createdAt)}</span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                  {visitor.records.length > 20 && (
+                                    <p className="text-xs text-foreground/40 text-center py-2">
+                                      + {visitor.records.length - 20} more records
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
               )}
-            </AnimatePresence>
+            </GlassPanel>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
             {isLoading ? (
               <div className="flex items-center justify-center py-20">
