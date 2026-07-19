@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
 export async function GET() {
@@ -9,6 +9,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const prisma = getPrisma();
     const messages = await prisma.message.findMany({
       where: { deleted: false },
       orderBy: { createdAt: "desc" },
@@ -41,6 +42,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    const prisma = getPrisma();
     const message = await prisma.message.update({
       where: { id },
       data: { read: read !== undefined ? read : true },
@@ -73,6 +75,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    const prisma = getPrisma();
     await prisma.message.update({
       where: { id },
       data: { deleted: true },

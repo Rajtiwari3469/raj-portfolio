@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { getPrisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
@@ -337,6 +336,7 @@ function isEndingMessage(message: string): boolean {
 
 async function hasRatingAlready(sessionId: string): Promise<boolean> {
   try {
+    const prisma = getPrisma();
     const rating = await prisma.chatMessage.findFirst({
       where: { sessionId, rating: { not: null }, deleted: false },
     });
@@ -348,6 +348,7 @@ async function hasRatingAlready(sessionId: string): Promise<boolean> {
 
 export async function POST(request: NextRequest) {
   try {
+    const prisma = getPrisma();
     const body = await request.json();
     const { sessionId, sender, message, messageType } = body;
 
@@ -422,6 +423,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    const prisma = getPrisma();
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get("sessionId");
     if (!sessionId) return NextResponse.json({ error: "sessionId is required" }, { status: 400 });
@@ -442,6 +444,7 @@ export async function DELETE(request: NextRequest) {
     const auth = await isAuthenticated();
     if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    const prisma = getPrisma();
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get("sessionId");
     if (!sessionId) return NextResponse.json({ error: "sessionId is required" }, { status: 400 });

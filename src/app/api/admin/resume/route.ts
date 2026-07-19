@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
 export async function GET() {
@@ -7,6 +7,7 @@ export async function GET() {
     const auth = await isAuthenticated();
     if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    const prisma = getPrisma();
     const resumes = await prisma.resume.findMany({
       orderBy: { createdAt: "desc" },
     });
@@ -27,6 +28,7 @@ export async function POST(request: NextRequest) {
 
     if (!name) return NextResponse.json({ error: "Name required" }, { status: 400 });
 
+    const prisma = getPrisma();
     const resume = await prisma.resume.create({
       data: {
         name,
@@ -56,6 +58,7 @@ export async function PUT(request: NextRequest) {
 
     if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
 
+    const prisma = getPrisma();
     const resume = await prisma.resume.update({
       where: { id },
       data: {
@@ -84,6 +87,7 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
 
+    const prisma = getPrisma();
     await prisma.resume.delete({ where: { id } });
     return NextResponse.json({ message: "Deleted" });
   } catch (error) {

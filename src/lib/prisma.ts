@@ -45,25 +45,4 @@ export function getPrisma(): PrismaClient {
   return globalForPrisma.prisma;
 }
 
-export const prisma = new Proxy({} as PrismaClient, {
-  get(_target, prop) {
-    const client = getPrisma();
-    const value = Reflect.get(client, prop as string);
-    if (typeof value === "function") {
-      return value.bind(client);
-    }
-    return value;
-  },
-  has(_target, prop) {
-    const client = getPrisma();
-    return Reflect.has(client, prop as string);
-  },
-  ownKeys() {
-    const client = getPrisma();
-    return Reflect.ownKeys(client);
-  },
-  getOwnPropertyDescriptor(_target, prop) {
-    const client = getPrisma();
-    return Reflect.getOwnPropertyDescriptor(client, prop as string);
-  },
-});
+

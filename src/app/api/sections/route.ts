@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 
 const SECTION_KEYS = [
   "aboutContent",
@@ -11,6 +11,7 @@ const SECTION_KEYS = [
 
 export async function GET() {
   try {
+    const prisma = getPrisma();
     const settings = await prisma.setting.findMany({
       where: { key: { in: SECTION_KEYS } },
     });

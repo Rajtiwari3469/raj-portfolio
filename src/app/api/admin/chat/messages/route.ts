@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const prisma = getPrisma();
     const messages = await prisma.chatMessage.findMany({
       where: { sessionId, deleted: false },
       orderBy: { createdAt: "asc" },
@@ -56,6 +57,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const prisma = getPrisma();
     const chatMessage = await prisma.chatMessage.create({
       data: {
         sessionId,
@@ -85,6 +87,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { aiEnabled } = body;
 
+    const prisma = getPrisma();
     await prisma.setting.upsert({
       where: { key: "chatAIEnabled" },
       update: { value: String(aiEnabled) },
@@ -132,6 +135,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "sessionId is required" }, { status: 400 });
     }
 
+    const prisma = getPrisma();
     await prisma.chatMessage.updateMany({ where: { sessionId }, data: { deleted: true } });
 
     return NextResponse.json({ message: "Chat session deleted" });

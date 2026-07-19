@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
 export async function GET() {
@@ -9,6 +9,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const prisma = getPrisma();
     const projects = await prisma.project.findMany({
       orderBy: { createdAt: "desc" },
     });
@@ -40,6 +41,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const prisma = getPrisma();
     const project = await prisma.project.create({
       data: {
         title,
@@ -84,6 +86,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    const prisma = getPrisma();
     const project = await prisma.project.update({
       where: { id },
       data,
@@ -116,6 +119,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    const prisma = getPrisma();
     await prisma.project.delete({
       where: { id },
     });

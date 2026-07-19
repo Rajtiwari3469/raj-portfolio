@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
 const SECTION_KEYS = [
@@ -12,6 +12,7 @@ const SECTION_KEYS = [
 
 export async function GET() {
   try {
+    const prisma = getPrisma();
     const settings = await prisma.setting.findMany({
       where: { key: { in: SECTION_KEYS } },
     });
@@ -42,6 +43,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const prisma = getPrisma();
     const body = await request.json();
     const entries = Object.entries(body).filter(([key]) =>
       SECTION_KEYS.includes(key)

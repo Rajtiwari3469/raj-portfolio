@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
 const SENSITIVE_KEYS = [
@@ -16,6 +16,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const prisma = getPrisma();
     const settings = await prisma.setting.findMany();
     const settingsObject: Record<string, string> = {};
     settings.forEach((setting) => {
@@ -43,6 +44,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const updates = Object.entries(body);
 
+    const prisma = getPrisma();
     for (const [key, value] of updates) {
       await prisma.setting.upsert({
         where: { key },
