@@ -30,7 +30,7 @@ export async function GET() {
   } catch (error) {
     console.error("Get sections error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch section content" },
+      { error: "Failed to fetch section content", details: String(error) },
       { status: 500 }
     );
   }
