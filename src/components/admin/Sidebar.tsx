@@ -20,7 +20,6 @@ import {
   PenTool,
   BarChart3,
   History,
-  IndianRupee,
 } from "lucide-react";
 
 const menuItems = [
@@ -30,7 +29,6 @@ const menuItems = [
   { name: "Certificates", href: "/admin/certificates", icon: Award },
   { name: "Resume", href: "/admin/resume", icon: FileText },
   { name: "Content", href: "/admin/content", icon: PenTool },
-  { name: "Pricing", href: "/admin/pricing", icon: IndianRupee },
   { name: "Touch Messages", href: "/admin/touch-messages", icon: Mail },
   { name: "Chat", href: "/admin/chat", icon: MessageCircle },
   { name: "Public Records", href: "/admin/public-records", icon: BarChart3 },

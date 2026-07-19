@@ -154,16 +154,3 @@ model PublicRecord {
   visitDuration Int?
   createdAt     DateTime @default(now())
 }
-
-model Pricing {
-  id           String   @id @default(cuid())
-  projectName  String
-  totalPrice   Int
-  advancePrice Int
-  billingType  String   @default("one-time")
-  description  String?
-  active       Boolean  @default(true)
-  order        Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-}

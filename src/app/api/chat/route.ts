@@ -2,44 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
-async function getPricingContext(): Promise<string> {
-  try {
-    const prisma = getPrisma();
-    const pricing = await prisma.pricing.findMany({
-      where: { active: true },
-      orderBy: { order: "asc" },
-    });
-
-    if (pricing.length === 0) {
-      return `PRICING (Default estimates):
-- Web Development (React, Next.js, Node.js): ₹15,000+
-- Mobile App Development (React Native, Flutter): ₹25,000+
-- Full-Stack Projects: ₹25,000+
-- AI/ML Solutions: ₹30,000+
-- Portfolio Website: ₹8,000+
-- E-commerce Website: ₹25,000+
-- Payment: 50% advance, 50% on completion`;
-    }
-
-    const lines = pricing.map((p) => {
-      const pending = p.totalPrice - p.advancePrice;
-      const desc = p.description ? ` (${p.description})` : "";
-      const period = p.billingType && p.billingType !== "one-time" ? `/${p.billingType}` : "";
-      return `- ${p.projectName}${desc}: ₹${p.totalPrice.toLocaleString("en-IN")}${period} total | ₹${p.advancePrice.toLocaleString("en-IN")}${period} advance | ₹${pending.toLocaleString("en-IN")}${period} pending`;
-    });
-
-    return `ACTUAL PRICING (use these EXACT prices — never make up numbers):
-${lines.join("\n")}
-Always mention advance + pending split when discussing any project. If project type is not in the list, say you'll connect them with Sir for a custom quote.`;
-  } catch {
-    return `PRICING (Default):
-- Web Development: ₹15,000+ | Mobile Apps: ₹25,000+ | Full-Stack: ₹25,000+
-- AI/ML: ₹30,000+ | Portfolio: ₹8,000+ | E-commerce: ₹25,000+
-- Payment: 50% advance, 50% on completion`;
-  }
-}
-
-function buildSystemPrompt(pricingContext: string): string {
+function buildSystemPrompt(): string {
   return `You are a smart, friendly, and professional AI assistant working on Raj Tiwari's portfolio website. You are a REAL person-like assistant — NOT a robot, NOT a generic chatbot. You think before replying, understand context, and respond naturally.
 
 ## YOUR CORE BEHAVIOR
@@ -62,7 +25,7 @@ When someone says hi/hello/hey:
 - If they ask a general question → answer it briefly, then ask about their project needs
 - If they seem frustrated → be empathetic and helpful
 - NEVER give robotic/template responses — every reply must feel unique
-- If they ask "who are you" → "I'm Raj's personal assistant! I help with project inquiries, pricing, and everything related to Raj's work. What can I do for you? 😊"
+- If they ask "who are you" → "I'm Raj's personal assistant! I help with project inquiries, and everything related to Raj's work. What can I do for you? 😊"
 
 ### 3. ABOUT RAJ — Don't reveal details, redirect to Sir
 When someone asks about Raj (who is Raj, tell me about Raj, Raj kaun hai, Raj details, etc.):
@@ -70,19 +33,16 @@ When someone asks about Raj (who is Raj, tell me about Raj, Raj kaun hai, Raj de
 - ALWAYS say something like:
   - "Sir will connect with you soon! 😊 In the meantime, is there anything I can help you with regarding projects or services?"
   - "Sir will be in touch with you shortly! Is there something specific I can help you with right now?"
-  - "Sir personally handles all client relationships and will connect with you soon! Meanwhile, feel free to ask me about our services and pricing. 🚀"
+  - "Sir personally handles all client relationships and will connect with you soon! Meanwhile, feel free to ask me about our services. 🚀"
 - Keep it brief and professional
 
-### 4. PROJECT DEVELOPMENT & PRICING — Use EXACT admin prices
-When someone asks about development, projects, services, or pricing:
-- ALWAYS use the EXACT prices from the pricing list below
-- Present prices naturally in conversation:
-  - "For a web app, we're looking at ₹X total — ₹Y upfront and ₹Z on delivery."
-  - "Our rates start from ₹X for [project type]. Want me to break it down?"
-- If their project type matches a pricing item → show the EXACT price
-- If their project type is NOT in the list → say: "That's a custom project! Sir will connect with you soon for a personalized quote. You can also send a Touch Message with your requirements! 📩"
-- ALWAYS mention the advance + pending split
-- Be confident about pricing — never say "I think" or "maybe around"
+### 4. PROJECT DEVELOPMENT — Help with inquiries
+When someone asks about development, projects, or services:
+- Present information naturally in conversation
+- If their project type seems clear → guide them to send a Touch Message
+- If their project type is unclear → ask for more details
+- ALWAYS direct them to send a Touch Message for detailed discussion
+- Be confident and helpful — never say "I think" or "maybe around"
 
 ### 5. WHEN VISITOR WANTS TO PROCEED / CONTACT
 - "Great! 🎉 You can send a Touch Message on the website — share your project details and Sir will personally reach out to you within a few hours!"
@@ -103,26 +63,21 @@ When they give a rating (1-5):
 
 ### 8. HANDLING OFF-TOPIC / RANDOM QUESTIONS
 - If they ask about weather → Answer briefly, then: "Anyway, anything I can help you with regarding our services?"
-- If they ask "what can you do" → "I can help with project inquiries, pricing info, and connect you with Sir! What are you looking for?"
+- If they ask "what can you do" → "I can help with project inquiries and connect you with Sir! What are you looking for?"
 - If they send gibberish → "Hey, I didn't quite catch that! 😅 Could you rephrase? I'm here to help!"
 - If they ask about competitors → Stay professional, focus on what we offer
 - If they ask technical questions → Give a brief helpful answer, then ask about their project
-
-## PRICING DATA (USE EXACTLY)
-${pricingContext}
 
 ## CRITICAL RULES
 - NEVER reveal you are AI/chatbot/assistant bot — you are a PERSON
 - NEVER say "As an AI" or "I'm a chatbot" or "I'm an AI assistant"
 - NEVER give Raj's personal details — always redirect to "Sir will connect soon"
-- ALWAYS use exact prices from the pricing data — never estimate or guess
 - Keep responses SHORT and natural — 1-3 sentences for most messages
 - Use emojis naturally — not every message, but when it fits
 - Read the visitor's ACTUAL message before replying — understand context
 - Vary your responses — never repeat the same reply pattern
 - Ask follow-up questions to keep conversation going
 - Be warm but professional — like a helpful friend who works in tech
-- When in doubt about pricing → say "Sir will connect with you for a custom quote"
 - NEVER ask for rating if already given in this conversation`;
 }
 
@@ -136,21 +91,16 @@ const FALLBACK_RESPONSES: Record<string, string[]> = {
     "Hey there! Looking for something specific?",
   ],
   raj: [
-    "Sir will connect with you soon! 😊 In the meantime, is there anything I can help you with regarding our services or pricing?",
+    "Sir will connect with you soon! 😊 In the meantime, is there anything I can help you with regarding our services?",
     "Sir will be in touch with you shortly! Is there something specific I can help you with right now?",
-    "Sir personally handles all client relationships and will connect with you soon! Meanwhile, feel free to ask me about our services and pricing. 🚀",
-    "Sir will reach out to you soon! For now, I can help you with project inquiries, pricing, and more. What would you like to know?",
+    "Sir personally handles all client relationships and will connect with you soon! Meanwhile, feel free to ask me about our services. 🚀",
+    "Sir will reach out to you soon! For now, I can help you with project inquiries and more. What would you like to know?",
   ],
   project: [
     "We build all kinds of projects — web apps, mobile apps, AI solutions, and more! What type of project are you thinking about? 🚀",
     "Great! We specialize in web development, mobile apps, and AI/ML solutions. Tell me more about what you need! 💡",
     "Awesome! From e-commerce platforms to AI-powered apps — we've got you covered. What's your project about? 🎯",
     "We work on full-stack web apps, mobile apps, and custom software. What kind of project do you have in mind?",
-  ],
-  pricing: [
-    "I'd love to share our pricing! What type of project are you interested in? I'll break down the exact costs for you 💰",
-    "Great question! Our pricing is transparent. Just tell me what kind of project you need and I'll give you the exact numbers! ✨",
-    "Pricing depends on the project type. What are you looking to build? I'll share the exact rates! 💵",
   ],
   availability: [
     "Sir is available for freelance work! 🎉 He typically responds within a few hours. Want to discuss your project?",
@@ -209,10 +159,6 @@ function getFallbackResponse(message: string): string {
     return FALLBACK_RESPONSES.raj[Math.floor(Math.random() * FALLBACK_RESPONSES.raj.length)];
   }
 
-  if (lower.match(/\b(price|pricing|cost|charge|fees|how\s*much|rate|budget|advance|pending|expensive|cheap|affordable|tariff|quotation|quote)\b/)) {
-    return FALLBACK_RESPONSES.pricing[Math.floor(Math.random() * FALLBACK_RESPONSES.pricing.length)];
-  }
-
   if (lower.match(/\b(project|website|app|development|build|create|develop|mobile|web|software|saas|ecommerce|e-commerce|dashboard|blog|portfolio|ai|ml|chatbot|api|frontend|backend|full\s*stack)\b/)) {
     return FALLBACK_RESPONSES.project[Math.floor(Math.random() * FALLBACK_RESPONSES.project.length)];
   }
@@ -234,11 +180,11 @@ function getFallbackResponse(message: string): string {
   }
 
   if (lower.match(/\b(what\s*can\s*you\s*do|what\s*do\s*you\s*do|help|services|what\s*services|capabilities)\b/)) {
-    return "I can help you with project inquiries, pricing info, and connect you with Sir! I can tell you about web development, mobile apps, AI solutions, and more. What are you looking for? 😊";
+    return "I can help you with project inquiries and connect you with Sir! I can tell you about web development, mobile apps, AI solutions, and more. What are you looking for? 😊";
   }
 
   if (lower.match(/\b(who\s*are\s*you|what\s*are\s*you|your\s*name|introduce\s*yourself)\b/)) {
-    return "I'm Raj's personal assistant! I help with project inquiries, pricing, and everything related to our services. What can I do for you? 😊";
+    return "I'm Raj's personal assistant! I help with project inquiries and everything related to our services. What can I do for you? 😊";
   }
 
   if (lower.match(/\b(weather|joke|funny|laugh|entertain|music|movie|game|sport|cricket|football|score)\b/)) {
@@ -298,8 +244,7 @@ async function generateAIReply(
     const apiKey = process.env.GOOGLE_AI_API_KEY;
     if (!apiKey) return getFallbackResponse(visitorMessage);
 
-    const pricingContext = await getPricingContext();
-    const systemPrompt = buildSystemPrompt(pricingContext);
+    const systemPrompt = buildSystemPrompt();
 
     const historyText = conversationHistory
       .slice(-10)
