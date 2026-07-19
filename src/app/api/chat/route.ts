@@ -24,7 +24,8 @@ async function getPricingContext(): Promise<string> {
     const lines = pricing.map((p) => {
       const pending = p.totalPrice - p.advancePrice;
       const desc = p.description ? ` (${p.description})` : "";
-      return `- ${p.projectName}${desc}: ₹${p.totalPrice.toLocaleString("en-IN")} total | ₹${p.advancePrice.toLocaleString("en-IN")} advance | ₹${pending.toLocaleString("en-IN")} pending`;
+      const period = p.billingType && p.billingType !== "one-time" ? `/${p.billingType}` : "";
+      return `- ${p.projectName}${desc}: ₹${p.totalPrice.toLocaleString("en-IN")}${period} total | ₹${p.advancePrice.toLocaleString("en-IN")}${period} advance | ₹${pending.toLocaleString("en-IN")}${period} pending`;
     });
 
     return `ACTUAL PRICING (use these EXACT prices — never make up numbers):

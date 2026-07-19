@@ -13,6 +13,7 @@ interface PricingItem {
   projectName: string;
   totalPrice: number;
   advancePrice: number;
+  billingType: string;
   description: string | null;
   active: boolean;
   order: number;
@@ -32,6 +33,7 @@ export default function PricingPage() {
     projectName: "",
     totalPrice: "",
     advancePrice: "",
+    billingType: "one-time",
     description: "",
   });
 
@@ -74,6 +76,7 @@ export default function PricingPage() {
           projectName: form.projectName,
           totalPrice: total,
           advancePrice: advance,
+          billingType: form.billingType,
           description: form.description || null,
         }),
       });
@@ -98,6 +101,7 @@ export default function PricingPage() {
       projectName: item.projectName,
       totalPrice: String(item.totalPrice),
       advancePrice: String(item.advancePrice),
+      billingType: item.billingType || "one-time",
       description: item.description || "",
     });
     setEditingId(item.id);
@@ -134,8 +138,20 @@ export default function PricingPage() {
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return `₹${(amount / 1000).toFixed(amount % 1000 === 0 ? 0 : 1)}k`;
+  const formatCurrency = (amount: number, billingType?: string) => {
+    const formatted = `₹${(amount / 1000).toFixed(amount % 1000 === 0 ? 0 : 1)}k`;
+    if (billingType && billingType !== "one-time") {
+      return `${formatted}/${billingType}`;
+    }
+    return formatted;
+  };
+
+  const formatCurrencyFull = (amount: number, billingType?: string) => {
+    const formatted = `₹${amount.toLocaleString("en-IN")}`;
+    if (billingType && billingType !== "one-time") {
+      return `${formatted}/${billingType}`;
+    }
+    return formatted;
   };
 
   if (loading) {
@@ -158,7 +174,7 @@ export default function PricingPage() {
         <Button
           variant="primary"
           onClick={() => {
-            setForm({ projectName: "", totalPrice: "", advancePrice: "", description: "" });
+            setForm({ projectName: "", totalPrice: "", advancePrice: "", billingType: "one-time", description: "" });
             setEditingId(null);
             setShowForm(true);
           }}
@@ -227,18 +243,38 @@ export default function PricingPage() {
                   className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary/30 transition-colors"
                 />
               </div>
+              <div>
+                <label className="block text-xs text-foreground/40 mb-1.5">Billing Period</label>
+                <div className="relative">
+                  <select
+                    value={form.billingType}
+                    onChange={(e) => setForm({ ...form, billingType: e.target.value })}
+                    className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary/30 transition-colors appearance-none"
+                  >
+                    <option value="one-time" style={{ background: "#0a0a1f" }}>One-time</option>
+                    <option value="month" style={{ background: "#0a0a1f" }}>/month</option>
+                    <option value="year" style={{ background: "#0a0a1f" }}>/year</option>
+                    <option value="week" style={{ background: "#0a0a1f" }}>/week</option>
+                    <option value="day" style={{ background: "#0a0a1f" }}>/day</option>
+                    <option value="hour" style={{ background: "#0a0a1f" }}>/hour</option>
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <div className="w-2.5 h-2.5 border-r-2 border-b-2 border-foreground/30 rotate-45" />
+                  </div>
+                </div>
+              </div>
             </div>
 
             {form.totalPrice && form.advancePrice && (
               <div className="flex gap-4 text-sm">
                 <div className="px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary">
-                  Total: {formatCurrency(parseInt(form.totalPrice) || 0)}
+                  Total: {formatCurrency(parseInt(form.totalPrice) || 0, form.billingType)}
                 </div>
                 <div className="px-3 py-1.5 rounded-lg bg-gold/10 border border-gold/20 text-gold">
-                  Advance: {formatCurrency(parseInt(form.advancePrice) || 0)}
+                  Advance: {formatCurrency(parseInt(form.advancePrice) || 0, form.billingType)}
                 </div>
                 <div className="px-3 py-1.5 rounded-lg bg-secondary/10 border border-secondary/20 text-secondary">
-                  Pending: {formatCurrency((parseInt(form.totalPrice) || 0) - (parseInt(form.advancePrice) || 0))}
+                  Pending: {formatCurrency((parseInt(form.totalPrice) || 0) - (parseInt(form.advancePrice) || 0), form.billingType)}
                 </div>
               </div>
             )}
@@ -294,13 +330,13 @@ export default function PricingPage() {
                     )}
                     <div className="flex gap-3 mt-1.5 text-sm">
                       <span className="text-primary font-medium">
-                        Total: {formatCurrency(item.totalPrice)}
+                        Total: {formatCurrencyFull(item.totalPrice, item.billingType)}
                       </span>
                       <span className="text-gold">
-                        Advance: {formatCurrency(item.advancePrice)}
+                        Advance: {formatCurrencyFull(item.advancePrice, item.billingType)}
                       </span>
                       <span className="text-secondary">
-                        Pending: {formatCurrency(item.totalPrice - item.advancePrice)}
+                        Pending: {formatCurrencyFull(item.totalPrice - item.advancePrice, item.billingType)}
                       </span>
                     </div>
                   </div>

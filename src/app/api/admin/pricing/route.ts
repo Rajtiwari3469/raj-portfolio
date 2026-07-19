@@ -9,12 +9,19 @@ async function ensurePricingTable(prisma: ReturnType<typeof getPrisma>) {
       "projectName" TEXT NOT NULL,
       "totalPrice" INTEGER NOT NULL,
       "advancePrice" INTEGER NOT NULL,
+      "billingType" TEXT NOT NULL DEFAULT 'one-time',
       "description" TEXT,
       "active" BOOLEAN NOT NULL DEFAULT true,
       "order" INTEGER NOT NULL DEFAULT 0,
       "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
       "updatedAt" TIMESTAMP(3) NOT NULL
     );
+  `);
+  await prisma.$executeRawUnsafe(`
+    DO $$ BEGIN
+      ALTER TABLE "Pricing" ADD COLUMN IF NOT EXISTS "billingType" TEXT NOT NULL DEFAULT 'one-time';
+    EXCEPTION WHEN duplicate_column THEN null;
+    END $$;
   `);
 }
 
@@ -41,7 +48,7 @@ export async function POST(request: NextRequest) {
     if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await request.json();
-    const { projectName, totalPrice, advancePrice, description } = body;
+    const { projectName, totalPrice, advancePrice, billingType, description } = body;
 
     if (!projectName || !totalPrice || !advancePrice) {
       return NextResponse.json({ error: "projectName, totalPrice, and advancePrice are required" }, { status: 400 });
@@ -62,6 +69,7 @@ export async function POST(request: NextRequest) {
         projectName,
         totalPrice,
         advancePrice,
+        billingType: billingType || "one-time",
         description: description || null,
         order: nextOrder,
       },
@@ -80,7 +88,7 @@ export async function PUT(request: NextRequest) {
     if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await request.json();
-    const { id, projectName, totalPrice, advancePrice, description, active, order } = body;
+    const { id, projectName, totalPrice, advancePrice, billingType, description, active, order } = body;
 
     if (!id) return NextResponse.json({ error: "id is required" }, { status: 400 });
 
@@ -91,6 +99,7 @@ export async function PUT(request: NextRequest) {
         ...(projectName !== undefined && { projectName }),
         ...(totalPrice !== undefined && { totalPrice }),
         ...(advancePrice !== undefined && { advancePrice }),
+        ...(billingType !== undefined && { billingType }),
         ...(description !== undefined && { description }),
         ...(active !== undefined && { active }),
         ...(order !== undefined && { order }),

@@ -160,6 +160,7 @@ model Pricing {
   projectName  String
   totalPrice   Int
   advancePrice Int
+  billingType  String   @default("one-time")
   description  String?
   active       Boolean  @default(true)
   order        Int      @default(0)
