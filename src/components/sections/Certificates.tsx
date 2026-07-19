@@ -83,9 +83,6 @@ export default function Certificates() {
                 </div>
 
                 <GlassPanel hover glow="gold" className="h-full flex flex-col relative overflow-visible">
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                    <div className="h-6 w-1 bg-gradient-to-b from-yellow-400/80 to-transparent rounded-full" />
-                  </div>
 
                   {cert.image && (
                     <div className="h-48 rounded-xl overflow-hidden mb-4 bg-white/[0.02] border border-white/[0.04]">
