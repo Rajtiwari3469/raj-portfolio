@@ -279,9 +279,9 @@ export default function Projects() {
                     <X size={20} />
                   </button>
 
-                  <div className="relative h-64 rounded-xl overflow-hidden mb-6 bg-white/[0.02] border border-white/[0.04]">
+                  <div className="relative rounded-xl mb-6 bg-white/[0.02] border border-white/[0.04]">
                     {allImages.length === 0 && (
-                      <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="flex items-center justify-center h-64">
                         <Folder size={56} className="text-primary/15" />
                       </div>
                     )}
@@ -292,7 +292,7 @@ export default function Projects() {
                         width={800}
                         height={400}
                         unoptimized
-                        className="w-full h-full object-cover"
+                        className="w-full h-auto rounded-xl"
                       />
                     ) : null}
                     {allImages.length > 1 && (
