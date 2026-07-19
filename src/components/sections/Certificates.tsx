@@ -140,25 +140,6 @@ export default function Certificates() {
             ))}
           </div>
         )}
-
-        {certificates.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.2 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className="mt-12"
-          >
-            <GlassPanel className="text-center">
-              <div className="flex justify-center gap-4">
-                <div className="text-center">
-                  <p className="text-3xl font-bold gradient-text">{certificates.length}+</p>
-                  <p className="text-sm text-foreground/40">Certifications</p>
-                </div>
-              </div>
-            </GlassPanel>
-          </motion.div>
-        )}
       </div>
 
       <AnimatePresence>
