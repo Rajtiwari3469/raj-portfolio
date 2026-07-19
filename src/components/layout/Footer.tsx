@@ -86,6 +86,7 @@ export default function Footer() {
               <li className="text-foreground/40 text-xs">Application Development</li>
               <li className="text-foreground/40 text-xs">Software Development</li>
               <li className="text-foreground/40 text-xs">AI Solutions</li>
+              <li className="text-foreground/40 text-xs">UI/UX Design</li>
             </ul>
           </div>
 
