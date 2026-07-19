@@ -20,7 +20,11 @@ async function ensurePricingTable(prisma: ReturnType<typeof getPrisma>) {
 
 export async function GET() {
   try {
+    const auth = await isAuthenticated();
+    if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const prisma = getPrisma();
+    await ensurePricingTable(prisma);
     const pricing = await prisma.pricing.findMany({
       orderBy: { order: "asc" },
     });
