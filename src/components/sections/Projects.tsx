@@ -21,7 +21,7 @@ interface Project {
   status: string;
 }
 
-type FilterType = "all" | "active" | "in-progress" | "completed";
+type FilterType = "all" | "active" | "in-progress";
 
 export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -56,13 +56,11 @@ export default function Projects() {
 
   const activeProjects = projects.filter((p) => p.status === "active");
   const inProgressProjects = projects.filter((p) => p.status === "in-progress");
-  const completedProjects = projects.filter((p) => p.status === "completed");
 
   const filters: { id: FilterType; label: string; count: number; icon: React.ReactNode }[] = [
     { id: "all", label: "All Projects", count: projects.length, icon: <Folder size={14} /> },
     { id: "active", label: "Active", count: activeProjects.length, icon: <Clock size={14} /> },
     { id: "in-progress", label: "In Progress", count: inProgressProjects.length, icon: <Clock size={14} /> },
-    { id: "completed", label: "Completed", count: completedProjects.length, icon: <CheckCircle size={14} /> },
   ];
 
   const getAllImages = (project: Project): string[] => {
