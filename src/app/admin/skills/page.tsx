@@ -30,6 +30,7 @@ export default function SkillsPage() {
     category: "Programming",
     level: 50,
   });
+  const [customName, setCustomName] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -56,8 +57,14 @@ export default function SkillsPage() {
     e.preventDefault();
     setIsSaving(true);
     try {
+      const skillName = formData.name === "__custom__" ? customName.trim() : formData.name;
+      if (!skillName) {
+        toast("Please enter a skill name", "error");
+        setIsSaving(false);
+        return;
+      }
       const payload = {
-        name: formData.name,
+        name: skillName,
         category: formData.category,
         level: formData.level,
       };
@@ -115,11 +122,13 @@ export default function SkillsPage() {
   const openModal = (skill?: Skill) => {
     if (skill) {
       setEditingSkill(skill);
+      const isCustom = !getSkillsForCategory(skill.category).some((s) => s.name === skill.name);
       setFormData({
-        name: skill.name,
+        name: isCustom ? "__custom__" : skill.name,
         category: skill.category,
         level: skill.level,
       });
+      setCustomName(isCustom ? skill.name : "");
     } else {
       setEditingSkill(null);
       setFormData({
@@ -127,6 +136,7 @@ export default function SkillsPage() {
         category: "Frontend",
         level: 80,
       });
+      setCustomName("");
     }
     setIsModalOpen(true);
   };
@@ -134,6 +144,7 @@ export default function SkillsPage() {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingSkill(null);
+    setCustomName("");
   };
 
   const categories = [...new Set(skills.map((s) => s.category))];
@@ -176,6 +187,10 @@ export default function SkillsPage() {
       { name: "SWR", color: "#ffffff" },
       { name: "Sass", color: "#cc6699" },
       { name: "Sass/SCSS", color: "#cc6699" },
+      { name: "DS", color: "#00d4aa" },
+      { name: "SE", color: "#ff6b35" },
+      { name: "EOS", color: "#7c4dff" },
+      { name: "DSA", color: "#00bcd4" },
     ],
     Backend: [
       { name: "Node.js", color: "#339933" },
@@ -216,6 +231,7 @@ export default function SkillsPage() {
       { name: "Nodemailer", color: "#ffffff" },
       { name: "SendGrid", color: "#1a82e2" },
       { name: "Twilio", color: "#f22f46" },
+      { name: "DSA", color: "#00bcd4" },
     ],
     Database: [
       { name: "MySQL", color: "#4479a1" },
@@ -431,9 +447,13 @@ export default function SkillsPage() {
             <div className="relative">
               <select
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setFormData({ ...formData, name: val });
+                  if (val !== "__custom__") setCustomName("");
+                }}
                 className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors appearance-none"
-                style={{ color: getSkillColor(formData.name) }}
+                style={{ color: formData.name === "__custom__" ? "#ffffff" : getSkillColor(formData.name) }}
                 required
               >
                 <option value="" disabled style={{ background: "#0a0a1f", color: "#555" }}>Select a skill</option>
@@ -442,18 +462,32 @@ export default function SkillsPage() {
                     {skill.name}
                   </option>
                 ))}
+                <option value="__custom__" style={{ color: "#ffffff", background: "#0a0a1f" }}>Other (Custom)</option>
               </select>
               <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                 <div className="w-2.5 h-2.5 border-r-2 border-b-2 border-foreground/30 rotate-45" />
               </div>
             </div>
           </div>
+          {formData.name === "__custom__" && (
+            <div>
+              <label className="block text-sm font-medium mb-2">Custom Skill Name</label>
+              <input
+                type="text"
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value)}
+                placeholder="Enter skill name manually"
+                className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
+                required
+              />
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium mb-2">Category</label>
             <div className="relative">
               <select
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value, name: "" })}
+                onChange={(e) => { setFormData({ ...formData, category: e.target.value, name: "" }); setCustomName(""); }}
                 className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors appearance-none"
                 style={{ color: getCategoryColor(formData.category) }}
               >
