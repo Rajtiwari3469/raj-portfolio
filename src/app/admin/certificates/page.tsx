@@ -10,6 +10,7 @@ import Modal from "@/components/ui/Modal";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useToast } from "@/components/ui/Toast";
 import Image from "next/image";
+import { compressImage } from "@/lib/image-compress";
 
 interface Certificate {
   id: string;
@@ -67,20 +68,10 @@ export default function CertificatesPage() {
 
     setIsUploading(true);
     try {
-      const uploadFormData = new FormData();
-      uploadFormData.append("file", file);
-
-      const response = await fetch("/api/admin/upload", {
-        method: "POST",
-        body: uploadFormData,
-      });
-
-      const data = await response.json();
-      if (data.url) {
-        setFormData({ ...formData, image: data.url });
-        setImagePreview(data.url);
-        toast("Image uploaded");
-      }
+      const compressed = await compressImage(file, 800, 0.7);
+      setFormData({ ...formData, image: compressed });
+      setImagePreview(compressed);
+      toast("Image uploaded");
     } catch (error) {
       console.error("Failed to upload image:", error);
       toast("Upload failed", "error");

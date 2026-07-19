@@ -19,6 +19,7 @@ import Button from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import { useToast } from "@/components/ui/Toast";
 import Image from "next/image";
+import { compressImage } from "@/lib/image-compress";
 
 interface AboutContent {
   bio: string[];
@@ -252,13 +253,14 @@ export default function ContentPage() {
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
-                    toast("Uploading...", "info");
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                      setProfileImage(reader.result as string);
+                    toast("Compressing and uploading...", "info");
+                    try {
+                      const compressed = await compressImage(file, 800, 0.7);
+                      setProfileImage(compressed);
                       toast("Profile image updated");
-                    };
-                    reader.readAsDataURL(file);
+                    } catch {
+                      toast("Failed to process image", "error");
+                    }
                   }}
                   className="block w-full text-sm text-foreground/60 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-primary/15 file:text-primary hover:file:bg-primary/25 file:transition-colors cursor-pointer"
                 />

@@ -10,6 +10,7 @@ import Modal from "@/components/ui/Modal";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useToast } from "@/components/ui/Toast";
 import Image from "next/image";
+import { compressImage } from "@/lib/image-compress";
 
 interface Resume {
   id: string;
@@ -166,16 +167,9 @@ export default function ResumePage() {
     if (!file) return;
     setUploadingPhoto(true);
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-      if (res.ok) {
-        const data = await res.json();
-        setFormData({ ...formData, candidatePhoto: data.url });
-        toast("Photo uploaded");
-      } else {
-        toast("Upload failed", "error");
-      }
+      const compressed = await compressImage(file, 400, 0.7);
+      setFormData({ ...formData, candidatePhoto: compressed });
+      toast("Photo uploaded");
     } catch {
       toast("Upload failed", "error");
     }

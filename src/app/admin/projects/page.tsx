@@ -11,6 +11,7 @@ import Modal from "@/components/ui/Modal";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useToast } from "@/components/ui/Toast";
 import Image from "next/image";
+import { compressImage } from "@/lib/image-compress";
 
 interface Project {
   id: string;
@@ -192,20 +193,13 @@ export default function ProjectsPage() {
     if (target === "image") setIsUploadingCover(true);
     else setIsUploadingMore(true);
     try {
-      const formDataUpload = new FormData();
-      formDataUpload.append("file", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: formDataUpload });
-      if (res.ok) {
-        const data = await res.json();
-        if (target === "image") {
-          setFormData((prev) => ({ ...prev, image: data.url }));
-        } else {
-          setFormData((prev) => ({ ...prev, images: [...prev.images, data.url] }));
-        }
-        toast("Image uploaded");
+      const compressed = await compressImage(file, 800, 0.7);
+      if (target === "image") {
+        setFormData((prev) => ({ ...prev, image: compressed }));
       } else {
-        toast("Upload failed", "error");
+        setFormData((prev) => ({ ...prev, images: [...prev.images, compressed] }));
       }
+      toast("Image uploaded");
     } catch {
       toast("Upload failed", "error");
     }

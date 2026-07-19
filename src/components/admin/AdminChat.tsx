@@ -8,6 +8,7 @@ import Button from "@/components/ui/Button";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useToast } from "@/components/ui/Toast";
 import Image from "next/image";
+import { compressImage } from "@/lib/image-compress";
 
 interface ChatMsg {
   id: string;
@@ -156,15 +157,8 @@ export default function AdminChat() {
     if (!file) return;
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
-      if (res.ok) {
-        const data = await res.json();
-        await sendReply(data.url, "image");
-      } else {
-        toast("Upload failed", "error");
-      }
+      const compressed = await compressImage(file, 600, 0.7);
+      await sendReply(compressed, "image");
     } catch {
       toast("Upload failed", "error");
     }
