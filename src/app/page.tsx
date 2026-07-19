@@ -13,6 +13,8 @@ import ChatWidget from "@/components/ui/ChatWidget";
 import FloatingElements from "@/components/ui/FloatingElements";
 import { getPrisma } from "@/lib/prisma";
 
+export const revalidate = 0;
+
 async function getSettings() {
   try {
     const prisma = getPrisma();
