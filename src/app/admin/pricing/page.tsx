@@ -85,7 +85,7 @@ export default function PricingPage() {
         toast(editingId ? "Pricing updated" : "Pricing added");
         setShowForm(false);
         setEditingId(null);
-        setForm({ projectName: "", totalPrice: "", advancePrice: "", description: "" });
+        setForm({ projectName: "", totalPrice: "", advancePrice: "", billingType: "one-time", description: "" });
         fetchPricing();
       } else {
         const data = await res.json();
