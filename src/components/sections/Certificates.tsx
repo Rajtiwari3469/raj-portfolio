@@ -150,9 +150,6 @@ export default function Certificates() {
             className="mt-12"
           >
             <GlassPanel className="text-center">
-              <p className="text-foreground/50 mb-4 tracking-wide">
-                Continuously learning and expanding my skill set
-              </p>
               <div className="flex justify-center gap-4">
                 <div className="text-center">
                   <p className="text-3xl font-bold gradient-text">{certificates.length}+</p>
