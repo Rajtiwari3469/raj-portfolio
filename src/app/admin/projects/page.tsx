@@ -483,10 +483,11 @@ export default function ProjectsPage() {
               <select
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value, year: e.target.value === "personal" ? "" : formData.year })}
-                className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
+                className="w-full px-4 py-3 rounded-xl bg-[#1a1a2e] text-foreground border border-white/10 focus:border-primary/30 focus:outline-none transition-colors appearance-none cursor-pointer"
+                style={{ colorScheme: "dark" }}
               >
-                <option value="personal">Personal</option>
-                <option value="college">College</option>
+                <option value="personal" className="bg-[#1a1a2e] text-foreground">Personal</option>
+                <option value="college" className="bg-[#1a1a2e] text-foreground">College</option>
               </select>
             </div>
             {formData.type === "college" && (
@@ -539,10 +540,11 @@ export default function ProjectsPage() {
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
+                className="w-full px-4 py-3 rounded-xl bg-[#1a1a2e] text-foreground border border-white/10 focus:border-primary/30 focus:outline-none transition-colors appearance-none cursor-pointer"
+                style={{ colorScheme: "dark" }}
               >
-                <option value="active">Active</option>
-                <option value="in-progress">In Progress</option>
+                <option value="active" className="bg-[#1a1a2e] text-foreground">Active</option>
+                <option value="in-progress" className="bg-[#1a1a2e] text-foreground">In Progress</option>
               </select>
             </div>
           </div>
