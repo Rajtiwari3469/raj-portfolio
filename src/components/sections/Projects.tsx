@@ -232,17 +232,18 @@ export default function Projects() {
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="text-lg font-semibold">{project.title}</h3>
                         <div className="flex items-center gap-1.5">
-                          {activeTab === "college" && project.year && (
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium ${
+                            project.type === "college"
+                              ? "bg-purple-500/15 text-purple-300 border border-purple-500/20"
+                              : "bg-blue-500/15 text-blue-300 border border-blue-500/20"
+                          }`}>
+                            {project.type === "college" ? <GraduationCap size={11} /> : <User size={11} />}
+                            {project.type === "college" ? "College" : "Personal"}
+                          </span>
+                          {project.type === "college" && project.year && (
                             <span className="px-2 py-0.5 rounded-lg text-xs font-medium bg-purple-500/15 text-purple-300 border border-purple-500/20">
                               {project.year}
                             </span>
-                          )}
-                          <span className="text-xs text-foreground/30">{project.category}</span>
-                          {project.subCategory && (
-                            <>
-                              <span className="text-xs text-foreground/20">/</span>
-                              <span className="text-xs text-primary/60">{project.subCategory}</span>
-                            </>
                           )}
                         </div>
                       </div>
@@ -390,6 +391,14 @@ export default function Projects() {
                       <div className="flex items-center gap-3 mb-3">
                         <h2 className="text-2xl font-bold">{selectedProject.title}</h2>
                         <div className="flex items-center gap-1.5">
+                          <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium ${
+                            selectedProject.type === "college"
+                              ? "bg-purple-500/15 text-purple-300 border border-purple-500/20"
+                              : "bg-blue-500/15 text-blue-300 border border-blue-500/20"
+                          }`}>
+                            {selectedProject.type === "college" ? <GraduationCap size={12} /> : <User size={12} />}
+                            {selectedProject.type === "college" ? "College" : "Personal"}
+                          </span>
                           <span className="px-3 py-1 rounded-lg text-xs font-medium bg-primary/10 text-primary border border-primary/20">
                             {selectedProject.category}
                           </span>
