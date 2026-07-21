@@ -258,6 +258,14 @@ export default function ProjectsPage() {
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="font-semibold">{project.title}</h3>
                       <div className="flex items-center gap-1.5">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${
+                          project.type === "college"
+                            ? "bg-purple-500/20 text-purple-400 border border-purple-500/20"
+                            : "bg-blue-500/20 text-blue-400 border border-blue-500/20"
+                        }`}>
+                          {project.type === "college" ? <GraduationCap size={12} /> : <User size={12} />}
+                          {project.type === "college" ? "College" : "Personal"}
+                        </span>
                         {project.type === "college" && project.year && (
                           <span className="px-2 py-0.5 rounded-full text-xs bg-purple-500/20 text-purple-400 border border-purple-500/20">
                             {project.year}
@@ -271,16 +279,6 @@ export default function ProjectsPage() {
                           {project.status}
                         </span>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${
-                        project.type === "college"
-                          ? "bg-purple-500/15 text-purple-400 border border-purple-500/15"
-                          : "bg-blue-500/15 text-blue-400 border border-blue-500/15"
-                      }`}>
-                        {project.type === "college" ? <GraduationCap size={12} /> : <User size={12} />}
-                        {project.type === "college" ? "College" : "Personal"}
-                      </span>
                     </div>
                     <p className="text-sm text-foreground/60 line-clamp-2 mb-3">
                       {project.description}
