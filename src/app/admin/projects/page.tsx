@@ -70,6 +70,7 @@ export default function ProjectsPage() {
   });
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [activeType, setActiveType] = useState<"all" | "personal" | "college">("all");
 
   const fetchProjects = async () => {
     try {
@@ -220,6 +221,14 @@ export default function ProjectsPage() {
     setFormData((prev) => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
   };
 
+  const filteredProjects = projects.filter((p) => {
+    if (activeType === "all") return true;
+    return p.type === activeType;
+  });
+
+  const personalCount = projects.filter((p) => p.type === "personal").length;
+  const collegeCount = projects.filter((p) => p.type === "college").length;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -233,19 +242,49 @@ export default function ProjectsPage() {
         </Button>
       </div>
 
+      <div className="flex justify-center gap-3">
+        {[
+          { id: "all" as const, label: "All", count: projects.length },
+          { id: "personal" as const, label: "Personal", count: personalCount, icon: <User size={14} /> },
+          { id: "college" as const, label: "College", count: collegeCount, icon: <GraduationCap size={14} /> },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveType(tab.id)}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all duration-300 text-sm font-medium ${
+              activeType === tab.id
+                ? "bg-primary/10 text-primary border border-primary/30 shadow-[0_0_15px_rgba(0,212,255,0.1)]"
+                : "text-foreground/70 hover:bg-white/[0.03] hover:text-foreground border border-white/[0.08] hover:border-white/[0.15]"
+            }`}
+          >
+            {tab.icon}
+            <span className="tracking-wide">{tab.label}</span>
+            <span className={`px-2 py-0.5 rounded-lg text-xs ${
+              activeType === tab.id ? "bg-primary/20 text-primary" : "bg-white/[0.03] text-foreground/30"
+            }`}>
+              {tab.count}
+            </span>
+          </button>
+        ))}
+      </div>
+
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 size={32} className="animate-spin text-primary" />
         </div>
-      ) : projects.length === 0 ? (
+      ) : filteredProjects.length === 0 ? (
         <GlassPanel className="text-center py-16">
           <FolderKanban size={48} className="mx-auto mb-4 text-foreground/20" />
-          <p className="text-foreground/60">No projects yet. Create your first project!</p>
+          <p className="text-foreground/60">
+            {projects.length === 0
+              ? "No projects yet. Create your first project!"
+              : `No ${activeType} projects found.`}
+          </p>
         </GlassPanel>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence>
-            {projects.map((project) => (
+            {filteredProjects.map((project) => (
               <motion.div
                 key={project.id}
                 layout
