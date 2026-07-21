@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
     const subCategory = searchParams.get("subCategory");
     const featured = searchParams.get("featured");
     const status = searchParams.get("status");
+    const type = searchParams.get("type");
 
     const where: Record<string, unknown> = {};
 
@@ -26,6 +27,10 @@ export async function GET(request: NextRequest) {
 
     if (status && status !== "all") {
       where.status = status;
+    }
+
+    if (type && type !== "all") {
+      where.type = type;
     }
 
     const projects = await prisma.project.findMany({

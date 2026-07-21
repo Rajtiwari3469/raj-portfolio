@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, Folder, CheckCircle, Clock, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { ExternalLink, Folder, Clock, X, ChevronLeft, ChevronRight, GraduationCap, User } from "lucide-react";
 import { GithubIcon } from "@/components/ui/SocialIcons";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Image from "next/image";
@@ -18,15 +18,19 @@ interface Project {
   technology: string[];
   category: string;
   subCategory: string | null;
+  type: string;
+  year: string | null;
   status: string;
 }
 
-type FilterType = "all" | "active" | "in-progress";
+type TabType = "personal" | "college";
+type StatusFilter = "all" | "active" | "in-progress";
 
 export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
+  const [activeTab, setActiveTab] = useState<TabType>("personal");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [modalImageIndex, setModalImageIndex] = useState(0);
 
@@ -49,19 +53,15 @@ export default function Projects() {
     fetchProjects();
   }, [fetchProjects]);
 
-  const filteredProjects = projects.filter((project) => {
-    if (activeFilter === "all") return true;
-    return project.status === activeFilter;
+  const tabProjects = projects.filter((p) => p.type === activeTab);
+
+  const filteredProjects = tabProjects.filter((project) => {
+    if (statusFilter === "all") return true;
+    return project.status === statusFilter;
   });
 
-  const activeProjects = projects.filter((p) => p.status === "active");
-  const inProgressProjects = projects.filter((p) => p.status === "in-progress");
-
-  const filters: { id: FilterType; label: string; count: number; icon: React.ReactNode }[] = [
-    { id: "all", label: "All Projects", count: projects.length, icon: <Folder size={14} /> },
-    { id: "active", label: "Active", count: activeProjects.length, icon: <Clock size={14} /> },
-    { id: "in-progress", label: "In Progress", count: inProgressProjects.length, icon: <Clock size={14} /> },
-  ];
+  const activeCount = tabProjects.filter((p) => p.status === "active").length;
+  const inProgressCount = tabProjects.filter((p) => p.status === "in-progress").length;
 
   const getAllImages = (project: Project): string[] => {
     const imgs: string[] = [];
@@ -97,23 +97,58 @@ export default function Projects() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, amount: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="flex justify-center gap-3 mb-6"
+        >
+          <button
+            onClick={() => { setActiveTab("personal"); setStatusFilter("all"); }}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 text-sm font-medium ${
+              activeTab === "personal"
+                ? "bg-primary/10 text-primary border border-primary/30 shadow-[0_0_15px_rgba(0,212,255,0.1)]"
+                : "text-foreground/70 hover:bg-white/[0.03] hover:text-foreground border border-white/[0.08] hover:border-white/[0.15]"
+            }`}
+          >
+            <User size={16} />
+            Personal
+          </button>
+          <button
+            onClick={() => { setActiveTab("college"); setStatusFilter("all"); }}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 text-sm font-medium ${
+              activeTab === "college"
+                ? "bg-primary/10 text-primary border border-primary/30 shadow-[0_0_15px_rgba(0,212,255,0.1)]"
+                : "text-foreground/70 hover:bg-white/[0.03] hover:text-foreground border border-white/[0.08] hover:border-white/[0.15]"
+            }`}
+          >
+            <GraduationCap size={16} />
+            College
+          </button>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, amount: 0.2 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           className="flex flex-wrap justify-center gap-3 mb-12"
         >
-          {filters.map((filter) => (
+          {[
+            { id: "all" as StatusFilter, label: "All", count: tabProjects.length },
+            { id: "active" as StatusFilter, label: "Active", count: activeCount },
+            { id: "in-progress" as StatusFilter, label: "In Progress", count: inProgressCount },
+          ].map((filter) => (
             <button
               key={filter.id}
-              onClick={() => setActiveFilter(filter.id)}
+              onClick={() => setStatusFilter(filter.id)}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all duration-300 text-sm ${
-                activeFilter === filter.id
+                statusFilter === filter.id
                   ? "bg-primary/10 text-primary border border-primary/30 shadow-[0_0_15px_rgba(0,212,255,0.1)]"
                   : "text-foreground/70 hover:bg-white/[0.03] hover:text-foreground border border-white/[0.08] hover:border-white/[0.15]"
               }`}
             >
-              {filter.icon}
+              {filter.id === "active" ? <Clock size={14} /> : filter.id === "in-progress" ? <Clock size={14} /> : <Folder size={14} />}
               <span className="font-medium tracking-wide">{filter.label}</span>
               <span className={`px-2 py-0.5 rounded-lg text-xs ${
-                activeFilter === filter.id
+                statusFilter === filter.id
                   ? "bg-primary/20 text-primary"
                   : "bg-white/[0.03] text-foreground/30"
               }`}>
@@ -128,9 +163,9 @@ export default function Projects() {
         ) : filteredProjects.length === 0 ? (
           <GlassPanel className="text-center py-12">
             <p className="text-foreground/50">
-              {projects.length === 0
-                ? "No projects yet. Add projects from the admin dashboard!"
-                : `No ${activeFilter} projects found.`}
+              {tabProjects.length === 0
+                ? `No ${activeTab} projects yet. Add projects from the admin dashboard!`
+                : `No ${statusFilter === "all" ? "" : statusFilter} ${activeTab} projects found.`}
             </p>
           </GlassPanel>
         ) : (
@@ -176,24 +211,17 @@ export default function Projects() {
                         <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-xl ${
                           project.status === "active"
                             ? "bg-green-500/20 text-green-300 border border-green-500/20"
-                            : project.status === "in-progress"
-                            ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/20"
-                            : "bg-blue-500/20 text-blue-300 border border-blue-500/20"
+                            : "bg-yellow-500/20 text-yellow-300 border border-yellow-500/20"
                         }`}>
                           {project.status === "active" ? (
                             <>
                               <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
                               Active
                             </>
-                          ) : project.status === "in-progress" ? (
+                          ) : (
                             <>
                               <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
                               In Progress
-                            </>
-                          ) : (
-                            <>
-                              <CheckCircle size={12} />
-                              Completed
                             </>
                           )}
                         </span>
@@ -204,6 +232,11 @@ export default function Projects() {
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="text-lg font-semibold">{project.title}</h3>
                         <div className="flex items-center gap-1.5">
+                          {activeTab === "college" && project.year && (
+                            <span className="px-2 py-0.5 rounded-lg text-xs font-medium bg-purple-500/15 text-purple-300 border border-purple-500/20">
+                              {project.year}
+                            </span>
+                          )}
                           <span className="text-xs text-foreground/30">{project.category}</span>
                           {project.subCategory && (
                             <>
@@ -335,24 +368,17 @@ export default function Projects() {
                       <span className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium backdrop-blur-xl ${
                         selectedProject.status === "active"
                           ? "bg-green-500/20 text-green-300 border border-green-500/20"
-                          : selectedProject.status === "in-progress"
-                          ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/20"
-                          : "bg-blue-500/20 text-blue-300 border border-blue-500/20"
+                          : "bg-yellow-500/20 text-yellow-300 border border-yellow-500/20"
                       }`}>
                         {selectedProject.status === "active" ? (
                           <>
                             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                             Active
                           </>
-                        ) : selectedProject.status === "in-progress" ? (
+                        ) : (
                           <>
                             <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
                             In Progress
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle size={14} />
-                            Completed
                           </>
                         )}
                       </span>
@@ -370,6 +396,11 @@ export default function Projects() {
                           {selectedProject.subCategory && (
                             <span className="px-3 py-1 rounded-lg text-xs font-medium bg-primary/5 text-primary/70 border border-primary/10">
                               {selectedProject.subCategory}
+                            </span>
+                          )}
+                          {selectedProject.type === "college" && selectedProject.year && (
+                            <span className="px-3 py-1 rounded-lg text-xs font-medium bg-purple-500/15 text-purple-300 border border-purple-500/20">
+                              {selectedProject.year}
                             </span>
                           )}
                         </div>

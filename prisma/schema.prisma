@@ -26,6 +26,8 @@ model Project {
   technology   String[]
   category     String
   subCategory  String?
+  type         String   @default("personal")
+  year         String?
   status       String   @default("active")
   featured     Boolean  @default(false)
   order        Int      @default(0)

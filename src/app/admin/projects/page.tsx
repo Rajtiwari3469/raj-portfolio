@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Edit, Trash2, ExternalLink, Upload, Loader2, FolderKanban, X } from "lucide-react";
+import { Plus, Edit, Trash2, ExternalLink, Upload, Loader2, FolderKanban, X, User, GraduationCap } from "lucide-react";
 import { GithubIcon } from "@/components/ui/SocialIcons";
 import GlassPanel from "@/components/ui/GlassPanel";
 import Button from "@/components/ui/Button";
@@ -24,6 +24,8 @@ interface Project {
   technology: string[];
   category: string;
   subCategory: string | null;
+  type: string;
+  year: string | null;
   status: string;
   featured: boolean;
   order: number;
@@ -60,6 +62,8 @@ export default function ProjectsPage() {
     technology: "",
     category: "Full Stack",
     subCategory: "Web App",
+    type: "personal",
+    year: "",
     status: "active",
     featured: false,
     order: 0,
@@ -93,6 +97,7 @@ export default function ProjectsPage() {
       const payload = {
         ...formData,
         technology: formData.technology.split(",").map((t) => t.trim()),
+        year: formData.type === "college" ? (formData.year || null) : null,
       };
 
       let res;
@@ -158,6 +163,8 @@ export default function ProjectsPage() {
         technology: project.technology.join(", "),
         category: project.category,
         subCategory: project.subCategory || "",
+        type: project.type || "personal",
+        year: project.year || "",
         status: project.status,
         featured: project.featured,
         order: project.order,
@@ -174,6 +181,8 @@ export default function ProjectsPage() {
         technology: "",
         category: "Full Stack",
         subCategory: "Web App",
+        type: "personal",
+        year: "",
         status: "active",
         featured: false,
         order: 0,
@@ -248,14 +257,29 @@ export default function ProjectsPage() {
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="font-semibold">{project.title}</h3>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        project.status === "active"
-                          ? "bg-green-500/20 text-green-400 border border-green-500/20"
-                          : project.status === "in-progress"
-                          ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/20"
-                          : "bg-primary/20 text-primary border border-primary/20"
+                      <div className="flex items-center gap-1.5">
+                        {project.type === "college" && project.year && (
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-purple-500/20 text-purple-400 border border-purple-500/20">
+                            {project.year}
+                          </span>
+                        )}
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          project.status === "active"
+                            ? "bg-green-500/20 text-green-400 border border-green-500/20"
+                            : "bg-yellow-500/20 text-yellow-400 border border-yellow-500/20"
+                        }`}>
+                          {project.status}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${
+                        project.type === "college"
+                          ? "bg-purple-500/15 text-purple-400 border border-purple-500/15"
+                          : "bg-blue-500/15 text-blue-400 border border-blue-500/15"
                       }`}>
-                        {project.status}
+                        {project.type === "college" ? <GraduationCap size={12} /> : <User size={12} />}
+                        {project.type === "college" ? "College" : "Personal"}
                       </span>
                     </div>
                     <p className="text-sm text-foreground/60 line-clamp-2 mb-3">
@@ -415,6 +439,29 @@ export default function ProjectsPage() {
             onChange={(e) => setFormData({ ...formData, technology: e.target.value })}
             placeholder="React, Node.js, PostgreSQL"
           />
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Project Type</label>
+              <select
+                value={formData.type}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value, year: e.target.value === "personal" ? "" : formData.year })}
+                className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
+              >
+                <option value="personal">Personal</option>
+                <option value="college">College</option>
+              </select>
+            </div>
+            {formData.type === "college" && (
+              <Input
+                label="Year"
+                value={formData.year}
+                onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                placeholder="e.g. 1st year, 2nd year, 3rd year, Final year"
+              />
+            )}
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2">Category</label>
@@ -458,7 +505,6 @@ export default function ProjectsPage() {
                 className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 focus:border-primary/30 focus:outline-none transition-colors"
               >
                 <option value="active">Active</option>
-                <option value="completed">Completed</option>
                 <option value="in-progress">In Progress</option>
               </select>
             </div>
